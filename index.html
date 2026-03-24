@@ -445,13 +445,14 @@
   Chart.register(ChartDataLabels);
   const el = id => document.getElementById(id);
 
-  // ========== CONFIG ==========
-  const SHEET_ID = "1ax8ZpVRSZnDkTm_T1GY37ybSgrlP_8Rk";
-  const URLS = {
-    fila: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1716569787`,
-    agendados: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1546152833`,
-    faturado: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=252919053`,
-    financeiro: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=269446681`
+  // ========== CONFIG COM LINKS PÚBLICOS ==========
+  const BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/export?format=csv&gid=";
+  
+  const GIDS = {
+    fila: "1716569787",
+    agendados: "1546152833",
+    faturado: "252919053",
+    financeiro: "269446681"
   };
 
   let dadosFila = [], dadosAgendados = [], dadosFaturado = [], dadosFinanceiro = [];
@@ -468,38 +469,44 @@
     setTimeout(() => d.remove(), 3500); 
   }
 
-  // Função para carregar CSV pulando a primeira linha (cabeçalho duplo)
-  async function loadCSV(url, skipRows = 1) {
+  async function loadCSV(gid) {
+    const url = BASE_URL + gid;
+    console.log("Carregando:", url);
     const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status} - ${url}`);
     const text = await response.text();
-    const lines = text.split('\n');
-    // Pula as linhas de cabeçalho
-    const dataLines = lines.slice(skipRows);
-    const csvData = dataLines.join('\n');
-    const parsed = Papa.parse(csvData, { header: true, skipEmptyLines: true });
+    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
     return parsed.data;
   }
 
   async function loadAllData() {
     el("loading").classList.add("on");
     try {
-      // Carrega cada planilha pulando a primeira linha (cabeçalho duplo)
-      const filaRaw = await loadCSV(URLS.fila, 1);
-      const agendadosRaw = await loadCSV(URLS.agendados, 1);
-      const faturadoRaw = await loadCSV(URLS.faturado, 1);
-      const financeiroRaw = await loadCSV(URLS.financeiro, 1);
+      // Carrega todas as abas
+      const [filaRaw, agendadosRaw, faturadoRaw, financeiroRaw] = await Promise.all([
+        loadCSV(GIDS.fila),
+        loadCSV(GIDS.agendados),
+        loadCSV(GIDS.faturado),
+        loadCSV(GIDS.financeiro)
+      ]);
 
-      // Mapeia os dados com os nomes corretos das colunas (segunda linha)
+      console.log("Fila raw:", filaRaw.length, "registros");
+      console.log("Agendados raw:", agendadosRaw.length, "registros");
+      console.log("Faturado raw:", faturadoRaw.length, "registros");
+      console.log("Financeiro raw:", financeiroRaw.length, "registros");
+
+      // Mapeia Fila
       dadosFila = filaRaw.map(r => ({ 
         codigo: r["CÓDIGO DO PROCEDIMENTO"] || r["CÓDIGO PROCEDIMENTO"] || "",
         descricao: r["PROCEDIMENTO DESCRIÇÃO"] || "",
         grupo: r["GRUPO"] || "",
         subgrupo: r["SUBGRUPO"] || "",
         estabelecimento: r["PRESTADOR"] || "",
-        fila: parseInt(r["FILA INTERNA ATUAL SUR"]) || 0,
+        fila: parseInt(String(r["FILA INTERNA ATUAL SUR"] || "0").replace(/\./g, '')) || 0,
         complexidade: r["COMPLEXIDADE"] || ""
       })).filter(d => d.descricao);
 
+      // Mapeia Agendados/Recep/Faltosos
       dadosAgendados = agendadosRaw.map(r => ({ 
         codigo: r["CÓDIGO DO PROCEDIMENTO"] || "",
         descricao: r["PROCEDIMENTO DESCRIÇÃO"] || "",
@@ -507,32 +514,32 @@
         subgrupo: r["SUBGRUPO"] || "",
         estabelecimento: r["PRESTADOR"] || "",
         mes: r["MÊS"] || "",
-        faltosos: parseInt(r["FAL"]) || 0,
-        recepcionados: parseInt(r["REC"]) || 0,
-        oferta: parseInt(r["OFERTA"]) || 0
+        faltosos: parseInt(String(r["FAL"] || "0").replace(/\./g, '')) || 0,
+        recepcionados: parseInt(String(r["REC"] || "0").replace(/\./g, '')) || 0,
+        oferta: parseInt(String(r["OFERTA"] || "0").replace(/\./g, '')) || 0
       })).filter(d => d.descricao);
 
-      dadosFaturado = faturadoRaw.map(r => ({ 
-        codigo: r["CÓDIGO DO PROCEDIMENTO"] || "",
-        descricao: r["Procedimento Descrição"] || r["PROCEDIMENTO DESCRIÇÃO"] || "",
-        grupo: r["GRUPO"] || "",
-        subgrupo: r["SUB GRUPO"] || r["SUBGRUPO"] || "",
-        estabelecimento: r["ESTABELECIMENTO"] || "",
-        especialidade: r["Especialidade Descrição"] || "",
-        total: 0
-      })).filter(d => d.descricao);
-      
-      // Calcula total do faturado (soma dos meses)
-      dadosFaturado.forEach(d => {
+      // Mapeia Faturado (soma dos meses)
+      dadosFaturado = faturadoRaw.map(r => {
         let total = 0;
-        Object.keys(d).forEach(key => {
+        Object.keys(r).forEach(key => {
           if (key.match(/^(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/\d{2}$/)) {
-            total += parseFloat(String(d[key]).replace(/\./g, '').replace(',', '.')) || 0;
+            let val = parseFloat(String(r[key]).replace(/\./g, '').replace(',', '.')) || 0;
+            total += val;
           }
         });
-        d.total = total;
-      });
+        return {
+          codigo: r["CÓDIGO DO PROCEDIMENTO"] || "",
+          descricao: r["Procedimento Descrição"] || r["PROCEDIMENTO DESCRIÇÃO"] || "",
+          grupo: r["GRUPO"] || "",
+          subgrupo: r["SUB GRUPO"] || r["SUBGRUPO"] || "",
+          estabelecimento: r["ESTABELECIMENTO"] || "",
+          especialidade: r["Especialidade Descrição"] || "",
+          total: total
+        };
+      }).filter(d => d.descricao);
 
+      // Mapeia Financeiro
       dadosFinanceiro = financeiroRaw.map(r => ({ 
         codigo: r["CÓDIGO PROCEDIMENTO"] || "",
         descricao: r["PROCEDIMENTO DESCRIÇÃO"] || "",
@@ -542,6 +549,11 @@
         especialidade: r["ESPECIALIDADE"] || "",
         total: parseFloat(String(r["Total geral"] || "0").replace(/\./g, '').replace(',', '.')) || 0
       })).filter(d => d.descricao);
+
+      console.log("Dados processados - Fila:", dadosFila.length);
+      console.log("Dados processados - Agendados:", dadosAgendados.length);
+      console.log("Dados processados - Faturado:", dadosFaturado.length);
+      console.log("Dados processados - Financeiro:", dadosFinanceiro.length);
 
       // Popula grupos, subgrupos e estabelecimentos
       dadosFila.forEach(d => { 
@@ -559,10 +571,10 @@
 
       populateFilters();
       applyFilters();
-      toast("Dados carregados com sucesso!", "success");
+      toast(`Dados carregados! ${dadosFila.length} procedimentos na fila, ${dadosAgendados.length} registros de agendamentos`, "success");
     } catch (e) { 
-      console.error(e); 
-      toast("Erro ao carregar dados. Verifique se as planilhas estão públicas.", "error"); 
+      console.error("Erro detalhado:", e); 
+      toast("Erro ao carregar dados: " + e.message, "error"); 
     } finally { 
       el("loading").classList.remove("on"); 
     }
@@ -581,6 +593,10 @@
     let list = el("msListSub"); if (!list) return;
     list.innerHTML = "";
     let subArray = [...subgruposMap.keys()].sort();
+    if (subArray.length === 0) {
+      list.innerHTML = '<div class="ms-empty">Nenhum subgrupo disponível</div>';
+      return;
+    }
     subArray.forEach(sub => {
       let div = document.createElement("div"); div.className = "ms-item";
       let cb = document.createElement("input"); cb.type = "checkbox"; cb.value = sub; cb.checked = selectedSubgrupos.has(sub);
@@ -597,6 +613,10 @@
     let list = el("msListEstab"); if (!list) return;
     list.innerHTML = "";
     let estabArray = [...estabelecimentosSet].sort();
+    if (estabArray.length === 0) {
+      list.innerHTML = '<div class="ms-empty">Nenhum estabelecimento disponível</div>';
+      return;
+    }
     estabArray.forEach(estab => {
       let div = document.createElement("div"); div.className = "ms-item";
       let cb = document.createElement("input"); cb.type = "checkbox"; cb.value = estab; cb.checked = selectedEstabelecimentos.has(estab);
@@ -663,7 +683,7 @@
   }
 
   function renderCharts(fila, agendados, faturado) {
-    // Gráfico de Evolução (dados simulados com os reais)
+    // Gráfico de Evolução
     if (charts.cEvolucao) charts.cEvolucao.destroy();
     let ctx = el("cEvolucao")?.getContext("2d");
     if (ctx) {
@@ -673,10 +693,10 @@
       charts.cEvolucao = new Chart(ctx, { 
         type: "line", 
         data: { 
-          labels: meses.length ? meses : ["Jan", "Fev", "Mar"], 
+          labels: meses.length ? meses : ["Sem dados"], 
           datasets: [
-            { label: "Fila de Espera", data: meses.length ? dadosFilaPorMes : [120, 135, 142], borderColor: "#d97706", tension: 0.3, fill: false, borderWidth: 3 },
-            { label: "Cirurgias Realizadas", data: meses.length ? dadosRealizadosPorMes : [85, 92, 98], borderColor: "#0d9488", tension: 0.3, fill: false, borderWidth: 3 }
+            { label: "Fila de Espera", data: meses.length ? dadosFilaPorMes : [0], borderColor: "#d97706", tension: 0.3, fill: false, borderWidth: 3 },
+            { label: "Cirurgias Realizadas", data: meses.length ? dadosRealizadosPorMes : [0], borderColor: "#0d9488", tension: 0.3, fill: false, borderWidth: 3 }
           ] 
         }, 
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } } } 
@@ -722,17 +742,21 @@
     });
     
     let rows = Array.from(map.values());
-    tbody.innerHTML = rows.slice(0, 100).map(r => `
-      <tr>
-        <td>${r.descricao || "-"}</td>
-        <td>${r.grupo || "-"}</td>
-        <td>${r.subgrupo || "-"}</td>
-        <td>${r.estabelecimento || "-"}</td>
-        <td>${r.fila.toLocaleString()}</td>
-        <td>${r.realizados.toLocaleString()}</td>
-        <td>R$ ${r.faturamento.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
-      </tr>
-    `).join("");
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center">Nenhum dado encontrado</td></tr>';
+    } else {
+      tbody.innerHTML = rows.slice(0, 100).map(r => `
+        <tr>
+          <td>${r.descricao || "-"}</td>
+          <td>${r.grupo || "-"}</td>
+          <td>${r.subgrupo || "-"}</td>
+          <td>${r.estabelecimento || "-"}</td>
+          <td>${r.fila.toLocaleString()}</td>
+          <td>${r.realizados.toLocaleString()}</td>
+          <td>R$ ${r.faturamento.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+        </tr>
+      `).join("");
+    }
     el("tInfo").innerText = `${rows.length} registros`;
   }
 
