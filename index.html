@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Painel Cirúrgico — Diretoria de Regulação do Acesso</title>
+  <title>Painel Cirurgia Eletiva — Diretoria de Regulação do Acesso</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
@@ -41,7 +41,6 @@
       line-height: 1.5;
     }
 
-    /* Header diferenciado */
     .header {
       position: sticky;
       top: 0;
@@ -51,7 +50,7 @@
       padding: 24px 32px;
       display: flex;
       gap: 24px;
-      align-items: center;
+      align-items: flex-start;
       flex-wrap: wrap;
       box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
@@ -65,12 +64,12 @@
       justify-content: center;
       font-size: 32px;
       border: 1px solid rgba(255,255,255,0.2);
-      backdrop-filter: blur(4px);
     }
-    .h-info { flex: 1; }
+    .h-info { flex: 1; min-width: 280px; }
     .h-title { font-size: 26px; font-weight: 800; letter-spacing: -0.3px; }
     .h-sub { font-size: 15px; opacity: 0.85; margin-top: 6px; font-weight: 500; }
     .h-meta { font-size: 12px; opacity: 0.7; margin-top: 6px; }
+    .lastUpdate { font-size: 11px; opacity: 0.6; margin-top: 8px; }
     .h-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
     .btn {
       border: none;
@@ -85,7 +84,6 @@
       transition: all 0.2s ease;
       background: rgba(255,255,255,0.1);
       color: white;
-      backdrop-filter: blur(4px);
       border: 1px solid rgba(255,255,255,0.2);
     }
     .btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
@@ -102,18 +100,9 @@
       gap: 8px;
       border: 1px solid rgba(13,148,136,0.4);
     }
-    .dot {
-      width: 8px;
-      height: 8px;
-      background: #0d9488;
-      border-radius: 50%;
-      box-shadow: 0 0 6px #0d9488;
-    }
-    .lastUpdate { font-size: 11px; opacity: 0.7; margin-top: 6px; }
+    .dot { width: 8px; height: 8px; background: #0d9488; border-radius: 50%; box-shadow: 0 0 6px #0d9488; }
 
     .wrap { max-width: 1600px; margin: 0 auto; padding: 24px 28px; }
-
-    /* Cards e filtros */
     .card {
       background: var(--card);
       border-radius: var(--r);
@@ -165,7 +154,6 @@
       font-weight: 600;
       font-size: 13px;
       cursor: pointer;
-      transition: all 0.2s;
     }
     select:focus, .ms-trigger:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
     .btn-clear {
@@ -177,16 +165,10 @@
       font-size: 12px;
       cursor: pointer;
     }
-    .btn-clear:hover { border-color: var(--danger); color: var(--danger); background: #fff5f5; }
+    .btn-clear:hover { border-color: var(--danger); color: var(--danger); }
 
-    /* Multi-select */
     .multiselect-wrapper { position: relative; width: 100%; }
-    .ms-trigger {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #fafcff;
-    }
+    .ms-trigger { display: flex; justify-content: space-between; align-items: center; }
     .ms-trigger.open { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
     .ms-arrow { font-size: 10px; transition: transform 0.2s; }
     .ms-trigger.open .ms-arrow { transform: rotate(180deg); }
@@ -206,42 +188,19 @@
     }
     .ms-dropdown.open { display: block; }
     .ms-actions { padding: 10px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); }
-    .ms-btn-all, .ms-btn-clr {
-      flex: 1;
-      padding: 6px;
-      border-radius: 30px;
-      font-weight: 700;
-      font-size: 11px;
-      border: none;
-      cursor: pointer;
-    }
+    .ms-btn-all, .ms-btn-clr { flex: 1; padding: 6px; border-radius: 30px; font-weight: 700; font-size: 11px; border: none; cursor: pointer; }
     .ms-btn-all { background: rgba(13,148,136,0.1); color: var(--accent); }
     .ms-btn-clr { background: rgba(220,38,38,0.08); color: var(--danger); }
     .ms-search-box { padding: 8px 10px; border-bottom: 1px solid var(--border); }
-    .ms-search-box input {
-      width: 100%;
-      padding: 8px 12px;
-      border-radius: 30px;
-      border: 1px solid var(--border);
-      font-size: 12px;
-    }
+    .ms-search-box input { width: 100%; padding: 8px 12px; border-radius: 30px; border: 1px solid var(--border); font-size: 12px; }
     .ms-list { padding: 6px; max-height: 220px; overflow-y: auto; }
-    .ms-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 12px;
-      cursor: pointer;
-      font-weight: 500;
-    }
+    .ms-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 12px; cursor: pointer; font-weight: 500; }
     .ms-item:hover { background: #f0fdfa; }
     .ms-item input { width: 16px; height: 16px; accent-color: var(--accent); }
 
-    /* KPIs */
     .kpis {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 18px;
       margin-top: 20px;
     }
@@ -254,19 +213,11 @@
       align-items: center;
       border: 1px solid var(--border);
       box-shadow: var(--shadow);
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s;
     }
     .kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
-    .kpiIcon {
-      width: 56px;
-      height: 56px;
-      border-radius: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 26px;
-    }
-    .kpi .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; }
+    .kpiIcon { width: 56px; height: 56px; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
+    .kpi .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); }
     .kpi .val { font-size: 32px; font-weight: 800; margin-top: 4px; line-height: 1.2; }
     .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600; }
     .kpi-fila .kpiIcon { background: rgba(13,148,136,0.12); color: var(--accent); }
@@ -276,7 +227,6 @@
     .kpi-ticket .kpiIcon { background: rgba(139,92,246,0.12); color: #8b5cf6; }
     .kpi-falt .kpiIcon { background: rgba(220,38,38,0.12); color: var(--danger); }
 
-    /* Tabs */
     .tabs {
       display: flex;
       gap: 8px;
@@ -298,25 +248,12 @@
       transition: all 0.2s;
       color: var(--muted);
     }
-    .tab.active {
-      background: var(--primary);
-      color: white;
-      box-shadow: 0 4px 10px rgba(15,47,79,0.2);
-    }
+    .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(15,47,79,0.2); }
     .tabContent { display: none; margin-top: 24px; }
     .tabContent.active { display: block; }
 
-    /* Gráficos */
     .section { padding: 20px; }
-    .sectionTitle {
-      font-weight: 800;
-      font-size: 16px;
-      color: var(--primary);
-      margin-bottom: 20px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+    .sectionTitle { font-weight: 800; font-size: 16px; color: var(--primary); margin-bottom: 20px; display: flex; align-items: center; gap: 10px; }
     .chartCard {
       background: var(--card);
       border-radius: 24px;
@@ -325,91 +262,27 @@
       box-shadow: var(--shadow);
       margin-bottom: 20px;
     }
-    .chartHead {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+    .chartHead { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
     .chartHead h3 { font-size: 15px; font-weight: 800; color: var(--text); }
     .chartWrap { position: relative; height: 380px; }
     .row2eq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     @media (max-width: 900px) { .row2eq { grid-template-columns: 1fr; } }
 
-    /* Tabelas */
-    .tableTop {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-    .search {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: #f9fafb;
-      padding: 8px 16px;
-      border-radius: 40px;
-      border: 1px solid var(--border);
-    }
+    .tableTop { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+    .search { display: flex; align-items: center; gap: 8px; background: #f9fafb; padding: 8px 16px; border-radius: 40px; border: 1px solid var(--border); }
     .search input { border: none; background: transparent; outline: none; font-weight: 500; }
     table { width: 100%; border-collapse: collapse; font-size: 12px; }
-    thead th {
-      text-align: left;
-      padding: 12px 12px;
-      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
-      color: white;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      cursor: pointer;
-    }
+    thead th { text-align: left; padding: 12px; background: linear-gradient(135deg, #0f2f4f, #1b4a5e); color: white; font-size: 11px; font-weight: 700; text-transform: uppercase; }
     tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 500; }
     tbody tr:hover { background: #f0fdfa; }
 
-    .toastBox {
-      position: fixed;
-      top: 100px;
-      right: 20px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .toast {
-      background: #1f2937;
-      color: white;
-      padding: 12px 18px;
-      border-radius: 16px;
-      border-left: 4px solid var(--accent);
-      font-weight: 600;
-      font-size: 13px;
-    }
-    .loading {
-      height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-light));
-      background-size: 200% 100%;
-      animation: shimmer 1s infinite;
-      display: none;
-    }
+    .toastBox { position: fixed; top: 100px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+    .toast { background: #1f2937; color: white; padding: 12px 18px; border-radius: 16px; border-left: 4px solid var(--accent); font-weight: 600; font-size: 13px; }
+    .loading { height: 3px; background: linear-gradient(90deg, var(--accent), var(--accent-light)); background-size: 200% 100%; animation: shimmer 1s infinite; display: none; }
     .loading.on { display: block; }
     @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
 
-    .fin-header {
-      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
-      border-radius: 24px;
-      padding: 20px 28px;
-      color: white;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+    .fin-header { background: linear-gradient(135deg, #0f2f4f, #1b4a5e); border-radius: 24px; padding: 20px 28px; color: white; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
     .fin-header-icon { font-size: 28px; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 20px; }
   </style>
 </head>
@@ -418,14 +291,14 @@
 <header class="header">
   <div class="h-icon"><i class="fa-solid fa-kit-medical"></i></div>
   <div class="h-info">
-    <div class="h-title">PAINEL CIRÚRGIA ELETIVA</div>
+    <div class="h-title">PAINEL CIRURGIA ELETIVA</div>
     <div class="h-sub">Diretoria de Regulação do Acesso</div>
     <div class="h-meta">Fila ↔ Agendamento ↔ Realizado ↔ Faturamento | Análise Estratégica</div>
-      <div class="h-meta">
-        Superintendente: <b style="color:#bfdbfe">Yara Ariane M.S.Souza</b>
-        &nbsp;•&nbsp; Diretora: <b style="color:#bfdbfe">Paloma Morais</b>
-        &nbsp;•&nbsp; Desenvolvido por <b style="color:#bfdbfe">Ana P. A. Silva — Matric. 201704</b>
-      </div>
+    <div class="h-meta">
+      Superintendente: <b style="color:#bfdbfe">Yara Ariane M.S.Souza</b>
+      &nbsp;•&nbsp; Diretora: <b style="color:#bfdbfe">Paloma Morais</b>
+      &nbsp;•&nbsp; Desenvolvido por <b style="color:#bfdbfe">Ana P. A. Silva — Matric. 201704</b>
+    </div>
     <div class="lastUpdate" id="lastUpdate">Carregando dados...</div>
   </div>
   <div class="h-actions">
@@ -587,26 +460,112 @@
   let allPeriodos = [];
   let charts = {};
 
-  function toast(msg, type = "info") { let box = el("toastBox"), d = document.createElement("div"); d.className = "toast"; d.innerHTML = `<i class="fa-solid fa-${type === "success" ? "circle-check" : "circle-info"}"></i> ${msg}`; box.appendChild(d); setTimeout(() => d.remove(), 3500); }
+  function toast(msg, type = "info") { 
+    let box = el("toastBox"), d = document.createElement("div"); 
+    d.className = "toast"; 
+    d.innerHTML = `<i class="fa-solid fa-${type === "success" ? "circle-check" : "circle-info"}"></i> ${msg}`; 
+    box.appendChild(d); 
+    setTimeout(() => d.remove(), 3500); 
+  }
+
+  // Função para carregar CSV pulando a primeira linha (cabeçalho duplo)
+  async function loadCSV(url, skipRows = 1) {
+    const response = await fetch(url);
+    const text = await response.text();
+    const lines = text.split('\n');
+    // Pula as linhas de cabeçalho
+    const dataLines = lines.slice(skipRows);
+    const csvData = dataLines.join('\n');
+    const parsed = Papa.parse(csvData, { header: true, skipEmptyLines: true });
+    return parsed.data;
+  }
 
   async function loadAllData() {
     el("loading").classList.add("on");
     try {
-      const [filaCSV, agendadosCSV, faturadoCSV, financeiroCSV] = await Promise.all([fetch(URLS.fila), fetch(URLS.agendados), fetch(URLS.faturado), fetch(URLS.financeiro)]);
-      dadosFila = Papa.parse(await filaCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO DO PROCEDIMENTO"], descricao: r["PROCEDIMENTO DESCRIÇÃO"], grupo: r["GRUPO"], subgrupo: r["SUBGRUPO"], estabelecimento: r["PRESTADOR"], fila: parseInt(r["FILA INTERNA ATUAL SUR"]) || 0, complexidade: r["COMPLEXIDADE"] }));
-      dadosAgendados = Papa.parse(await agendadosCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO DO PROCEDIMENTO"], descricao: r["PROCEDIMENTO DESCRIÇÃO"], grupo: r["GRUPO"], subgrupo: r["SUBGRUPO"], estabelecimento: r["PRESTADOR"], mes: r["MÊS"], faltosos: parseInt(r["FAL"]) || 0, recepcionados: parseInt(r["REC"]) || 0, oferta: parseInt(r["OFERTA"]) || 0 }));
-      dadosFaturado = Papa.parse(await faturadoCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO DO PROCEDIMENTO"], descricao: r["Procedimento Descrição"], grupo: r["GRUPO"], subgrupo: r["SUB GRUPO"], estabelecimento: r["ESTABELECIMENTO"], especialidade: r["Especialidade Descrição"], total: parseFloat(r["Total geral"]?.replace(",", ".")) || 0 }));
-      dadosFinanceiro = Papa.parse(await financeiroCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO PROCEDIMENTO"], descricao: r["PROCEDIMENTO DESCRIÇÃO"], grupo: r["GRUPO"], subgrupo: r["SUBGRUPO"], estabelecimento: r["ESTABELECIMENTO"], especialidade: r["ESPECIALIDADE"], total: parseFloat(r["Total geral"]?.replace(",", ".")) || 0 }));
+      // Carrega cada planilha pulando a primeira linha (cabeçalho duplo)
+      const filaRaw = await loadCSV(URLS.fila, 1);
+      const agendadosRaw = await loadCSV(URLS.agendados, 1);
+      const faturadoRaw = await loadCSV(URLS.faturado, 1);
+      const financeiroRaw = await loadCSV(URLS.financeiro, 1);
 
-      dadosFila.forEach(d => { gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
-      dadosAgendados.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.mes) allPeriodos.push(d.mes); });
+      // Mapeia os dados com os nomes corretos das colunas (segunda linha)
+      dadosFila = filaRaw.map(r => ({ 
+        codigo: r["CÓDIGO DO PROCEDIMENTO"] || r["CÓDIGO PROCEDIMENTO"] || "",
+        descricao: r["PROCEDIMENTO DESCRIÇÃO"] || "",
+        grupo: r["GRUPO"] || "",
+        subgrupo: r["SUBGRUPO"] || "",
+        estabelecimento: r["PRESTADOR"] || "",
+        fila: parseInt(r["FILA INTERNA ATUAL SUR"]) || 0,
+        complexidade: r["COMPLEXIDADE"] || ""
+      })).filter(d => d.descricao);
+
+      dadosAgendados = agendadosRaw.map(r => ({ 
+        codigo: r["CÓDIGO DO PROCEDIMENTO"] || "",
+        descricao: r["PROCEDIMENTO DESCRIÇÃO"] || "",
+        grupo: r["GRUPO"] || "",
+        subgrupo: r["SUBGRUPO"] || "",
+        estabelecimento: r["PRESTADOR"] || "",
+        mes: r["MÊS"] || "",
+        faltosos: parseInt(r["FAL"]) || 0,
+        recepcionados: parseInt(r["REC"]) || 0,
+        oferta: parseInt(r["OFERTA"]) || 0
+      })).filter(d => d.descricao);
+
+      dadosFaturado = faturadoRaw.map(r => ({ 
+        codigo: r["CÓDIGO DO PROCEDIMENTO"] || "",
+        descricao: r["Procedimento Descrição"] || r["PROCEDIMENTO DESCRIÇÃO"] || "",
+        grupo: r["GRUPO"] || "",
+        subgrupo: r["SUB GRUPO"] || r["SUBGRUPO"] || "",
+        estabelecimento: r["ESTABELECIMENTO"] || "",
+        especialidade: r["Especialidade Descrição"] || "",
+        total: 0
+      })).filter(d => d.descricao);
+      
+      // Calcula total do faturado (soma dos meses)
+      dadosFaturado.forEach(d => {
+        let total = 0;
+        Object.keys(d).forEach(key => {
+          if (key.match(/^(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/\d{2}$/)) {
+            total += parseFloat(String(d[key]).replace(/\./g, '').replace(',', '.')) || 0;
+          }
+        });
+        d.total = total;
+      });
+
+      dadosFinanceiro = financeiroRaw.map(r => ({ 
+        codigo: r["CÓDIGO PROCEDIMENTO"] || "",
+        descricao: r["PROCEDIMENTO DESCRIÇÃO"] || "",
+        grupo: r["GRUPO"] || "",
+        subgrupo: r["SUBGRUPO"] || "",
+        estabelecimento: r["ESTABELECIMENTO"] || "",
+        especialidade: r["ESPECIALIDADE"] || "",
+        total: parseFloat(String(r["Total geral"] || "0").replace(/\./g, '').replace(',', '.')) || 0
+      })).filter(d => d.descricao);
+
+      // Popula grupos, subgrupos e estabelecimentos
+      dadosFila.forEach(d => { 
+        if (d.grupo) gruposMap.set(d.grupo, true); 
+        if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo); 
+        if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); 
+      });
+      dadosAgendados.forEach(d => { 
+        if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); 
+        if (d.mes) allPeriodos.push(d.mes); 
+      });
       dadosFaturado.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
+      
       allPeriodos = [...new Set(allPeriodos)].sort();
 
       populateFilters();
       applyFilters();
       toast("Dados carregados com sucesso!", "success");
-    } catch (e) { console.error(e); toast("Erro ao carregar dados", "error"); } finally { el("loading").classList.remove("on"); }
+    } catch (e) { 
+      console.error(e); 
+      toast("Erro ao carregar dados. Verifique se as planilhas estão públicas.", "error"); 
+    } finally { 
+      el("loading").classList.remove("on"); 
+    }
   }
 
   function populateFilters() {
@@ -627,7 +586,8 @@
       let cb = document.createElement("input"); cb.type = "checkbox"; cb.value = sub; cb.checked = selectedSubgrupos.has(sub);
       cb.addEventListener("change", () => { if (cb.checked) selectedSubgrupos.add(sub); else selectedSubgrupos.delete(sub); updateMsLabelSub(); applyFilters(); });
       let span = document.createElement("span"); span.textContent = sub;
-      div.appendChild(cb); div.appendChild(span); div.addEventListener("click", (e) => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } });
+      div.appendChild(cb); div.appendChild(span); 
+      div.addEventListener("click", (e) => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } });
       list.appendChild(div);
     });
     updateMsLabelSub();
@@ -642,7 +602,8 @@
       let cb = document.createElement("input"); cb.type = "checkbox"; cb.value = estab; cb.checked = selectedEstabelecimentos.has(estab);
       cb.addEventListener("change", () => { if (cb.checked) selectedEstabelecimentos.add(estab); else selectedEstabelecimentos.delete(estab); updateMsLabelEstab(); applyFilters(); });
       let span = document.createElement("span"); span.textContent = estab;
-      div.appendChild(cb); div.appendChild(span); div.addEventListener("click", (e) => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } });
+      div.appendChild(cb); div.appendChild(span);
+      div.addEventListener("click", (e) => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } });
       list.appendChild(div);
     });
     updateMsLabelEstab();
@@ -663,9 +624,26 @@
   function applyFilters() {
     let grupo = el("grupoSelect").value;
     let periodo = el("periodoSelect").value;
-    let filteredFila = dadosFila.filter(d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)));
-    let filteredAgendados = dadosAgendados.filter(d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)) && (!periodo || d.mes === periodo));
-    let filteredFaturado = dadosFaturado.filter(d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)));
+    
+    let filteredFila = dadosFila.filter(d => 
+      (!grupo || d.grupo === grupo) && 
+      (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && 
+      (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento))
+    );
+    
+    let filteredAgendados = dadosAgendados.filter(d => 
+      (!grupo || d.grupo === grupo) && 
+      (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && 
+      (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)) && 
+      (!periodo || d.mes === periodo)
+    );
+    
+    let filteredFaturado = dadosFaturado.filter(d => 
+      (!grupo || d.grupo === grupo) && 
+      (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && 
+      (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento))
+    );
+    
     let totalFila = filteredFila.reduce((s, d) => s + d.fila, 0);
     let totalRealizados = filteredAgendados.reduce((s, d) => s + d.recepcionados, 0);
     let totalFaturamento = filteredFaturado.reduce((s, d) => s + d.total, 0);
@@ -680,26 +658,81 @@
     el("kTicketMedio").innerText = "R$ " + ticketMedio.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
     el("kFaltosos").innerText = totalFaltosos.toLocaleString();
 
-    renderCharts(filteredFila, filteredAgendados, filteredFaturado, dadosFinanceiro);
+    renderCharts(filteredFila, filteredAgendados, filteredFaturado);
     renderTable(filteredFila, filteredAgendados, filteredFaturado);
   }
 
-  function renderCharts(fila, agendados, faturado, financeiro) {
-    // Simulação de gráficos rápidos para demonstração
+  function renderCharts(fila, agendados, faturado) {
+    // Gráfico de Evolução (dados simulados com os reais)
     if (charts.cEvolucao) charts.cEvolucao.destroy();
     let ctx = el("cEvolucao")?.getContext("2d");
-    if (ctx) charts.cEvolucao = new Chart(ctx, { type: "line", data: { labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"], datasets: [{ label: "Fila", data: [120, 135, 142, 138, 145, 140], borderColor: "#d97706" }, { label: "Realizado", data: [85, 92, 98, 102, 108, 112], borderColor: "#0d9488" }] }, options: { responsive: true, maintainAspectRatio: false } });
-    if (el("cFunil")) new Chart(el("cFunil").getContext("2d"), { type: "doughnut", data: { labels: ["Fila", "Agendados", "Realizados"], datasets: [{ data: [fila.reduce((s, d) => s + d.fila, 0), agendados.reduce((s, d) => s + d.oferta, 0), agendados.reduce((s, d) => s + d.recepcionados, 0)], backgroundColor: ["#f59e0b", "#3b82f6", "#0d9488"] }] }, options: { responsive: true, maintainAspectRatio: false } });
+    if (ctx) {
+      let meses = [...new Set(agendados.map(a => a.mes).filter(m => m))].sort();
+      let dadosFilaPorMes = meses.map(m => fila.reduce((s, d) => s + d.fila, 0));
+      let dadosRealizadosPorMes = meses.map(m => agendados.filter(a => a.mes === m).reduce((s, d) => s + d.recepcionados, 0));
+      charts.cEvolucao = new Chart(ctx, { 
+        type: "line", 
+        data: { 
+          labels: meses.length ? meses : ["Jan", "Fev", "Mar"], 
+          datasets: [
+            { label: "Fila de Espera", data: meses.length ? dadosFilaPorMes : [120, 135, 142], borderColor: "#d97706", tension: 0.3, fill: false, borderWidth: 3 },
+            { label: "Cirurgias Realizadas", data: meses.length ? dadosRealizadosPorMes : [85, 92, 98], borderColor: "#0d9488", tension: 0.3, fill: false, borderWidth: 3 }
+          ] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } } } 
+      });
+    }
+    
+    // Funil Cirúrgico
+    if (el("cFunil")) {
+      if (charts.cFunil) charts.cFunil.destroy();
+      let totalFila = fila.reduce((s, d) => s + d.fila, 0);
+      let totalOferta = agendados.reduce((s, d) => s + d.oferta, 0);
+      let totalRealizados = agendados.reduce((s, d) => s + d.recepcionados, 0);
+      charts.cFunil = new Chart(el("cFunil").getContext("2d"), { 
+        type: "doughnut", 
+        data: { 
+          labels: ["Fila de Espera", "Agendados (Oferta)", "Realizados"], 
+          datasets: [{ data: [totalFila, totalOferta, totalRealizados], backgroundColor: ["#f59e0b", "#3b82f6", "#0d9488"] }] 
+        }, 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } } 
+      });
+    }
   }
 
   function renderTable(fila, agendados, faturado) {
     let tbody = el("tBody"); if (!tbody) return;
     let map = new Map();
-    fila.forEach(d => { let key = d.descricao; if (!map.has(key)) map.set(key, { descricao: d.descricao, grupo: d.grupo, subgrupo: d.subgrupo, estabelecimento: d.estabelecimento, fila: 0, realizados: 0, faturamento: 0 }); map.get(key).fila += d.fila; });
-    agendados.forEach(d => { let key = d.descricao; if (map.has(key)) map.get(key).realizados += d.recepcionados; else map.set(key, { descricao: d.descricao, grupo: d.grupo, subgrupo: d.subgrupo, estabelecimento: d.estabelecimento, fila: 0, realizados: d.recepcionados, faturamento: 0 }); });
-    faturado.forEach(d => { let key = d.descricao; if (map.has(key)) map.get(key).faturamento += d.total; });
+    
+    fila.forEach(d => { 
+      let key = d.descricao; 
+      if (!map.has(key)) map.set(key, { descricao: d.descricao, grupo: d.grupo, subgrupo: d.subgrupo, estabelecimento: d.estabelecimento, fila: 0, realizados: 0, faturamento: 0 }); 
+      map.get(key).fila += d.fila; 
+    });
+    
+    agendados.forEach(d => { 
+      let key = d.descricao; 
+      if (map.has(key)) map.get(key).realizados += d.recepcionados; 
+      else map.set(key, { descricao: d.descricao, grupo: d.grupo, subgrupo: d.subgrupo, estabelecimento: d.estabelecimento, fila: 0, realizados: d.recepcionados, faturamento: 0 }); 
+    });
+    
+    faturado.forEach(d => { 
+      let key = d.descricao; 
+      if (map.has(key)) map.get(key).faturamento += d.total; 
+    });
+    
     let rows = Array.from(map.values());
-    tbody.innerHTML = rows.slice(0, 100).map(r => `<tr><td>${r.descricao || "-"}</td><td>${r.grupo || "-"}</td><td>${r.subgrupo || "-"}</td><td>${r.estabelecimento || "-"}</td><td>${r.fila.toLocaleString()}</td><td>${r.realizados.toLocaleString()}</td><td>R$ ${r.faturamento.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td></tr>`).join("");
+    tbody.innerHTML = rows.slice(0, 100).map(r => `
+      <tr>
+        <td>${r.descricao || "-"}</td>
+        <td>${r.grupo || "-"}</td>
+        <td>${r.subgrupo || "-"}</td>
+        <td>${r.estabelecimento || "-"}</td>
+        <td>${r.fila.toLocaleString()}</td>
+        <td>${r.realizados.toLocaleString()}</td>
+        <td>R$ ${r.faturamento.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td>
+      </tr>
+    `).join("");
     el("tInfo").innerText = `${rows.length} registros`;
   }
 
@@ -711,7 +744,29 @@
     setTimeout(() => Object.values(charts).forEach(c => c?.resize?.()), 100);
   }
 
-  window.addEventListener("DOMContentLoaded", () => { loadAllData(); el("btnRefresh").addEventListener("click", () => loadAllData()); el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEstabelecimentos.clear(); updateMsLabelSub(); updateMsLabelEstab(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; applyFilters(); }); el("btnExcel").addEventListener("click", () => toast("Exportação Excel em desenvolvimento", "info")); el("tSearch").addEventListener("input", () => { let q = el("tSearch").value.toLowerCase(); let rows = document.querySelectorAll("#tBody tr"); rows.forEach(r => { let txt = r.innerText.toLowerCase(); r.style.display = txt.includes(q) ? "" : "none"; }); }); });
+  // Eventos
+  window.addEventListener("DOMContentLoaded", () => { 
+    loadAllData(); 
+    el("btnRefresh").addEventListener("click", () => loadAllData()); 
+    el("btnClear").addEventListener("click", () => { 
+      selectedSubgrupos.clear(); 
+      selectedEstabelecimentos.clear(); 
+      updateMsLabelSub(); 
+      updateMsLabelEstab(); 
+      el("grupoSelect").value = ""; 
+      el("periodoSelect").value = ""; 
+      applyFilters(); 
+    }); 
+    el("btnExcel").addEventListener("click", () => toast("Exportação Excel em desenvolvimento", "info")); 
+    el("tSearch").addEventListener("input", () => { 
+      let q = el("tSearch").value.toLowerCase(); 
+      let rows = document.querySelectorAll("#tBody tr"); 
+      rows.forEach(r => { 
+        let txt = r.innerText.toLowerCase(); 
+        r.style.display = txt.includes(q) ? "" : "none"; 
+      }); 
+    }); 
+  });
 </script>
 </body>
 </html>
