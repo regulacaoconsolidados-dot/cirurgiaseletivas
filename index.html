@@ -284,6 +284,16 @@
 
     .fin-header { background: linear-gradient(135deg, #0f2f4f, #1b4a5e); border-radius: 24px; padding: 20px 28px; color: white; margin-bottom: 20px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap; }
     .fin-header-icon { font-size: 28px; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 20px; }
+
+    .gauge-card {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+    .gauge-chart-wrap { position: relative; width: 200px; height: 120px; margin: 0 auto; }
+    .gauge-pct-big { font-size: 32px; font-weight: 800; }
   </style>
 </head>
 <body>
@@ -383,8 +393,8 @@
   <!-- Aba 1: Visão Estratégica -->
   <section id="tab-estrategica" class="tabContent active">
     <div class="row2eq">
-      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Realizado</h3></div><div class="chartWrap"><canvas id="cEvolucao"></canvas></div></div>
-      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3></div><div class="chartWrap"><canvas id="cFunil"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Realizado</h3><div class="chartSub" id="subEvolucao">Comparativo mensal</div></div><div class="chartWrap"><canvas id="cEvolucao"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3><div class="chartSub" id="subFunil">Fila → Agendados → Realizados</div></div><div class="chartWrap"><canvas id="cFunil"></canvas></div></div>
     </div>
     <div class="row2eq">
       <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top 10 Procedimentos na Fila</h3></div><div class="chartWrap"><canvas id="cTopFila"></canvas></div></div>
@@ -436,7 +446,7 @@
   <section id="tab-tabela" class="tabContent">
     <div class="card section">
       <div class="tableTop"><div class="sectionTitle"><i class="fa-solid fa-table"></i> Dados Consolidados</div><div class="search"><i class="fa-solid fa-search"></i><input id="tSearch" placeholder="Buscar procedimento, estabelecimento..."></div><div class="muted" id="tInfo">—</div></div>
-      <div style="overflow-x:auto;max-height:500px;"><table id="tabelaPrincipal"><thead><tr><th>Procedimento</th><th>Grupo</th><th>Subgrupo</th><th>Estabelecimento</th><th>Na Fila</th><th>Realizados</th><th>Faturamento (R$)</th></tr></thead><tbody id="tBody"></tbody></table></div>
+      <div style="overflow-x:auto;max-height:500px;"><table id="tabelaPrincipal"><thead>bon<th>Procedimento</th><th>Grupo</th><th>Subgrupo</th><th>Estabelecimento</th><th>Na Fila</th><th>Realizados</th><th>Faturamento (R$)</th></tr></thead><tbody id="tBody"></tbody></table></div>
     </div>
   </section>
 </main>
@@ -445,15 +455,15 @@
   Chart.register(ChartDataLabels);
   const el = id => document.getElementById(id);
 
-  // ========== CONFIG COM LINKS PÚBLICOS ==========
-  const BASE_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/export?format=csv&gid=";
+  // ========== CONFIG COM LINKS PÚBLICOS CORRETOS ==========
+  // ATENÇÃO: Você precisa gerar os links CSV no "Publicar na web" e substituir abaixo
+  // O formato correto é: https://docs.google.com/spreadsheets/d/e/.../pub?gid=...&single=true&output=csv
   
-  const GIDS = {
-    fila: "1716569787",
-    agendados: "1546152833",
-    faturado: "252919053",
-    financeiro: "269446681"
-  };
+  // Links gerados pelo Google Sheets (publique cada aba como CSV e cole aqui)
+  const URL_FILA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1716569787&single=true&output=csv";
+  const URL_AGENDADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1546152833&single=true&output=csv";
+  const URL_FATURADO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=252919053&single=true&output=csv";
+  const URL_FINANCEIRO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=269446681&single=true&output=csv";
 
   let dadosFila = [], dadosAgendados = [], dadosFaturado = [], dadosFinanceiro = [];
   let gruposMap = new Map(), subgruposMap = new Map(), estabelecimentosSet = new Set();
@@ -469,25 +479,28 @@
     setTimeout(() => d.remove(), 3500); 
   }
 
-  async function loadCSV(gid) {
-    const url = BASE_URL + gid;
+  async function loadCSV(url, skipRows = 1) {
     console.log("Carregando:", url);
     const response = await fetch(url);
     if (!response.ok) throw new Error(`HTTP ${response.status} - ${url}`);
     const text = await response.text();
-    const parsed = Papa.parse(text, { header: true, skipEmptyLines: true });
+    // Pula a primeira linha (logo da prefeitura) e usa a segunda como cabeçalho
+    const lines = text.split('\n');
+    const dataLines = lines.slice(skipRows);
+    const csvData = dataLines.join('\n');
+    const parsed = Papa.parse(csvData, { header: true, skipEmptyLines: true });
     return parsed.data;
   }
 
   async function loadAllData() {
     el("loading").classList.add("on");
     try {
-      // Carrega todas as abas
+      // Carrega todas as abas pulando a primeira linha (logo)
       const [filaRaw, agendadosRaw, faturadoRaw, financeiroRaw] = await Promise.all([
-        loadCSV(GIDS.fila),
-        loadCSV(GIDS.agendados),
-        loadCSV(GIDS.faturado),
-        loadCSV(GIDS.financeiro)
+        loadCSV(URL_FILA, 1),
+        loadCSV(URL_AGENDADOS, 1),
+        loadCSV(URL_FATURADO, 1),
+        loadCSV(URL_FINANCEIRO, 1)
       ]);
 
       console.log("Fila raw:", filaRaw.length, "registros");
@@ -497,7 +510,7 @@
 
       // Mapeia Fila
       dadosFila = filaRaw.map(r => ({ 
-        codigo: r["CÓDIGO DO PROCEDIMENTO"] || r["CÓDIGO PROCEDIMENTO"] || "",
+        codigo: r["CÓDIGO DO PROCEDIMENTO"] || "",
         descricao: r["PROCEDIMENTO DESCRIÇÃO"] || "",
         grupo: r["GRUPO"] || "",
         subgrupo: r["SUBGRUPO"] || "",
@@ -513,6 +526,8 @@
         grupo: r["GRUPO"] || "",
         subgrupo: r["SUBGRUPO"] || "",
         estabelecimento: r["PRESTADOR"] || "",
+        especialidade: r["ESPECIALIDADE"] || "",
+        complexidade: r["COMPLEXIDADE"] || "",
         mes: r["MÊS"] || "",
         faltosos: parseInt(String(r["FAL"] || "0").replace(/\./g, '')) || 0,
         recepcionados: parseInt(String(r["REC"] || "0").replace(/\./g, '')) || 0,
@@ -530,9 +545,9 @@
         });
         return {
           codigo: r["CÓDIGO DO PROCEDIMENTO"] || "",
-          descricao: r["Procedimento Descrição"] || r["PROCEDIMENTO DESCRIÇÃO"] || "",
+          descricao: r["Procedimento Descrição"] || "",
           grupo: r["GRUPO"] || "",
-          subgrupo: r["SUB GRUPO"] || r["SUBGRUPO"] || "",
+          subgrupo: r["SUB GRUPO"] || "",
           estabelecimento: r["ESTABELECIMENTO"] || "",
           especialidade: r["Especialidade Descrição"] || "",
           total: total
@@ -550,10 +565,10 @@
         total: parseFloat(String(r["Total geral"] || "0").replace(/\./g, '').replace(',', '.')) || 0
       })).filter(d => d.descricao);
 
-      console.log("Dados processados - Fila:", dadosFila.length);
-      console.log("Dados processados - Agendados:", dadosAgendados.length);
-      console.log("Dados processados - Faturado:", dadosFaturado.length);
-      console.log("Dados processados - Financeiro:", dadosFinanceiro.length);
+      console.log("✅ Dados processados - Fila:", dadosFila.length);
+      console.log("✅ Dados processados - Agendados:", dadosAgendados.length);
+      console.log("✅ Dados processados - Faturado:", dadosFaturado.length);
+      console.log("✅ Dados processados - Financeiro:", dadosFinanceiro.length);
 
       // Popula grupos, subgrupos e estabelecimentos
       dadosFila.forEach(d => { 
@@ -566,15 +581,16 @@
         if (d.mes) allPeriodos.push(d.mes); 
       });
       dadosFaturado.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
+      dadosFinanceiro.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
       
       allPeriodos = [...new Set(allPeriodos)].sort();
 
       populateFilters();
       applyFilters();
-      toast(`Dados carregados! ${dadosFila.length} procedimentos na fila, ${dadosAgendados.length} registros de agendamentos`, "success");
+      toast(`✅ Dados carregados! ${dadosFila.length} procedimentos na fila, ${dadosAgendados.length} registros de agendamentos`, "success");
     } catch (e) { 
-      console.error("Erro detalhado:", e); 
-      toast("Erro ao carregar dados: " + e.message, "error"); 
+      console.error("❌ Erro detalhado:", e); 
+      toast("❌ Erro ao carregar dados: " + e.message, "error"); 
     } finally { 
       el("loading").classList.remove("on"); 
     }
@@ -678,28 +694,28 @@
     el("kTicketMedio").innerText = "R$ " + ticketMedio.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
     el("kFaltosos").innerText = totalFaltosos.toLocaleString();
 
-    renderCharts(filteredFila, filteredAgendados, filteredFaturado);
+    renderAllCharts(filteredFila, filteredAgendados, filteredFaturado);
     renderTable(filteredFila, filteredAgendados, filteredFaturado);
   }
 
-  function renderCharts(fila, agendados, faturado) {
-    // Gráfico de Evolução
+  function renderAllCharts(fila, agendados, faturado) {
+    // Gráfico de Evolução (Fila vs Realizado)
     if (charts.cEvolucao) charts.cEvolucao.destroy();
-    let ctx = el("cEvolucao")?.getContext("2d");
-    if (ctx) {
+    let ctxEvol = el("cEvolucao")?.getContext("2d");
+    if (ctxEvol) {
       let meses = [...new Set(agendados.map(a => a.mes).filter(m => m))].sort();
       let dadosFilaPorMes = meses.map(m => fila.reduce((s, d) => s + d.fila, 0));
       let dadosRealizadosPorMes = meses.map(m => agendados.filter(a => a.mes === m).reduce((s, d) => s + d.recepcionados, 0));
-      charts.cEvolucao = new Chart(ctx, { 
+      charts.cEvolucao = new Chart(ctxEvol, { 
         type: "line", 
         data: { 
           labels: meses.length ? meses : ["Sem dados"], 
           datasets: [
-            { label: "Fila de Espera", data: meses.length ? dadosFilaPorMes : [0], borderColor: "#d97706", tension: 0.3, fill: false, borderWidth: 3 },
-            { label: "Cirurgias Realizadas", data: meses.length ? dadosRealizadosPorMes : [0], borderColor: "#0d9488", tension: 0.3, fill: false, borderWidth: 3 }
+            { label: "Fila de Espera", data: meses.length ? dadosFilaPorMes : [0], borderColor: "#d97706", backgroundColor: "rgba(217,119,6,0.1)", tension: 0.3, fill: true, borderWidth: 3 },
+            { label: "Cirurgias Realizadas", data: meses.length ? dadosRealizadosPorMes : [0], borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", tension: 0.3, fill: true, borderWidth: 3 }
           ] 
         }, 
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" } } } 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "top" }, datalabels: { display: false } } } 
       });
     }
     
@@ -713,9 +729,191 @@
         type: "doughnut", 
         data: { 
           labels: ["Fila de Espera", "Agendados (Oferta)", "Realizados"], 
-          datasets: [{ data: [totalFila, totalOferta, totalRealizados], backgroundColor: ["#f59e0b", "#3b82f6", "#0d9488"] }] 
+          datasets: [{ data: [totalFila, totalOferta, totalRealizados], backgroundColor: ["#f59e0b", "#3b82f6", "#0d9488"], borderWidth: 0 }] 
         }, 
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" } } } 
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" }, datalabels: { color: "#fff", font: { weight: "bold", size: 14 }, formatter: (v) => v > 0 ? v.toLocaleString() : "" } } } 
+      });
+    }
+
+    // Top 10 Procedimentos na Fila
+    if (el("cTopFila")) {
+      if (charts.cTopFila) charts.cTopFila.destroy();
+      let procMap = new Map();
+      fila.forEach(d => { procMap.set(d.descricao, (procMap.get(d.descricao) || 0) + d.fila); });
+      let top10 = [...procMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cTopFila = new Chart(el("cTopFila").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 30 ? t[0].substring(0,27)+"..." : t[0]), datasets: [{ label: "Quantidade na Fila", data: top10.map(t => t[1]), backgroundColor: "#f59e0b", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "right", formatter: (v) => v.toLocaleString() } } }
+      });
+    }
+
+    // Top 10 Procedimentos Realizados
+    if (el("cTopRealizados")) {
+      if (charts.cTopRealizados) charts.cTopRealizados.destroy();
+      let procMap = new Map();
+      agendados.forEach(d => { procMap.set(d.descricao, (procMap.get(d.descricao) || 0) + d.recepcionados); });
+      let top10 = [...procMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cTopRealizados = new Chart(el("cTopRealizados").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 30 ? t[0].substring(0,27)+"..." : t[0]), datasets: [{ label: "Quantidade Realizada", data: top10.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "right", formatter: (v) => v.toLocaleString() } } }
+      });
+    }
+
+    // Evolução da Fila por Mês
+    if (el("cEvolucaoFila")) {
+      if (charts.cEvolucaoFila) charts.cEvolucaoFila.destroy();
+      let meses = [...new Set(agendados.map(a => a.mes).filter(m => m))].sort();
+      let dadosFilaPorMes = meses.map(m => fila.reduce((s, d) => s + d.fila, 0));
+      charts.cEvolucaoFila = new Chart(el("cEvolucaoFila").getContext("2d"), {
+        type: "line", data: { labels: meses, datasets: [{ label: "Fila de Espera", data: dadosFilaPorMes, borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.1)", fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+      });
+    }
+
+    // Distribuição por Complexidade na Fila
+    if (el("cComplexidadeFila")) {
+      if (charts.cComplexidadeFila) charts.cComplexidadeFila.destroy();
+      let compMap = new Map();
+      fila.forEach(d => { if (d.complexidade) compMap.set(d.complexidade, (compMap.get(d.complexidade) || 0) + d.fila); });
+      charts.cComplexidadeFila = new Chart(el("cComplexidadeFila").getContext("2d"), {
+        type: "pie", data: { labels: [...compMap.keys()], datasets: [{ data: [...compMap.values()], backgroundColor: ["#0d9488", "#f59e0b", "#3b82f6", "#8b5cf6"] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" }, datalabels: { formatter: (v) => v > 0 ? v.toLocaleString() : "" } } }
+      });
+    }
+
+    // Top Estabelecimentos com Maior Fila
+    if (el("cRankFilaEstab")) {
+      if (charts.cRankFilaEstab) charts.cRankFilaEstab.destroy();
+      let estabMap = new Map();
+      fila.forEach(d => { if (d.estabelecimento) estabMap.set(d.estabelecimento, (estabMap.get(d.estabelecimento) || 0) + d.fila); });
+      let top10 = [...estabMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cRankFilaEstab = new Chart(el("cRankFilaEstab").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 25 ? t[0].substring(0,22)+"..." : t[0]), datasets: [{ label: "Fila", data: top10.map(t => t[1]), backgroundColor: "#f59e0b", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "right", formatter: (v) => v.toLocaleString() } } }
+      });
+    }
+
+    // Evolução das Cirurgias Realizadas
+    if (el("cEvolucaoRealizados")) {
+      if (charts.cEvolucaoRealizados) charts.cEvolucaoRealizados.destroy();
+      let meses = [...new Set(agendados.map(a => a.mes).filter(m => m))].sort();
+      let dadosRealizadosPorMes = meses.map(m => agendados.filter(a => a.mes === m).reduce((s, d) => s + d.recepcionados, 0));
+      charts.cEvolucaoRealizados = new Chart(el("cEvolucaoRealizados").getContext("2d"), {
+        type: "line", data: { labels: meses, datasets: [{ label: "Cirurgias Realizadas", data: dadosRealizadosPorMes, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+      });
+    }
+
+    // Distribuição por Especialidade (Realizados)
+    if (el("cEspecialidadeRealizados")) {
+      if (charts.cEspecialidadeRealizados) charts.cEspecialidadeRealizados.destroy();
+      let espMap = new Map();
+      agendados.forEach(d => { if (d.especialidade) espMap.set(d.especialidade, (espMap.get(d.especialidade) || 0) + d.recepcionados); });
+      let top8 = [...espMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 8);
+      charts.cEspecialidadeRealizados = new Chart(el("cEspecialidadeRealizados").getContext("2d"), {
+        type: "pie", data: { labels: top8.map(t => t[0].length > 20 ? t[0].substring(0,17)+"..." : t[0]), datasets: [{ data: top8.map(t => t[1]), backgroundColor: ["#0d9488", "#f59e0b", "#3b82f6", "#8b5cf6", "#ec489a", "#ef4444", "#10b981", "#6366f1"] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: "bottom" }, datalabels: { formatter: (v) => v > 0 ? v.toLocaleString() : "" } } }
+      });
+    }
+
+    // Top Estabelecimentos por Produção
+    if (el("cRankProducaoEstab")) {
+      if (charts.cRankProducaoEstab) charts.cRankProducaoEstab.destroy();
+      let estabMap = new Map();
+      agendados.forEach(d => { if (d.estabelecimento) estabMap.set(d.estabelecimento, (estabMap.get(d.estabelecimento) || 0) + d.recepcionados); });
+      let top10 = [...estabMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cRankProducaoEstab = new Chart(el("cRankProducaoEstab").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 25 ? t[0].substring(0,22)+"..." : t[0]), datasets: [{ label: "Cirurgias Realizadas", data: top10.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "right", formatter: (v) => v.toLocaleString() } } }
+      });
+    }
+
+    // Faturamento Mensal
+    if (el("cFaturamentoMensal")) {
+      if (charts.cFaturamentoMensal) charts.cFaturamentoMensal.destroy();
+      let mesesFat = ["jan/25", "fev/25", "mar/25", "abr/25", "mai/25", "jun/25", "jul/25", "ago/25", "set/25", "out/25", "nov/25", "dez/25"];
+      let valoresMensais = new Array(12).fill(0);
+      faturado.forEach(d => {
+        Object.keys(d).forEach(key => {
+          let idx = mesesFat.indexOf(key);
+          if (idx !== -1 && d[key]) {
+            valoresMensais[idx] += parseFloat(String(d[key]).replace(/\./g, '').replace(',', '.')) || 0;
+          }
+        });
+      });
+      charts.cFaturamentoMensal = new Chart(el("cFaturamentoMensal").getContext("2d"), {
+        type: "line", data: { labels: mesesFat, datasets: [{ label: "Faturamento (R$)", data: valoresMensais, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` } }, datalabels: { display: false } }, scales: { y: { ticks: { callback: (v) => "R$ " + v.toLocaleString() } } } }
+      });
+    }
+
+    // Faturamento por Especialidade
+    if (el("cFatEspecialidade")) {
+      if (charts.cFatEspecialidade) charts.cFatEspecialidade.destroy();
+      let espMap = new Map();
+      faturado.forEach(d => { if (d.especialidade) espMap.set(d.especialidade, (espMap.get(d.especialidade) || 0) + d.total); });
+      let top8 = [...espMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 8);
+      charts.cFatEspecialidade = new Chart(el("cFatEspecialidade").getContext("2d"), {
+        type: "bar", data: { labels: top8.map(t => t[0].length > 20 ? t[0].substring(0,17)+"..." : t[0]), datasets: [{ label: "Faturamento (R$)", data: top8.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` } }, datalabels: { anchor: "end", align: "top", formatter: (v) => "R$ " + (v/1000).toFixed(0) + "k" } }, scales: { y: { ticks: { callback: (v) => "R$ " + (v/1000).toFixed(0) + "k" } } } }
+      });
+    }
+
+    // Faturamento por Estabelecimento
+    if (el("cFatEstabelecimento")) {
+      if (charts.cFatEstabelecimento) charts.cFatEstabelecimento.destroy();
+      let estabMap = new Map();
+      faturado.forEach(d => { if (d.estabelecimento) estabMap.set(d.estabelecimento, (estabMap.get(d.estabelecimento) || 0) + d.total); });
+      let top8 = [...estabMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 8);
+      charts.cFatEstabelecimento = new Chart(el("cFatEstabelecimento").getContext("2d"), {
+        type: "bar", data: { labels: top8.map(t => t[0].length > 20 ? t[0].substring(0,17)+"..." : t[0]), datasets: [{ label: "Faturamento (R$)", data: top8.map(t => t[1]), backgroundColor: "#f59e0b", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` } }, datalabels: { anchor: "end", align: "right", formatter: (v) => "R$ " + (v/1000).toFixed(0) + "k" } }, scales: { x: { ticks: { callback: (v) => "R$ " + (v/1000).toFixed(0) + "k" } } } }
+      });
+    }
+
+    // Rankings Físico e Financeiro por Estabelecimento
+    if (el("cRankFisicoEstab")) {
+      if (charts.cRankFisicoEstab) charts.cRankFisicoEstab.destroy();
+      let estabMap = new Map();
+      agendados.forEach(d => { if (d.estabelecimento) estabMap.set(d.estabelecimento, (estabMap.get(d.estabelecimento) || 0) + d.recepcionados); });
+      let top10 = [...estabMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cRankFisicoEstab = new Chart(el("cRankFisicoEstab").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 25 ? t[0].substring(0,22)+"..." : t[0]), datasets: [{ label: "Cirurgias Realizadas", data: top10.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "right", formatter: (v) => v.toLocaleString() } } }
+      });
+    }
+
+    if (el("cRankFinanceiroEstab")) {
+      if (charts.cRankFinanceiroEstab) charts.cRankFinanceiroEstab.destroy();
+      let estabMap = new Map();
+      faturado.forEach(d => { if (d.estabelecimento) estabMap.set(d.estabelecimento, (estabMap.get(d.estabelecimento) || 0) + d.total); });
+      let top10 = [...estabMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cRankFinanceiroEstab = new Chart(el("cRankFinanceiroEstab").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 25 ? t[0].substring(0,22)+"..." : t[0]), datasets: [{ label: "Faturamento (R$)", data: top10.map(t => t[1]), backgroundColor: "#f59e0b", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { tooltip: { callbacks: { label: (ctx) => `R$ ${ctx.raw.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}` } }, datalabels: { anchor: "end", align: "right", formatter: (v) => "R$ " + (v/1000).toFixed(0) + "k" } }, scales: { x: { ticks: { callback: (v) => "R$ " + (v/1000).toFixed(0) + "k" } } } }
+      });
+    }
+
+    // Top Especialidades e Procedimentos
+    if (el("cRankEspecialidades")) {
+      if (charts.cRankEspecialidades) charts.cRankEspecialidades.destroy();
+      let espMap = new Map();
+      agendados.forEach(d => { if (d.especialidade) espMap.set(d.especialidade, (espMap.get(d.especialidade) || 0) + d.recepcionados); });
+      let top10 = [...espMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cRankEspecialidades = new Chart(el("cRankEspecialidades").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 25 ? t[0].substring(0,22)+"..." : t[0]), datasets: [{ label: "Cirurgias Realizadas", data: top10.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "right", formatter: (v) => v.toLocaleString() } } }
+      });
+    }
+
+    if (el("cRankProcedimentos")) {
+      if (charts.cRankProcedimentos) charts.cRankProcedimentos.destroy();
+      let procMap = new Map();
+      agendados.forEach(d => { procMap.set(d.descricao, (procMap.get(d.descricao) || 0) + d.recepcionados); });
+      let top10 = [...procMap.entries()].sort((a,b) => b[1] - a[1]).slice(0, 10);
+      charts.cRankProcedimentos = new Chart(el("cRankProcedimentos").getContext("2d"), {
+        type: "bar", data: { labels: top10.map(t => t[0].length > 25 ? t[0].substring(0,22)+"..." : t[0]), datasets: [{ label: "Quantidade Realizada", data: top10.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, indexAxis: "y", plugins: { legend: { display: false }, datalabels: { anchor: "end", align: "right", formatter: (v) => v.toLocaleString() } } }
       });
     }
   }
@@ -747,7 +945,7 @@
     } else {
       tbody.innerHTML = rows.slice(0, 100).map(r => `
         <tr>
-          <td>${r.descricao || "-"}</td>
+          <td title="${r.descricao}">${r.descricao.length > 50 ? r.descricao.substring(0,47)+"..." : r.descricao}</td>
           <td>${r.grupo || "-"}</td>
           <td>${r.subgrupo || "-"}</td>
           <td>${r.estabelecimento || "-"}</td>
@@ -781,7 +979,7 @@
       el("periodoSelect").value = ""; 
       applyFilters(); 
     }); 
-    el("btnExcel").addEventListener("click", () => toast("Exportação Excel em desenvolvimento", "info")); 
+    el("btnExcel").addEventListener("click", () => toast("📊 Exportação Excel em desenvolvimento", "info")); 
     el("tSearch").addEventListener("input", () => { 
       let q = el("tSearch").value.toLowerCase(); 
       let rows = document.querySelectorAll("#tBody tr"); 
