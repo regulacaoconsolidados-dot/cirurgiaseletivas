@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Cirúrgico — Diretoria de Regulação do Acesso</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+    :root {
+      --primary: #0f2f4f;
+      --primary-dark: #082236;
+      --accent: #0d9488;
+      --accent-light: #14b8a6;
+      --accent-gold: #d97706;
+      --success: #059669;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 1px 2px 0 rgba(0,0,0,0.03);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+      --r: 20px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Header diferenciado */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #0a2a3b 0%, #0f2f4f 50%, #1b4a5e 100%);
+      color: white;
+      padding: 24px 32px;
+      display: flex;
+      gap: 24px;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    .h-icon {
+      width: 70px;
+      height: 70px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      border: 1px solid rgba(255,255,255,0.2);
+      backdrop-filter: blur(4px);
+    }
+    .h-info { flex: 1; }
+    .h-title { font-size: 26px; font-weight: 800; letter-spacing: -0.3px; }
+    .h-sub { font-size: 15px; opacity: 0.85; margin-top: 6px; font-weight: 500; }
+    .h-meta { font-size: 12px; opacity: 0.7; margin-top: 6px; }
+    .h-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+    .btn-excel { background: rgba(13,148,136,0.3); border-color: rgba(13,148,136,0.5); }
+    .btn-excel:hover { background: rgba(13,148,136,0.5); }
+    .pill {
+      background: rgba(13,148,136,0.2);
+      border-radius: 40px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(13,148,136,0.4);
+    }
+    .dot {
+      width: 8px;
+      height: 8px;
+      background: #0d9488;
+      border-radius: 50%;
+      box-shadow: 0 0 6px #0d9488;
+    }
+    .lastUpdate { font-size: 11px; opacity: 0.7; margin-top: 6px; }
+
+    .wrap { max-width: 1600px; margin: 0 auto; padding: 24px 28px; }
+
+    /* Cards e filtros */
+    .card {
+      background: var(--card);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+    }
+    .card:hover { box-shadow: var(--shadow-lg); }
+    .filters { padding: 20px 24px; }
+    .filtersTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .filtersTitle {
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filtersGrid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+    .fg { grid-column: span 3; }
+    @media (max-width: 900px) { .fg { grid-column: span 6; } }
+    @media (max-width: 600px) { .fg { grid-column: span 12; } }
+    .fg label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+    select, .ms-trigger {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      background: #fafcff;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    select:focus, .ms-trigger:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
+    .btn-clear {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-clear:hover { border-color: var(--danger); color: var(--danger); background: #fff5f5; }
+
+    /* Multi-select */
+    .multiselect-wrapper { position: relative; width: 100%; }
+    .ms-trigger {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #fafcff;
+    }
+    .ms-trigger.open { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
+    .ms-arrow { font-size: 10px; transition: transform 0.2s; }
+    .ms-trigger.open .ms-arrow { transform: rotate(180deg); }
+    .ms-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+      z-index: 200;
+      max-height: 320px;
+      overflow: auto;
+    }
+    .ms-dropdown.open { display: block; }
+    .ms-actions { padding: 10px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); }
+    .ms-btn-all, .ms-btn-clr {
+      flex: 1;
+      padding: 6px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 11px;
+      border: none;
+      cursor: pointer;
+    }
+    .ms-btn-all { background: rgba(13,148,136,0.1); color: var(--accent); }
+    .ms-btn-clr { background: rgba(220,38,38,0.08); color: var(--danger); }
+    .ms-search-box { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .ms-search-box input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+    }
+    .ms-list { padding: 6px; max-height: 220px; overflow-y: auto; }
+    .ms-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .ms-item:hover { background: #f0fdfa; }
+    .ms-item input { width: 16px; height: 16px; accent-color: var(--accent); }
+
+    /* KPIs */
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 18px;
+      margin-top: 20px;
+    }
+    .kpi {
+      background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .kpiIcon {
+      width: 56px;
+      height: 56px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .kpi .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; }
+    .kpi .val { font-size: 32px; font-weight: 800; margin-top: 4px; line-height: 1.2; }
+    .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+    .kpi-fila .kpiIcon { background: rgba(13,148,136,0.12); color: var(--accent); }
+    .kpi-real .kpiIcon { background: rgba(5,150,105,0.12); color: var(--success); }
+    .kpi-conv .kpiIcon { background: rgba(217,119,6,0.12); color: var(--accent-gold); }
+    .kpi-fat .kpiIcon { background: rgba(15,47,79,0.12); color: var(--primary); }
+    .kpi-ticket .kpiIcon { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+    .kpi-falt .kpiIcon { background: rgba(220,38,38,0.12); color: var(--danger); }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: var(--card);
+      padding: 6px;
+      border-radius: 60px;
+      border: 1px solid var(--border);
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      border: none;
+      background: transparent;
+      padding: 10px 24px;
+      border-radius: 40px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+    }
+    .tab.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 10px rgba(15,47,79,0.2);
+    }
+    .tabContent { display: none; margin-top: 24px; }
+    .tabContent.active { display: block; }
+
+    /* Gráficos */
+    .section { padding: 20px; }
+    .sectionTitle {
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--primary);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .chartCard {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+    .chartHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .chartHead h3 { font-size: 15px; font-weight: 800; color: var(--text); }
+    .chartWrap { position: relative; height: 380px; }
+    .row2eq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .row2eq { grid-template-columns: 1fr; } }
+
+    /* Tabelas */
+    .tableTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f9fafb;
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+    }
+    .search input { border: none; background: transparent; outline: none; font-weight: 500; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th {
+      text-align: left;
+      padding: 12px 12px;
+      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    tbody td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 500; }
+    tbody tr:hover { background: #f0fdfa; }
+
+    .toastBox {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toast {
+      background: #1f2937;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 16px;
+      border-left: 4px solid var(--accent);
+      font-weight: 600;
+      font-size: 13px;
+    }
+    .loading {
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      background-size: 200% 100%;
+      animation: shimmer 1s infinite;
+      display: none;
+    }
+    .loading.on { display: block; }
+    @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+
+    .fin-header {
+      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      border-radius: 24px;
+      padding: 20px 28px;
+      color: white;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .fin-header-icon { font-size: 28px; background: rgba(255,255,255,0.15); padding: 12px; border-radius: 20px; }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="h-icon"><i class="fa-solid fa-kit-medical"></i></div>
+  <div class="h-info">
+    <div class="h-title">PAINEL CIRÚRGICO</div>
+    <div class="h-sub">Diretoria de Regulação do Acesso — Gestão de Fila e Produção Cirúrgica</div>
+    <div class="h-meta">Fila ↔ Agendamento ↔ Realizado ↔ Faturamento | Análise Estratégica</div>
+    <div class="lastUpdate" id="lastUpdate">Carregando dados...</div>
+  </div>
+  <div class="h-actions">
+    <div class="pill"><span class="dot"></span> Dados em tempo real</div>
+    <button class="btn btn-primary" id="btnRefresh"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+    <button class="btn btn-excel" id="btnExcel"><i class="fa-solid fa-file-excel"></i> Exportar Excel</button>
+  </div>
+</header>
+
+<div class="loading" id="loading"></div>
+<div class="toastBox" id="toastBox"></div>
+
+<main class="wrap">
+  <!-- Filtros -->
+  <div class="card filters">
+    <div class="filtersTop">
+      <div class="filtersTitle"><i class="fa-solid fa-sliders-h" style="color:var(--accent)"></i> Filtros Dinâmicos</div>
+      <button class="btn-clear" id="btnClear"><i class="fa-solid fa-eraser"></i> Limpar Filtros</button>
+    </div>
+    <div class="filtersGrid">
+      <div class="fg">
+        <label><i class="fa-solid fa-layer-group"></i> GRUPO</label>
+        <select id="grupoSelect" onchange="handleGrupoChange()">
+          <option value="">Todos os Grupos</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label><i class="fa-solid fa-code-branch"></i> SUBGRUPO</label>
+        <div class="multiselect-wrapper" id="msWrapperSub">
+          <div class="ms-trigger" id="msTriggerSub" onclick="toggleMsDropdownSub(event)">
+            <span class="ms-label-text" id="msLabelSub">Todos</span>
+            <i class="fa-solid fa-chevron-down ms-arrow"></i>
+          </div>
+          <div class="ms-dropdown" id="msDropdownSub">
+            <div class="ms-actions"><button class="ms-btn-all" onclick="selectAllSub(event)">Selecionar Todos</button><button class="ms-btn-clr" onclick="clearSubSelection(event)">Limpar</button></div>
+            <div class="ms-search-box"><input type="text" id="msSearchSub" placeholder="Buscar..." oninput="filterMsListSub()"></div>
+            <div class="ms-list" id="msListSub"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fg">
+        <label><i class="fa-solid fa-building"></i> ESTABELECIMENTO</label>
+        <div class="multiselect-wrapper" id="msWrapperEstab">
+          <div class="ms-trigger" id="msTriggerEstab" onclick="toggleMsDropdownEstab(event)">
+            <span class="ms-label-text" id="msLabelEstab">Todos</span>
+            <i class="fa-solid fa-chevron-down ms-arrow"></i>
+          </div>
+          <div class="ms-dropdown" id="msDropdownEstab">
+            <div class="ms-actions"><button class="ms-btn-all" onclick="selectAllEstab(event)">Selecionar Todos</button><button class="ms-btn-clr" onclick="clearEstabSelection(event)">Limpar</button></div>
+            <div class="ms-search-box"><input type="text" id="msSearchEstab" placeholder="Buscar..." oninput="filterMsListEstab()"></div>
+            <div class="ms-list" id="msListEstab"></div>
+          </div>
+        </div>
+      </div>
+      <div class="fg">
+        <label><i class="fa-solid fa-calendar"></i> PERÍODO</label>
+        <select id="periodoSelect"><option value="">Todos os meses</option></select>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpis">
+    <div class="kpi kpi-fila"><div class="kpiIcon"><i class="fa-solid fa-clock"></i></div><div><div class="label">Fila de Espera</div><div class="val" id="kFila">0</div><div class="sub">Procedimentos aguardando</div></div></div>
+    <div class="kpi kpi-real"><div class="kpiIcon"><i class="fa-solid fa-scalpel"></i></div><div><div class="label">Cirurgias Realizadas</div><div class="val" id="kRealizados">0</div><div class="sub">Procedimentos executados</div></div></div>
+    <div class="kpi kpi-conv"><div class="kpiIcon"><i class="fa-solid fa-chart-line"></i></div><div><div class="label">Taxa de Conversão</div><div class="val" id="kConversao">0%</div><div class="sub">Realizado / Fila</div></div></div>
+    <div class="kpi kpi-fat"><div class="kpiIcon"><i class="fa-solid fa-dollar-sign"></i></div><div><div class="label">Faturamento Total</div><div class="val" id="kFaturamento">R$ 0</div><div class="sub">Acumulado no período</div></div></div>
+    <div class="kpi kpi-ticket"><div class="kpiIcon"><i class="fa-solid fa-ticket"></i></div><div><div class="label">Ticket Médio</div><div class="val" id="kTicketMedio">R$ 0</div><div class="sub">Por cirurgia realizada</div></div></div>
+    <div class="kpi kpi-falt"><div class="kpiIcon"><i class="fa-solid fa-user-slash"></i></div><div><div class="label">Faltosos (Absenteísmo)</div><div class="val" id="kFaltosos">0</div><div class="sub">Agendados que não compareceram</div></div></div>
+  </div>
+
+  <!-- Abas -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('estrategica', this)"><i class="fa-solid fa-chart-pie"></i> Visão Estratégica</button>
+    <button class="tab" onclick="switchTab('fila', this)"><i class="fa-solid fa-hourglass-half"></i> Análise da Fila</button>
+    <button class="tab" onclick="switchTab('producao', this)"><i class="fa-solid fa-hospital-user"></i> Produção Cirúrgica</button>
+    <button class="tab" onclick="switchTab('financeiro', this)"><i class="fa-solid fa-coins"></i> Performance Financeira</button>
+    <button class="tab" onclick="switchTab('rankings', this)"><i class="fa-solid fa-trophy"></i> Rankings</button>
+    <button class="tab" onclick="switchTab('tabela', this)"><i class="fa-solid fa-table"></i> Dados Detalhados</button>
+  </div>
+
+  <!-- Aba 1: Visão Estratégica -->
+  <section id="tab-estrategica" class="tabContent active">
+    <div class="row2eq">
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Realizado</h3></div><div class="chartWrap"><canvas id="cEvolucao"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3></div><div class="chartWrap"><canvas id="cFunil"></canvas></div></div>
+    </div>
+    <div class="row2eq">
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top 10 Procedimentos na Fila</h3></div><div class="chartWrap"><canvas id="cTopFila"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top 10 Procedimentos Realizados</h3></div><div class="chartWrap"><canvas id="cTopRealizados"></canvas></div></div>
+    </div>
+  </section>
+
+  <!-- Aba 2: Análise da Fila -->
+  <section id="tab-fila" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês</h3></div><div class="chartWrap"><canvas id="cEvolucaoFila"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Complexidade</h3></div><div class="chartWrap"><canvas id="cComplexidadeFila"></canvas></div></div>
+    </div>
+    <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-ranking-star"></i> Top Estabelecimentos com Maior Fila</h3></div><div class="chartWrap"><canvas id="cRankFilaEstab"></canvas></div></div>
+  </section>
+
+  <!-- Aba 3: Produção Cirúrgica -->
+  <section id="tab-producao" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas</h3></div><div class="chartWrap"><canvas id="cEvolucaoRealizados"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Especialidade</h3></div><div class="chartWrap"><canvas id="cEspecialidadeRealizados"></canvas></div></div>
+    </div>
+    <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-building"></i> Top Estabelecimentos por Produção</h3></div><div class="chartWrap"><canvas id="cRankProducaoEstab"></canvas></div></div>
+  </section>
+
+  <!-- Aba 4: Performance Financeira -->
+  <section id="tab-financeiro" class="tabContent">
+    <div class="fin-header"><div class="fin-header-icon"><i class="fa-solid fa-chart-line"></i></div><div><h3 style="margin:0">Faturamento Mensal Acumulado</h3><div style="font-size:12px;opacity:0.8">Evolução financeira do período</div></div></div>
+    <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Faturamento por Competência</h3></div><div class="chartWrap"><canvas id="cFaturamentoMensal"></canvas></div></div>
+    <div class="row2eq">
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faturamento por Especialidade</h3></div><div class="chartWrap"><canvas id="cFatEspecialidade"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-building"></i> Faturamento por Estabelecimento</h3></div><div class="chartWrap"><canvas id="cFatEstabelecimento"></canvas></div></div>
+    </div>
+  </section>
+
+  <!-- Aba 5: Rankings -->
+  <section id="tab-rankings" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-trophy"></i> Top 10 Estabelecimentos (Físico)</h3></div><div class="chartWrap"><canvas id="cRankFisicoEstab"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-sack-dollar"></i> Top 10 Estabelecimentos (Financeiro)</h3></div><div class="chartWrap"><canvas id="cRankFinanceiroEstab"></canvas></div></div>
+    </div>
+    <div class="row2eq">
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top 10 Especialidades (Realizado)</h3></div><div class="chartWrap"><canvas id="cRankEspecialidades"></canvas></div></div>
+      <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top 10 Procedimentos (Realizado)</h3></div><div class="chartWrap"><canvas id="cRankProcedimentos"></canvas></div></div>
+    </div>
+  </section>
+
+  <!-- Aba 6: Tabela Detalhada -->
+  <section id="tab-tabela" class="tabContent">
+    <div class="card section">
+      <div class="tableTop"><div class="sectionTitle"><i class="fa-solid fa-table"></i> Dados Consolidados</div><div class="search"><i class="fa-solid fa-search"></i><input id="tSearch" placeholder="Buscar procedimento, estabelecimento..."></div><div class="muted" id="tInfo">—</div></div>
+      <div style="overflow-x:auto;max-height:500px;"><table id="tabelaPrincipal"><thead><tr><th>Procedimento</th><th>Grupo</th><th>Subgrupo</th><th>Estabelecimento</th><th>Na Fila</th><th>Realizados</th><th>Faturamento (R$)</th></tr></thead><tbody id="tBody"></tbody></table></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  Chart.register(ChartDataLabels);
+  const el = id => document.getElementById(id);
+
+  // ========== CONFIG ==========
+  const SHEET_ID = "1ax8ZpVRSZnDkTm_T1GY37ybSgrlP_8Rk";
+  const URLS = {
+    fila: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1716569787`,
+    agendados: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=1546152833`,
+    faturado: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=252919053`,
+    financeiro: `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=269446681`
+  };
+
+  let dadosFila = [], dadosAgendados = [], dadosFaturado = [], dadosFinanceiro = [];
+  let gruposMap = new Map(), subgruposMap = new Map(), estabelecimentosSet = new Set();
+  let selectedSubgrupos = new Set(), selectedEstabelecimentos = new Set();
+  let allPeriodos = [];
+  let charts = {};
+
+  function toast(msg, type = "info") { let box = el("toastBox"), d = document.createElement("div"); d.className = "toast"; d.innerHTML = `<i class="fa-solid fa-${type === "success" ? "circle-check" : "circle-info"}"></i> ${msg}`; box.appendChild(d); setTimeout(() => d.remove(), 3500); }
+
+  async function loadAllData() {
+    el("loading").classList.add("on");
+    try {
+      const [filaCSV, agendadosCSV, faturadoCSV, financeiroCSV] = await Promise.all([fetch(URLS.fila), fetch(URLS.agendados), fetch(URLS.faturado), fetch(URLS.financeiro)]);
+      dadosFila = Papa.parse(await filaCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO DO PROCEDIMENTO"], descricao: r["PROCEDIMENTO DESCRIÇÃO"], grupo: r["GRUPO"], subgrupo: r["SUBGRUPO"], estabelecimento: r["PRESTADOR"], fila: parseInt(r["FILA INTERNA ATUAL SUR"]) || 0, complexidade: r["COMPLEXIDADE"] }));
+      dadosAgendados = Papa.parse(await agendadosCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO DO PROCEDIMENTO"], descricao: r["PROCEDIMENTO DESCRIÇÃO"], grupo: r["GRUPO"], subgrupo: r["SUBGRUPO"], estabelecimento: r["PRESTADOR"], mes: r["MÊS"], faltosos: parseInt(r["FAL"]) || 0, recepcionados: parseInt(r["REC"]) || 0, oferta: parseInt(r["OFERTA"]) || 0 }));
+      dadosFaturado = Papa.parse(await faturadoCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO DO PROCEDIMENTO"], descricao: r["Procedimento Descrição"], grupo: r["GRUPO"], subgrupo: r["SUB GRUPO"], estabelecimento: r["ESTABELECIMENTO"], especialidade: r["Especialidade Descrição"], total: parseFloat(r["Total geral"]?.replace(",", ".")) || 0 }));
+      dadosFinanceiro = Papa.parse(await financeiroCSV.text(), { header: true, skipEmptyLines: true }).data.map(r => ({ codigo: r["CÓDIGO PROCEDIMENTO"], descricao: r["PROCEDIMENTO DESCRIÇÃO"], grupo: r["GRUPO"], subgrupo: r["SUBGRUPO"], estabelecimento: r["ESTABELECIMENTO"], especialidade: r["ESPECIALIDADE"], total: parseFloat(r["Total geral"]?.replace(",", ".")) || 0 }));
+
+      dadosFila.forEach(d => { gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
+      dadosAgendados.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.mes) allPeriodos.push(d.mes); });
+      dadosFaturado.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
+      allPeriodos = [...new Set(allPeriodos)].sort();
+
+      populateFilters();
+      applyFilters();
+      toast("Dados carregados com sucesso!", "success");
+    } catch (e) { console.error(e); toast("Erro ao carregar dados", "error"); } finally { el("loading").classList.remove("on"); }
+  }
+
+  function populateFilters() {
+    let grupoSelect = el("grupoSelect");
+    grupoSelect.innerHTML = '<option value="">Todos os Grupos</option>' + [...gruposMap.keys()].sort().map(g => `<option value="${g}">${g}</option>`).join("");
+    buildSubgrupoList();
+    buildEstabelecimentoList();
+    let periodoSelect = el("periodoSelect");
+    periodoSelect.innerHTML = '<option value="">Todos os meses</option>' + allPeriodos.map(p => `<option value="${p}">${p}</option>`).join("");
+  }
+
+  function buildSubgrupoList() {
+    let list = el("msListSub"); if (!list) return;
+    list.innerHTML = "";
+    let subArray = [...subgruposMap.keys()].sort();
+    subArray.forEach(sub => {
+      let div = document.createElement("div"); div.className = "ms-item";
+      let cb = document.createElement("input"); cb.type = "checkbox"; cb.value = sub; cb.checked = selectedSubgrupos.has(sub);
+      cb.addEventListener("change", () => { if (cb.checked) selectedSubgrupos.add(sub); else selectedSubgrupos.delete(sub); updateMsLabelSub(); applyFilters(); });
+      let span = document.createElement("span"); span.textContent = sub;
+      div.appendChild(cb); div.appendChild(span); div.addEventListener("click", (e) => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } });
+      list.appendChild(div);
+    });
+    updateMsLabelSub();
+  }
+
+  function buildEstabelecimentoList() {
+    let list = el("msListEstab"); if (!list) return;
+    list.innerHTML = "";
+    let estabArray = [...estabelecimentosSet].sort();
+    estabArray.forEach(estab => {
+      let div = document.createElement("div"); div.className = "ms-item";
+      let cb = document.createElement("input"); cb.type = "checkbox"; cb.value = estab; cb.checked = selectedEstabelecimentos.has(estab);
+      cb.addEventListener("change", () => { if (cb.checked) selectedEstabelecimentos.add(estab); else selectedEstabelecimentos.delete(estab); updateMsLabelEstab(); applyFilters(); });
+      let span = document.createElement("span"); span.textContent = estab;
+      div.appendChild(cb); div.appendChild(span); div.addEventListener("click", (e) => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } });
+      list.appendChild(div);
+    });
+    updateMsLabelEstab();
+  }
+
+  function updateMsLabelSub() { let lbl = el("msLabelSub"); if (lbl) lbl.textContent = selectedSubgrupos.size ? `${selectedSubgrupos.size} selecionados` : "Todos"; }
+  function updateMsLabelEstab() { let lbl = el("msLabelEstab"); if (lbl) lbl.textContent = selectedEstabelecimentos.size ? `${selectedEstabelecimentos.size} selecionados` : "Todos"; }
+  function toggleMsDropdownSub(e) { e.stopPropagation(); el("msDropdownSub").classList.toggle("open"); }
+  function toggleMsDropdownEstab(e) { e.stopPropagation(); el("msDropdownEstab").classList.toggle("open"); }
+  function selectAllSub(e) { selectedSubgrupos.clear(); [...subgruposMap.keys()].forEach(s => selectedSubgrupos.add(s)); updateMsLabelSub(); applyFilters(); }
+  function clearSubSelection(e) { selectedSubgrupos.clear(); updateMsLabelSub(); applyFilters(); }
+  function selectAllEstab(e) { selectedEstabelecimentos.clear(); [...estabelecimentosSet].forEach(e => selectedEstabelecimentos.add(e)); updateMsLabelEstab(); applyFilters(); }
+  function clearEstabSelection(e) { selectedEstabelecimentos.clear(); updateMsLabelEstab(); applyFilters(); }
+  function filterMsListSub() { let q = el("msSearchSub")?.value.toLowerCase(); let items = el("msListSub")?.querySelectorAll(".ms-item"); items?.forEach(i => { let txt = i.querySelector("span")?.textContent.toLowerCase(); i.style.display = txt.includes(q) ? "" : "none"; }); }
+  function filterMsListEstab() { let q = el("msSearchEstab")?.value.toLowerCase(); let items = el("msListEstab")?.querySelectorAll(".ms-item"); items?.forEach(i => { let txt = i.querySelector("span")?.textContent.toLowerCase(); i.style.display = txt.includes(q) ? "" : "none"; }); }
+  function handleGrupoChange() { applyFilters(); }
+
+  function applyFilters() {
+    let grupo = el("grupoSelect").value;
+    let periodo = el("periodoSelect").value;
+    let filteredFila = dadosFila.filter(d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)));
+    let filteredAgendados = dadosAgendados.filter(d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)) && (!periodo || d.mes === periodo));
+    let filteredFaturado = dadosFaturado.filter(d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)));
+    let totalFila = filteredFila.reduce((s, d) => s + d.fila, 0);
+    let totalRealizados = filteredAgendados.reduce((s, d) => s + d.recepcionados, 0);
+    let totalFaturamento = filteredFaturado.reduce((s, d) => s + d.total, 0);
+    let totalFaltosos = filteredAgendados.reduce((s, d) => s + d.faltosos, 0);
+    let ticketMedio = totalRealizados > 0 ? totalFaturamento / totalRealizados : 0;
+    let conversao = totalFila > 0 ? (totalRealizados / totalFila) * 100 : 0;
+
+    el("kFila").innerText = totalFila.toLocaleString();
+    el("kRealizados").innerText = totalRealizados.toLocaleString();
+    el("kConversao").innerText = conversao.toFixed(1) + "%";
+    el("kFaturamento").innerText = "R$ " + totalFaturamento.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    el("kTicketMedio").innerText = "R$ " + ticketMedio.toLocaleString("pt-BR", { minimumFractionDigits: 2 });
+    el("kFaltosos").innerText = totalFaltosos.toLocaleString();
+
+    renderCharts(filteredFila, filteredAgendados, filteredFaturado, dadosFinanceiro);
+    renderTable(filteredFila, filteredAgendados, filteredFaturado);
+  }
+
+  function renderCharts(fila, agendados, faturado, financeiro) {
+    // Simulação de gráficos rápidos para demonstração
+    if (charts.cEvolucao) charts.cEvolucao.destroy();
+    let ctx = el("cEvolucao")?.getContext("2d");
+    if (ctx) charts.cEvolucao = new Chart(ctx, { type: "line", data: { labels: ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun"], datasets: [{ label: "Fila", data: [120, 135, 142, 138, 145, 140], borderColor: "#d97706" }, { label: "Realizado", data: [85, 92, 98, 102, 108, 112], borderColor: "#0d9488" }] }, options: { responsive: true, maintainAspectRatio: false } });
+    if (el("cFunil")) new Chart(el("cFunil").getContext("2d"), { type: "doughnut", data: { labels: ["Fila", "Agendados", "Realizados"], datasets: [{ data: [fila.reduce((s, d) => s + d.fila, 0), agendados.reduce((s, d) => s + d.oferta, 0), agendados.reduce((s, d) => s + d.recepcionados, 0)], backgroundColor: ["#f59e0b", "#3b82f6", "#0d9488"] }] }, options: { responsive: true, maintainAspectRatio: false } });
+  }
+
+  function renderTable(fila, agendados, faturado) {
+    let tbody = el("tBody"); if (!tbody) return;
+    let map = new Map();
+    fila.forEach(d => { let key = d.descricao; if (!map.has(key)) map.set(key, { descricao: d.descricao, grupo: d.grupo, subgrupo: d.subgrupo, estabelecimento: d.estabelecimento, fila: 0, realizados: 0, faturamento: 0 }); map.get(key).fila += d.fila; });
+    agendados.forEach(d => { let key = d.descricao; if (map.has(key)) map.get(key).realizados += d.recepcionados; else map.set(key, { descricao: d.descricao, grupo: d.grupo, subgrupo: d.subgrupo, estabelecimento: d.estabelecimento, fila: 0, realizados: d.recepcionados, faturamento: 0 }); });
+    faturado.forEach(d => { let key = d.descricao; if (map.has(key)) map.get(key).faturamento += d.total; });
+    let rows = Array.from(map.values());
+    tbody.innerHTML = rows.slice(0, 100).map(r => `<tr><td>${r.descricao || "-"}</td><td>${r.grupo || "-"}</td><td>${r.subgrupo || "-"}</td><td>${r.estabelecimento || "-"}</td><td>${r.fila.toLocaleString()}</td><td>${r.realizados.toLocaleString()}</td><td>R$ ${r.faturamento.toLocaleString("pt-BR", { minimumFractionDigits: 2 })}</td></tr>`).join("");
+    el("tInfo").innerText = `${rows.length} registros`;
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll(".tabContent").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    el(`tab-${id}`).classList.add("active");
+    btn.classList.add("active");
+    setTimeout(() => Object.values(charts).forEach(c => c?.resize?.()), 100);
+  }
+
+  window.addEventListener("DOMContentLoaded", () => { loadAllData(); el("btnRefresh").addEventListener("click", () => loadAllData()); el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEstabelecimentos.clear(); updateMsLabelSub(); updateMsLabelEstab(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; applyFilters(); }); el("btnExcel").addEventListener("click", () => toast("Exportação Excel em desenvolvimento", "info")); el("tSearch").addEventListener("input", () => { let q = el("tSearch").value.toLowerCase(); let rows = document.querySelectorAll("#tBody tr"); rows.forEach(r => { let txt = r.innerText.toLowerCase(); r.style.display = txt.includes(q) ? "" : "none"; }); }); });
+</script>
+</body>
+</html>
