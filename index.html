@@ -15,14 +15,17 @@
 
   <style>
     :root {
-      --primary: #0f2f4f;
-      --primary-dark: #082236;
-      --accent: #0d9488;
-      --accent-light: #14b8a6;
-      --accent-gold: #d97706;
-      --success: #059669;
+      --primary: #0B3B2F;
+      --primary-dark: #0A2E25;
+      --accent: #B87333;
+      --accent-light: #CD7A4A;
+      --blue-light: #5A9EFF;
+      --blue-medium: #3B82F6;
+      --red-light: #F87171;
+      --red-medium: #EF4444;
+      --success: #0B5E42;
       --warning: #f59e0b;
-      --danger: #dc2626;
+      --danger: #F87171;
       --bg: #f0f4f8;
       --card: #ffffff;
       --text: #111827;
@@ -45,7 +48,7 @@
       position: sticky;
       top: 0;
       z-index: 50;
-      background: linear-gradient(135deg, #0a2a3b 0%, #0f2f4f 50%, #1b4a5e 100%);
+      background: linear-gradient(135deg, #0B5E42 0%, #0B3B2F 50%, #0A2E25 100%);
       color: white;
       padding: 24px 32px;
       display: flex;
@@ -82,15 +85,15 @@
       gap: 8px;
       cursor: pointer;
       transition: all 0.2s ease;
-      background: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.2);
       color: white;
-      border: 1px solid rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.3);
     }
-    .btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
-    .btn-excel { background: rgba(13,148,136,0.3); border-color: rgba(13,148,136,0.5); }
-    .btn-excel:hover { background: rgba(13,148,136,0.5); }
+    .btn:hover { background: rgba(255,255,255,0.35); transform: translateY(-1px); }
+    .btn-excel { background: rgba(11,94,66,0.7); border-color: rgba(11,94,66,0.9); }
+    .btn-excel:hover { background: rgba(11,94,66,0.9); }
     .pill {
-      background: rgba(13,148,136,0.2);
+      background: rgba(11,94,66,0.3);
       border-radius: 40px;
       padding: 8px 16px;
       font-size: 12px;
@@ -98,9 +101,9 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      border: 1px solid rgba(13,148,136,0.4);
+      border: 1px solid rgba(11,94,66,0.5);
     }
-    .dot { width: 8px; height: 8px; background: #0d9488; border-radius: 50%; box-shadow: 0 0 6px #0d9488; }
+    .dot { width: 8px; height: 8px; background: #0B5E42; border-radius: 50%; box-shadow: 0 0 6px #0B5E42; }
 
     .wrap { max-width: 1600px; margin: 0 auto; padding: 24px 28px; }
     .card {
@@ -156,9 +159,9 @@
       cursor: pointer;
     }
     select:focus, .ms-trigger:focus, .search-proc-input:focus {
-      border-color: var(--accent);
+      border-color: var(--success);
       outline: none;
-      box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
+      box-shadow: 0 0 0 3px rgba(11,94,66,0.2);
     }
     .search-proc-input {
       cursor: text;
@@ -176,7 +179,7 @@
 
     .multiselect-wrapper { position: relative; width: 100%; }
     .ms-trigger { display: flex; justify-content: space-between; align-items: center; }
-    .ms-trigger.open { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
+    .ms-trigger.open { border-color: var(--success); box-shadow: 0 0 0 3px rgba(11,94,66,0.2); }
     .ms-arrow { font-size: 10px; transition: transform 0.2s; }
     .ms-trigger.open .ms-arrow { transform: rotate(180deg); }
     .ms-dropdown {
@@ -204,8 +207,8 @@
       border: none;
       cursor: pointer;
     }
-    .ms-btn-all { background: rgba(13,148,136,0.1); color: var(--accent); }
-    .ms-btn-clr { background: rgba(220,38,38,0.08); color: var(--danger); }
+    .ms-btn-all { background: rgba(11,94,66,0.1); color: var(--success); }
+    .ms-btn-clr { background: rgba(248,113,113,0.08); color: var(--danger); }
     .ms-search-box { padding: 8px 10px; border-bottom: 1px solid var(--border); }
     .ms-search-box input {
       width: 100%;
@@ -226,18 +229,17 @@
       font-weight: 500;
     }
     .ms-item:hover { background: #f0fdfa; }
-    .ms-item input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .ms-item input { width: 16px; height: 16px; accent-color: var(--success); }
     .ms-empty { padding: 12px; color: var(--muted); font-size: 12px; text-align: center; }
 
     .kpis {
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 18px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
       margin-top: 20px;
     }
-    @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 500px) { .kpis { grid-template-columns: 1fr; } }
+    @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 700px) { .kpis { grid-template-columns: 1fr; } }
     
     .kpi {
       background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
@@ -263,12 +265,10 @@
     .kpi .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; }
     .kpi .val { font-size: 30px; font-weight: 800; margin-top: 4px; line-height: 1.2; }
     .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600; }
-    .kpi-fila .kpiIcon { background: rgba(13,148,136,0.12); color: var(--accent); }
-    .kpi-real .kpiIcon { background: rgba(5,150,105,0.12); color: var(--success); }
-    .kpi-conv .kpiIcon { background: rgba(217,119,6,0.12); color: var(--accent-gold); }
-    .kpi-fat .kpiIcon { background: rgba(15,47,79,0.12); color: var(--primary); }
-    .kpi-ticket .kpiIcon { background: rgba(139,92,246,0.12); color: #8b5cf6; }
-    .kpi-falt .kpiIcon { background: rgba(220,38,38,0.12); color: var(--danger); }
+    .kpi-fila .kpiIcon { background: rgba(11,94,66,0.12); color: var(--success); }
+    .kpi-real .kpiIcon { background: rgba(11,94,66,0.12); color: var(--success); }
+    .kpi-fat .kpiIcon { background: rgba(11,94,66,0.12); color: var(--success); }
+    .kpi-falt .kpiIcon { background: rgba(248,113,113,0.12); color: var(--danger); }
 
     .tabs {
       display: flex;
@@ -291,7 +291,8 @@
       transition: all 0.2s;
       color: var(--muted);
     }
-    .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(15,47,79,0.2); }
+    .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(11,59,47,0.2); }
+
     .tabContent { display: none; margin-top: 24px; }
     .tabContent.active { display: block; }
 
@@ -325,10 +326,11 @@
     .chartSub { font-size: 12px; color: var(--muted); font-weight: 600; }
     .chartWrap { position: relative; height: 380px; }
     .row2eq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .full-width { grid-template-columns: 1fr; }
     @media (max-width: 900px) { .row2eq { grid-template-columns: 1fr; } }
 
     .fin-header {
-      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      background: linear-gradient(135deg, #0B3B2F, #0B5E42);
       border-radius: 24px;
       padding: 20px 28px;
       color: white;
@@ -357,7 +359,7 @@
       font-size: 12px;
     }
     .fin-table th {
-      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      background: linear-gradient(135deg, #0B3B2F, #0B5E42);
       color: white;
       padding: 12px 10px;
       text-align: right;
@@ -366,7 +368,7 @@
       text-transform: uppercase;
       white-space: nowrap;
     }
-    .fin-table th:first-child { text-align: left; position: sticky; left: 0; background: linear-gradient(135deg, #0f2f4f, #1b4a5e); }
+    .fin-table th:first-child { text-align: left; position: sticky; left: 0; background: linear-gradient(135deg, #0B3B2F, #0B5E42); }
     .fin-table td {
       padding: 10px 10px;
       border-bottom: 1px solid var(--border);
@@ -426,12 +428,15 @@
     .data-table th {
       text-align: left;
       padding: 12px;
-      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      background: linear-gradient(135deg, #0B3B2F, #0B5E42);
       color: white;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
+      cursor: pointer;
+      user-select: none;
     }
+    .data-table th:hover { background: linear-gradient(135deg, #0B5E42, #0B3B2F); }
     .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 500; }
     .data-table tr:hover { background: #f0fdfa; }
 
@@ -460,7 +465,7 @@
 
     .loading {
       height: 3px;
-      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      background: linear-gradient(90deg, var(--success), var(--accent-light));
       background-size: 200% 100%;
       animation: shimmer 1s infinite;
       display: none;
@@ -470,6 +475,28 @@
       0% { background-position: -200% 0; }
       100% { background-position: 200% 0; }
     }
+
+    .estab-selector {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f9fafb;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+    .estab-selector label {
+      font-weight: 700;
+      color: var(--primary);
+    }
+    .estab-selector select {
+      padding: 8px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-weight: 500;
+      min-width: 250px;
+    }
   </style>
 </head>
 <body>
@@ -477,7 +504,7 @@
 <header class="header">
   <div class="h-icon"><i class="fa-solid fa-kit-medical"></i></div>
   <div class="h-info">
-    <div class="h-title">PAINEL CIRURGIA ELETIVA</div>
+    <div class="h-title">Painel Cirurgia Eletiva</div>
     <div class="h-sub">Diretoria de Regulação do Acesso | Análise Estratégica</div>
     <div class="h-meta">
       Superintendente: <b style="color:#bfdbfe">Yara Ariane M.S.Souza</b>
@@ -499,19 +526,19 @@
 <main class="wrap">
   <div class="card filters">
     <div class="filtersTop">
-      <div class="filtersTitle"><i class="fa-solid fa-sliders-h" style="color:var(--accent)"></i> Filtros Dinâmicos</div>
+      <div class="filtersTitle"><i class="fa-solid fa-sliders-h" style="color:var(--success)"></i> Filtros Dinâmicos</div>
       <button class="btn-clear" id="btnClear"><i class="fa-solid fa-eraser"></i> Limpar Filtros</button>
     </div>
     <div class="filtersGrid">
       <div class="fg">
-        <label><i class="fa-solid fa-layer-group"></i> GRUPO</label>
+        <label><i class="fa-solid fa-layer-group"></i> Grupo</label>
         <select id="grupoSelect">
           <option value="">Todos os Grupos</option>
         </select>
       </div>
 
       <div class="fg">
-        <label><i class="fa-solid fa-code-branch"></i> SUBGRUPO</label>
+        <label><i class="fa-solid fa-code-branch"></i> Subgrupo</label>
         <div class="multiselect-wrapper" id="msWrapperSub">
           <div class="ms-trigger" id="msTriggerSub" onclick="toggleMsDropdownSub(event)">
             <span class="ms-label-text" id="msLabelSub">Todos</span>
@@ -531,7 +558,7 @@
       </div>
 
       <div class="fg">
-        <label><i class="fa-solid fa-building"></i> ESTABELECIMENTO</label>
+        <label><i class="fa-solid fa-building"></i> Estabelecimento</label>
         <div class="multiselect-wrapper" id="msWrapperEstab">
           <div class="ms-trigger" id="msTriggerEstab" onclick="toggleMsDropdownEstab(event)">
             <span class="ms-label-text" id="msLabelEstab">Todos</span>
@@ -551,14 +578,14 @@
       </div>
 
       <div class="fg">
-        <label><i class="fa-solid fa-calendar"></i> PERÍODO</label>
+        <label><i class="fa-solid fa-calendar"></i> Período</label>
         <select id="periodoSelect">
           <option value="">Todos os meses</option>
         </select>
       </div>
 
       <div class="fg">
-        <label><i class="fa-solid fa-search"></i> PROCEDIMENTO / ESPECIALIDADE</label>
+        <label><i class="fa-solid fa-search"></i> Procedimento / Especialidade</label>
         <input type="text" id="procedimentoSearch" class="search-proc-input" placeholder="Digite para filtrar...">
       </div>
     </div>
@@ -568,7 +595,7 @@
     <div class="kpi kpi-fila">
       <div class="kpiIcon"><i class="fa-solid fa-clock"></i></div>
       <div>
-        <div class="label">Fila de Espera</div>
+        <div class="label">Fila de Espera Atual</div>
         <div class="val" id="kFila">0</div>
         <div class="sub">Procedimentos aguardando</div>
       </div>
@@ -583,30 +610,12 @@
       </div>
     </div>
 
-    <div class="kpi kpi-conv">
-      <div class="kpiIcon"><i class="fa-solid fa-chart-line"></i></div>
-      <div>
-        <div class="label">Taxa de Conversão</div>
-        <div class="val" id="kConversao">0%</div>
-        <div class="sub">Realizado / Fila</div>
-      </div>
-    </div>
-
     <div class="kpi kpi-fat">
-      <div class="kpiIcon"><i class="fa-solid fa-dollar-sign"></i></div>
+      <div class="kpiIcon"><i class="fa-solid fa-file-invoice"></i></div>
       <div>
-        <div class="label">Faturamento Total</div>
-        <div class="val" id="kFaturamento">R$ 0</div>
-        <div class="sub">Acumulado no período</div>
-      </div>
-    </div>
-
-    <div class="kpi kpi-ticket">
-      <div class="kpiIcon"><i class="fa-solid fa-ticket"></i></div>
-      <div>
-        <div class="label">Ticket Médio</div>
-        <div class="val" id="kTicketMedio">R$ 0</div>
-        <div class="sub">Por cirurgia realizada</div>
+        <div class="label">Faturados</div>
+        <div class="val" id="kFaturados">0</div>
+        <div class="sub">Procedimentos faturados</div>
       </div>
     </div>
 
@@ -615,67 +624,63 @@
       <div>
         <div class="label">Faltosos (Absenteísmo)</div>
         <div class="val" id="kFaltosos">0</div>
-        <div class="sub">Agendados que não compareceram</div>
+        <div class="sub">Ofertas que não compareceram</div>
       </div>
     </div>
   </div>
 
   <div class="tabs">
-    <button class="tab active" onclick="switchTab('estrategica', this)"><i class="fa-solid fa-chart-pie"></i> Visão Estratégica</button>
-    <button class="tab" onclick="switchTab('fila', this)"><i class="fa-solid fa-hourglass-half"></i> Análise da Fila</button>
-    <button class="tab" onclick="switchTab('producao', this)"><i class="fa-solid fa-hospital-user"></i> Produção Cirúrgica</button>
-    <button class="tab" onclick="switchTab('financeiro', this)"><i class="fa-solid fa-coins"></i> Performance Financeira</button>
-    <button class="tab" onclick="switchTab('rankings', this)"><i class="fa-solid fa-trophy"></i> Rankings</button>
-    <button class="tab" onclick="switchTab('tabela', this)"><i class="fa-solid fa-table"></i> Dados Detalhados</button>
+    <button class="tab active" onclick="switchTab('visao_geral', this)"><i class="fa-solid fa-chart-pie"></i> Visão Geral</button>
+    <button class="tab" onclick="switchTab('execucao_fila', this)"><i class="fa-solid fa-hourglass-half"></i> Execução da Fila de Espera</button>
+    <button class="tab" onclick="switchTab('execucao_agendamentos', this)"><i class="fa-solid fa-table-list"></i> Execução/Ofertas</button>
+    <button class="tab" onclick="switchTab('execucao_estabelecimento', this)"><i class="fa-solid fa-building"></i> Execução por Estabelecimento</button>
+    <button class="tab" onclick="switchTab('evolucao_financeira', this)"><i class="fa-solid fa-coins"></i> Evolução Financeira</button>
+    <button class="tab" onclick="switchTab('dados_detalhados', this)"><i class="fa-solid fa-database"></i> Dados Detalhados</button>
   </div>
 
-  <!-- ABA 1: VISÃO ESTRATÉGICA -->
-  <section id="tab-estrategica" class="tabContent active">
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Realizado</h3>
-          <div class="chartSub" id="subEvolucao">Comparativo mensal</div>
-        </div>
-        <div class="chartWrap"><canvas id="cEvolucao"></canvas></div>
+  <!-- ABA 1: VISÃO GERAL -->
+  <section id="tab-visao_geral" class="tabContent active">
+    <div class="chartCard">
+      <div class="chartHead">
+        <h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Realizado vs Ofertas vs Faltosos</h3>
+        <div class="chartSub">Comparativo mensal</div>
       </div>
+      <div class="chartWrap"><canvas id="cEvolucao"></canvas></div>
+    </div>
 
+    <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead">
           <h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3>
-          <div class="chartSub">Fila → Agendados → Realizados</div>
+          <div class="chartSub">Fila → Ofertas → Realizados → Faltosos</div>
         </div>
         <div class="chartWrap"><canvas id="cFunil"></canvas></div>
       </div>
-    </div>
-
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top 10 Procedimentos na Fila</h3></div>
-        <div class="chartWrap"><canvas id="cTopFila"></canvas></div>
-      </div>
 
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top 10 Procedimentos Realizados</h3></div>
-        <div class="chartWrap"><canvas id="cTopRealizados"></canvas></div>
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Complexidade</h3>
+          <div class="chartSub">Procedimentos na fila por nível de complexidade</div>
+        </div>
+        <div class="chartWrap"><canvas id="cComplexidadeFila"></canvas></div>
       </div>
     </div>
 
     <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Top Especialidades (Realizados vs Faturamento)</h3></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top Especialidades (Realizados vs Faturados)</h3></div>
         <div class="chartWrap"><canvas id="cTopEspComp"></canvas></div>
       </div>
 
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Complexidade</h3></div>
-        <div class="chartWrap"><canvas id="cComplexidadeFila"></canvas></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cFatEspecialidadeHorizontal"></canvas></div>
       </div>
     </div>
   </section>
 
-  <!-- ABA 2: ANÁLISE DA FILA -->
-  <section id="tab-fila" class="tabContent">
+  <!-- ABA 2: EXECUÇÃO DA FILA DE ESPERA -->
+  <section id="tab-execucao_fila" class="tabContent">
     <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3></div>
@@ -689,28 +694,69 @@
     </div>
   </section>
 
-  <!-- ABA 3: PRODUÇÃO CIRÚRGICA -->
-  <section id="tab-producao" class="tabContent">
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas</h3></div>
-        <div class="chartWrap"><canvas id="cEvolucaoRealizados"></canvas></div>
-      </div>
+  <!-- ABA 3: EXECUÇÃO/Ofertas -->
+  <section id="tab-execucao_agendamentos" class="tabContent">
+    <div class="chartCard">
+      <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas</h3></div>
+      <div class="chartWrap"><canvas id="cEvolucaoRealizados"></canvas></div>
+    </div>
 
+    <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Especialidade</h3></div>
         <div class="chartWrap"><canvas id="cEspecialidadeRealizados"></canvas></div>
       </div>
-    </div>
 
-    <div class="chartCard">
-      <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Top Estabelecimentos por Produção</h3></div>
-      <div class="chartWrap"><canvas id="cRankProducaoEstab"></canvas></div>
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Top Estabelecimentos por Produção</h3></div>
+        <div class="chartWrap"><canvas id="cRankProducaoEstab"></canvas></div>
+      </div>
     </div>
   </section>
 
-  <!-- ABA 4: PERFORMANCE FINANCEIRA (igual OCI) -->
-  <section id="tab-financeiro" class="tabContent">
+  <!-- ABA 4: EXECUÇÃO POR ESTABELECIMENTO -->
+  <section id="tab-execucao_estabelecimento" class="tabContent">
+    <div class="chartCard">
+      <div class="chartHead">
+        <h3><i class="fa-solid fa-chart-line"></i> Evolução Temporal por Estabelecimento</h3>
+        <div class="chartSub">Selecione um estabelecimento para visualizar a evolução mensal</div>
+      </div>
+      <div class="estab-selector">
+        <label><i class="fa-solid fa-building"></i> Escolha o Estabelecimento:</label>
+        <select id="estabSelecionado">
+          <option value="">Carregando estabelecimentos...</option>
+        </select>
+      </div>
+      <div class="chartWrap"><canvas id="cEvolucaoPorEstab"></canvas></div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cRealizadosPorEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faturados por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cFaturadosPorEstab"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Ofertas por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cOfertasPorEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faltosos por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cFaltososPorEstab"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 5: EVOLUÇÃO FINANCEIRA -->
+  <section id="tab-evolucao_financeira" class="tabContent">
     <div class="fin-header">
       <div class="fin-header-icon"><i class="fa-solid fa-chart-line"></i></div>
       <div>
@@ -736,7 +782,6 @@
       </div>
     </div>
 
-    <!-- TABELA FINANCEIRA IGUAL OCI -->
     <div class="chartCard">
       <div class="chartHead">
         <h3><i class="fa-solid fa-table"></i> Tabela Financeira — Faturamento por Especialidade × Competência</h3>
@@ -748,35 +793,8 @@
     </div>
   </section>
 
-  <!-- ABA 5: RANKINGS -->
-  <section id="tab-rankings" class="tabContent">
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-trophy"></i> Top 10 Estabelecimentos (Físico)</h3></div>
-        <div class="chartWrap"><canvas id="cRankFisicoEstab"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-sack-dollar"></i> Top 10 Estabelecimentos (Financeiro)</h3></div>
-        <div class="chartWrap"><canvas id="cRankFinanceiroEstab"></canvas></div>
-      </div>
-    </div>
-
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top 10 Especialidades (Realizado)</h3></div>
-        <div class="chartWrap"><canvas id="cRankEspecialidades"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top 10 Procedimentos (Realizado)</h3></div>
-        <div class="chartWrap"><canvas id="cRankProcedimentos"></canvas></div>
-      </div>
-    </div>
-  </section>
-
   <!-- ABA 6: DADOS DETALHADOS -->
-  <section id="tab-tabela" class="tabContent">
+  <section id="tab-dados_detalhados" class="tabContent">
     <div class="card section">
       <div class="tableTop">
         <div class="sectionTitle"><i class="fa-solid fa-table"></i> Dados Consolidados</div>
@@ -790,13 +808,13 @@
         <table class="data-table" id="tabelaPrincipal">
           <thead>
             <tr>
-              <th>Procedimento</th>
-              <th>Grupo</th>
-              <th>Subgrupo</th>
-              <th>Estabelecimento</th>
-              <th>Na Fila</th>
-              <th>Realizados</th>
-              <th>Faturamento (R$)</th>
+              <th onclick="sortTable(0)">Procedimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(1)">Grupo <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(2)">Subgrupo <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(3)">Estabelecimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(4)">Realizados (REC) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(5)">Faturados (Qtd) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(6)">Financeiro (R$) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
             </tr>
           </thead>
           <tbody id="tBody"></tbody>
@@ -817,24 +835,34 @@
   const URL_FINANCEIRO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=269446681&single=true&output=csv";
 
   const MONTHS_ORDER = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-  const MONTH_LABELS = { jan: "Jan", fev: "Fev", mar: "Mar", abr: "Abr", mai: "Mai", jun: "Jun", jul: "Jul", ago: "Ago", set: "Set", out: "Out", nov: "Nov", dez: "Dez" };
 
   let dadosFila = [];
   let dadosAgendados = [];
-  let dadosFinanceiro = [];  // Consolidado de FATURADO + FINANCEIRO
+  let dadosFaturado = [];
+  let dadosFinanceiro = [];
   
   let gruposMap = new Map();
   let subgruposMap = new Map();
   let estabelecimentosSet = new Set();
-  let procedimentosSet = new Set();
   
   let allPeriodos = [];
-  let filaPorMes = {};  // { "jan/25": 8445, "fev/25": 8200 }
+  let filaPorMes = {};
+  let realizadosPorMes = {};
+  let ofertasPorMes = {};
+  let faltososPorMes = {};
+  let faturadosPorMes = {};
+  
+  let realizadosPorEstab = new Map();
+  let faturadosPorEstab = new Map();
+  let ofertasPorEstab = new Map();
+  let faltososPorEstab = new Map();
   
   let selectedSubgrupos = new Set();
   let selectedEstabelecimentos = new Set();
   let charts = {};
   let lastTableRows = [];
+  let currentSortColumn = 0;
+  let currentSortDirection = 'asc';
 
   function toast(msg, type = "info") {
     const box = el("toastBox");
@@ -964,7 +992,6 @@
         loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
       ]);
 
-      // Processa FILA - captura DATA CORTE
       dadosFila = filaRaw.map(r => {
         let dataCorte = normalizePeriodo(getField(r, ["DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
         if (!dataCorte || dataCorte === "sem dados") dataCorte = "";
@@ -981,11 +1008,9 @@
         };
       }).filter(d => d.descricao);
 
-      // Agrupa fila por mês de dataCorte
       filaPorMes = {};
       dadosFila.forEach(d => { if (d.dataCorte) filaPorMes[d.dataCorte] = (filaPorMes[d.dataCorte] || 0) + d.fila; });
 
-      // Processa AGENDADOS
       dadosAgendados = agendadosRaw.map(r => ({
         codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
         descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])),
@@ -1000,42 +1025,126 @@
         oferta: parseNumberBR(getField(r, ["OFERTA"]))
       })).filter(d => d.descricao);
 
-      // Processa FINANCEIRO (consolidado de FATURADO + FINANCEIRO)
-      const processFinanceiro = (raw, tipo) => raw.map(r => {
+      realizadosPorMes = {};
+      ofertasPorMes = {};
+      faltososPorMes = {};
+      realizadosPorEstab.clear();
+      ofertasPorEstab.clear();
+      faltososPorEstab.clear();
+      
+      dadosAgendados.forEach(d => { 
+        if (d.mes) {
+          realizadosPorMes[d.mes] = (realizadosPorMes[d.mes] || 0) + d.recepcionados;
+          ofertasPorMes[d.mes] = (ofertasPorMes[d.mes] || 0) + d.oferta;
+          faltososPorMes[d.mes] = (faltososPorMes[d.mes] || 0) + d.faltosos;
+        }
+        if (d.estabelecimento) {
+          realizadosPorEstab.set(d.estabelecimento, (realizadosPorEstab.get(d.estabelecimento) || 0) + d.recepcionados);
+          ofertasPorEstab.set(d.estabelecimento, (ofertasPorEstab.get(d.estabelecimento) || 0) + d.oferta);
+          faltososPorEstab.set(d.estabelecimento, (faltososPorEstab.get(d.estabelecimento) || 0) + d.faltosos);
+        }
+      });
+
+      dadosFaturado = faturadoRaw.map(r => {
         const mensal = extractMonthlyValues(r);
-        const totalCalculado = Object.values(mensal).reduce((s,v) => s+v, 0);
         return {
-          codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO", "CÓDIGO PROCEDIMENTO"])),
+          codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
           descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO", "Procedimento Descrição"])),
           grupo: normalizeText(getField(r, ["GRUPO"])),
-          subgrupo: normalizeText(getField(r, ["SUBGRUPO", "SUB GRUPO"])),
+          subgrupo: normalizeText(getField(r, ["SUBGRUPO"])),
           estabelecimento: normalizeText(getField(r, ["ESTABELECIMENTO", "PRESTADOR"])),
           especialidade: normalizeText(getField(r, ["ESPECIALIDADE", "Especialidade Descrição"])),
           mensal,
-          total: parseNumberBR(getField(r, ["Total geral"])) || totalCalculado,
-          tipo
+          total: Object.values(mensal).reduce((s,v) => s+v, 0)
         };
       }).filter(d => d.descricao);
 
-      const faturadoProcessado = processFinanceiro(faturadoRaw, "faturado");
-      const financeiroProcessado = processFinanceiro(financeiroRaw, "financeiro");
-      dadosFinanceiro = [...faturadoProcessado, ...financeiroProcessado];
+      faturadosPorMes = {};
+      faturadosPorEstab.clear();
+      dadosFaturado.forEach(d => {
+        Object.entries(d.mensal).forEach(([mes, qtd]) => {
+          faturadosPorMes[mes] = (faturadosPorMes[mes] || 0) + qtd;
+        });
+        if (d.estabelecimento) {
+          faturadosPorEstab.set(d.estabelecimento, (faturadosPorEstab.get(d.estabelecimento) || 0) + d.total);
+        }
+      });
 
-      // Popula filtros
-      dadosFila.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.descricao) procedimentosSet.add(d.descricao); });
-      dadosAgendados.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.mes) allPeriodos.push(d.mes); if (d.descricao) procedimentosSet.add(d.descricao); });
-      dadosFinanceiro.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); if (d.descricao) procedimentosSet.add(d.descricao); });
+      dadosFinanceiro = financeiroRaw.map(r => {
+        const mensal = extractMonthlyValues(r);
+        return {
+          codigo: normalizeText(getField(r, ["CÓDIGO PROCEDIMENTO"])),
+          descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])),
+          grupo: normalizeText(getField(r, ["GRUPO"])),
+          subgrupo: normalizeText(getField(r, ["SUBGRUPO"])),
+          estabelecimento: normalizeText(getField(r, ["ESTABELECIMENTO"])),
+          especialidade: normalizeText(getField(r, ["ESPECIALIDADE"])),
+          mensal,
+          total: Object.values(mensal).reduce((s,v) => s+v, 0)
+        };
+      }).filter(d => d.descricao);
+
+      dadosFila.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
+      dadosAgendados.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.mes) allPeriodos.push(d.mes); });
+      dadosFaturado.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); });
+      dadosFinanceiro.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); });
 
       allPeriodos = sortPeriodos(allPeriodos);
+      
+      // Popular select de estabelecimentos para a aba de execução por estabelecimento
+      const estabSelect = el("estabSelecionado");
+      if (estabSelect) {
+        const estabList = [...estabelecimentosSet].sort();
+        estabSelect.innerHTML = '<option value="">Selecione um estabelecimento</option>' + 
+          estabList.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
+        estabSelect.addEventListener("change", () => {
+          if (charts.cEvolucaoPorEstab) charts.cEvolucaoPorEstab.destroy();
+          renderEvolucaoPorEstab(estabSelect.value);
+        });
+      }
+      
       populateFilters();
       updateLastUpdate();
       applyFilters();
-      toast(`Dados carregados! Fila: ${dadosFila.length} | Agendados: ${dadosAgendados.length} | Financeiro: ${dadosFinanceiro.length}`, "success");
+      toast(`Dados carregados!`, "success");
     } catch (e) {
       console.error(e);
       toast(`Erro: ${e.message}`, "error");
     } finally {
       el("loading").classList.remove("on");
+    }
+  }
+
+  function renderEvolucaoPorEstab(estabelecimento) {
+    if (!estabelecimento) return;
+    
+    const dadosEstab = dadosAgendados.filter(d => d.estabelecimento === estabelecimento);
+    const meses = allPeriodos;
+    const realizadosData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.recepcionados, 0));
+    const ofertasData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.oferta, 0));
+    const faltososData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.faltosos, 0));
+    
+    if (el("cEvolucaoPorEstab")) {
+      charts.cEvolucaoPorEstab = new Chart(el("cEvolucaoPorEstab").getContext("2d"), {
+        type: "line",
+        data: { 
+          labels: meses, 
+          datasets: [
+            { label: "Realizados", data: realizadosData, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 },
+            { label: "Ofertas", data: ofertasData, borderColor: "#5A9EFF", backgroundColor: "rgba(90,158,255,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#5A9EFF", pointRadius: 4 },
+            { label: "Faltosos", data: faltososData, borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointRadius: 4 }
+          ] 
+        },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 10 }, align: "top", offset: 4 },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
+            legend: { labels: { font: { weight: "bold" } } }
+          },
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
+        }
+      });
     }
   }
 
@@ -1086,7 +1195,6 @@
   function clearEstabSelection(e) { e.preventDefault(); selectedEstabelecimentos.clear(); buildEstabelecimentoList(); applyFilters(); }
   function filterMsListSub() { const q = (el("msSearchSub")?.value || "").toLowerCase(); el("msListSub")?.querySelectorAll(".ms-item").forEach(item => { item.style.display = (item.querySelector("span")?.textContent?.toLowerCase() || "").includes(q) ? "" : "none"; }); }
   function filterMsListEstab() { const q = (el("msSearchEstab")?.value || "").toLowerCase(); el("msListEstab")?.querySelectorAll(".ms-item").forEach(item => { item.style.display = (item.querySelector("span")?.textContent?.toLowerCase() || "").includes(q) ? "" : "none"; }); }
-  function handleGrupoChange() { buildSubgrupoList(); applyFilters(); }
 
   function escapeHtml(t) { return String(t ?? "").replace(/[&<>]/g, function(m) { if (m === "&") return "&amp;"; if (m === "<") return "&lt;"; if (m === ">") return "&gt;"; return m; }); }
 
@@ -1099,26 +1207,41 @@
 
     const filteredFila = dadosFila.filter(baseMatch);
     const filteredAgendados = dadosAgendados.filter(d => baseMatch(d) && (!periodo || d.mes === periodo));
-    const filteredFinanceiro = dadosFinanceiro.filter(d => baseMatch(d)).map(d => ({ ...d, totalFiltrado: periodo ? (d.mensal[periodo] || 0) : d.total }));
+    const filteredFaturado = dadosFaturado.filter(baseMatch);
+    const filteredFinanceiro = dadosFinanceiro.filter(baseMatch);
 
     const totalFila = filteredFila.reduce((s, d) => s + d.fila, 0);
     const totalRealizados = filteredAgendados.reduce((s, d) => s + d.recepcionados, 0);
-    const totalOferta = filteredAgendados.reduce((s, d) => s + d.oferta, 0);
-    const totalFaturamento = filteredFinanceiro.reduce((s, d) => s + d.totalFiltrado, 0);
+    const totalFaturadosQtd = filteredFaturado.reduce((s, d) => s + (periodo ? (d.mensal[periodo] || 0) : d.total), 0);
     const totalFaltosos = filteredAgendados.reduce((s, d) => s + d.faltosos, 0);
-    const ticketMedio = totalRealizados > 0 ? totalFaturamento / totalRealizados : 0;
-    const conversao = totalFila > 0 ? (totalRealizados / totalFila) * 100 : 0;
 
     el("kFila").innerText = totalFila.toLocaleString("pt-BR");
     el("kRealizados").innerText = totalRealizados.toLocaleString("pt-BR");
-    el("kConversao").innerText = `${conversao.toFixed(1).replace(".", ",")}%`;
-    el("kFaturamento").innerText = formatMoney(totalFaturamento);
-    el("kTicketMedio").innerText = formatMoney(ticketMedio);
+    el("kFaturados").innerText = totalFaturadosQtd.toLocaleString("pt-BR");
     el("kFaltosos").innerText = totalFaltosos.toLocaleString("pt-BR");
 
-    renderAllCharts(filteredFila, filteredAgendados, filteredFinanceiro, totalOferta, periodo);
-    renderTable(filteredFila, filteredAgendados, filteredFinanceiro);
+    renderAllCharts(filteredFila, filteredAgendados, filteredFaturado, filteredFinanceiro, periodo);
+    renderTable(filteredAgendados, filteredFaturado, filteredFinanceiro, periodo);
     renderFinTable(filteredFinanceiro, periodo);
+    renderGraficosPorEstabelecimento();
+  }
+
+  function renderGraficosPorEstabelecimento() {
+    // Realizados por Estabelecimento
+    const topRealizados = [...realizadosPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChart("cRealizadosPorEstab", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", { label: "Realizados", horizontal: true });
+    
+    // Faturados por Estabelecimento
+    const topFaturados = [...faturadosPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChart("cFaturadosPorEstab", topFaturados.map(t => truncateLabel(t[0],25)), topFaturados.map(t => t[1]), "#5A9EFF", { label: "Faturados", horizontal: true });
+    
+    // Ofertas por Estabelecimento
+    const topOfertas = [...ofertasPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChart("cOfertasPorEstab", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", { label: "Ofertas", horizontal: true });
+    
+    // Faltosos por Estabelecimento
+    const topFaltosos = [...faltososPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChart("cFaltososPorEstab", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", { label: "Faltosos", horizontal: true });
   }
 
   function makeBarChart(id, labels, values, color, opts = {}) {
@@ -1131,62 +1254,81 @@
         responsive: true, maintainAspectRatio: false,
         indexAxis: opts.horizontal ? "y" : "x",
         plugins: {
-          legend: { display: !!opts.showLegend },
+          legend: { display: !!opts.showLegend, labels: { font: { weight: "bold" } } },
           tooltip: opts.tooltip || {},
-          datalabels: { color: opts.dataLabelColor || "#374151", anchor: opts.horizontal ? "end" : "end", align: opts.horizontal ? "right" : "top", formatter: opts.formatter || (v => v.toLocaleString("pt-BR")) }
+          datalabels: { 
+            color: opts.dataLabelColor || "#1F2937", 
+            font: { weight: "bold", size: 11 },
+            anchor: opts.horizontal ? "end" : "end", 
+            align: opts.horizontal ? "right" : "top", 
+            formatter: opts.formatter || (v => v.toLocaleString("pt-BR")) 
+          }
         },
-        scales: opts.scales || {}
+        scales: opts.scales || { 
+          x: { grid: { display: false }, ticks: { font: { weight: "bold" } } },
+          y: { grid: { display: false }, ticks: { font: { weight: "bold" } } }
+        }
       }
     });
   }
 
-  function renderAllCharts(fila, agendados, financeiro, totalOferta, periodoSelecionado) {
+  function renderAllCharts(fila, agendados, faturado, financeiro, periodoSelecionado) {
     const totalFila = fila.reduce((s,d) => s+d.fila, 0);
+    const totalOferta = agendados.reduce((s,d) => s+d.oferta, 0);
     const totalRealizados = agendados.reduce((s,d) => s+d.recepcionados, 0);
+    const totalFaltosos = agendados.reduce((s,d) => s+d.faltosos, 0);
     const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
-    // Evolução Fila vs Realizado
+    // Evolução com 4 linhas
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
-      const dadosRealizadosPorMes = meses.map(m => agendados.filter(a => a.mes === m).reduce((s,d) => s+d.recepcionados, 0));
       const dadosFilaPorMes = meses.map(m => filaPorMes[m] || 0);
+      const dadosRealizadosPorMes = meses.map(m => realizadosPorMes[m] || 0);
+      const dadosOfertasPorMes = meses.map(m => ofertasPorMes[m] || 0);
+      const dadosFaltososPorMes = meses.map(m => faltososPorMes[m] || 0);
       charts.cEvolucao = new Chart(el("cEvolucao").getContext("2d"), {
         type: "line",
-        data: { labels: meses, datasets: [{ label: "Fila de Espera", data: dadosFilaPorMes, borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.1)", fill: true, tension: 0.3 }, { label: "Cirurgias Realizadas", data: dadosRealizadosPorMes, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true, tension: 0.3 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+        data: { 
+          labels: meses, 
+          datasets: [
+            { label: "Fila de Espera", data: dadosFilaPorMes, borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointBorderColor: "#F87171", pointRadius: 5, pointHoverRadius: 7 },
+            { label: "Ofertas", data: dadosOfertasPorMes, borderColor: "#5A9EFF", backgroundColor: "rgba(90,158,255,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#5A9EFF", pointBorderColor: "#5A9EFF", pointRadius: 5, pointHoverRadius: 7 },
+            { label: "Cirurgias Realizadas", data: dadosRealizadosPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointBorderColor: "#0B5E42", pointRadius: 5, pointHoverRadius: 7 },
+            { label: "Faltosos", data: dadosFaltososPorMes, borderColor: "#F59E0B", backgroundColor: "rgba(245,158,11,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F59E0B", pointBorderColor: "#F59E0B", pointRadius: 5, pointHoverRadius: 7 }
+          ] 
+        },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { 
+              display: true, 
+              color: "#1F2937", 
+              font: { weight: "bold", size: 11 },
+              formatter: (value) => value.toLocaleString("pt-BR"),
+              align: "top",
+              offset: 6
+            },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
+            legend: { labels: { font: { weight: "bold" } } }
+          },
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
+        }
       });
     }
 
-    // Funil
+    // Funil com Faltosos
     if (el("cFunil")) {
       if (charts.cFunil) charts.cFunil.destroy();
       charts.cFunil = new Chart(el("cFunil").getContext("2d"), {
         type: "doughnut",
-        data: { labels: ["Fila", "Agendados", "Realizados"], datasets: [{ data: [totalFila, totalOferta, totalRealizados], backgroundColor: ["#f59e0b", "#3b82f6", "#0d9488"], borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { color: "#fff", font: { weight: "bold" }, formatter: v => v.toLocaleString("pt-BR") } } }
-      });
-    }
-
-    // Top Fila
-    const procFila = new Map(); fila.forEach(d => procFila.set(d.descricao, (procFila.get(d.descricao) || 0) + d.fila));
-    const topFila = [...procFila.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cTopFila", topFila.map(t => truncateLabel(t[0],30)), topFila.map(t => t[1]), "#f59e0b", { label: "Na Fila", horizontal: true });
-
-    // Top Realizados
-    const procReal = new Map(); agendados.forEach(d => procReal.set(d.descricao, (procReal.get(d.descricao) || 0) + d.recepcionados));
-    const topReal = [...procReal.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cTopRealizados", topReal.map(t => truncateLabel(t[0],30)), topReal.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
-
-    // Top Especialidades Comparativo
-    if (el("cTopEspComp")) {
-      if (charts.cTopEspComp) charts.cTopEspComp.destroy();
-      const espReal = new Map(); agendados.forEach(d => espReal.set(d.especialidade || "Outros", (espReal.get(d.especialidade || "Outros") || 0) + d.recepcionados));
-      const espFat = new Map(); financeiro.forEach(d => espFat.set(d.especialidade || "Outros", (espFat.get(d.especialidade || "Outros") || 0) + d.totalFiltrado));
-      const topEsp = [...espReal.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
-      charts.cTopEspComp = new Chart(el("cTopEspComp").getContext("2d"), {
-        type: "bar",
-        data: { labels: topEsp.map(t => truncateLabel(t[0],20)), datasets: [{ label: "Realizados", data: topEsp.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }, { label: "Faturamento (R$)", data: topEsp.map(t => espFat.get(t[0]) || 0), backgroundColor: "#f59e0b", borderRadius: 8, yAxisID: "y1" }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } }, scales: { y: { title: { display: true, text: "Realizados" } }, y1: { position: "right", title: { display: true, text: "Faturamento (R$)" }, ticks: { callback: v => formatMoneyCompact(v) } } } }
+        data: { labels: ["Fila", "Ofertas", "Realizados", "Faltosos"], datasets: [{ data: [totalFila, totalOferta, totalRealizados, totalFaltosos], backgroundColor: ["#F87171", "#5A9EFF", "#0B5E42", "#F59E0B"], borderWidth: 0 }] },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { color: "#fff", font: { weight: "bold", size: 12 }, formatter: v => v.toLocaleString("pt-BR") },
+            legend: { labels: { font: { weight: "bold" } }, position: "bottom" }
+          } 
+        }
       });
     }
 
@@ -1194,10 +1336,105 @@
     if (el("cComplexidadeFila")) {
       if (charts.cComplexidadeFila) charts.cComplexidadeFila.destroy();
       const compMap = new Map(); fila.forEach(d => compMap.set(d.complexidade || "Não informado", (compMap.get(d.complexidade || "Não informado") || 0) + d.fila));
+      const labels = [...compMap.keys()];
+      const values = [...compMap.values()];
+      const total = values.reduce((a,b) => a+b, 0);
       charts.cComplexidadeFila = new Chart(el("cComplexidadeFila").getContext("2d"), {
-        type: "pie",
-        data: { labels: [...compMap.keys()], datasets: [{ data: [...compMap.values()], backgroundColor: ["#0d9488", "#f59e0b", "#3b82f6", "#8b5cf6"] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { formatter: v => v.toLocaleString("pt-BR") } } }
+        type: "doughnut",
+        data: { labels: labels, datasets: [{ data: values, backgroundColor: ["#5A9EFF", "#F87171", "#0B5E42", "#F59E0B"], borderWidth: 0 }] },
+        options: { 
+          responsive: true, maintainAspectRatio: false,
+          cutout: "60%",
+          plugins: { 
+            datalabels: { 
+              color: "#fff", 
+              font: { weight: "bold", size: 13 },
+              formatter: (value) => `${((value / total) * 100).toFixed(1)}%`
+            },
+            legend: { 
+              labels: { font: { weight: "bold" } }, 
+              position: "bottom",
+              generateLabels: (chart) => {
+                const data = chart.data;
+                return data.labels.map((label, i) => ({
+                  text: `${label}: ${data.datasets[0].data[i].toLocaleString("pt-BR")}`,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  hidden: false,
+                  index: i
+                }));
+              }
+            }
+          } 
+        }
+      });
+    }
+
+    // Top Especialidades (Realizados vs Faturados Qtd)
+    if (el("cTopEspComp")) {
+      if (charts.cTopEspComp) charts.cTopEspComp.destroy();
+      const espReal = new Map(); agendados.forEach(d => espReal.set(d.especialidade || "Outros", (espReal.get(d.especialidade || "Outros") || 0) + d.recepcionados));
+      const espFatQtd = new Map(); faturado.forEach(d => {
+        const esp = d.especialidade || "Outros";
+        const qtd = periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total;
+        espFatQtd.set(esp, (espFatQtd.get(esp) || 0) + qtd);
+      });
+      const topEsp = [...espReal.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
+      charts.cTopEspComp = new Chart(el("cTopEspComp").getContext("2d"), {
+        type: "bar",
+        data: { 
+          labels: topEsp.map(t => truncateLabel(t[0], 25)), 
+          datasets: [
+            { label: "Realizados", data: topEsp.map(t => t[1]), backgroundColor: "#0B5E42", borderRadius: 8 },
+            { label: "Faturados (Qtd)", data: topEsp.map(t => espFatQtd.get(t[0]) || 0), backgroundColor: "#5A9EFF", borderRadius: 8 }
+          ] 
+        },
+        options: { 
+          indexAxis: "y",
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { display: false },
+            legend: { labels: { font: { weight: "bold" } }, position: "top" },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } }
+          },
+          scales: { 
+            x: { grid: { display: false }, ticks: { font: { weight: "bold" } }, title: { display: true, text: "Quantidade", font: { weight: "bold" } } },
+            y: { grid: { display: false }, ticks: { font: { weight: "bold" } } }
+          }
+        }
+      });
+    }
+
+    // Receita Financeira por Especialidade com valor dentro da barra
+    if (el("cFatEspecialidadeHorizontal")) {
+      if (charts.cFatEspecialidadeHorizontal) charts.cFatEspecialidadeHorizontal.destroy();
+      const espFat = new Map(); financeiro.forEach(d => {
+        const esp = d.especialidade || "Outros";
+        const valor = periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total;
+        espFat.set(esp, (espFat.get(esp) || 0) + valor);
+      });
+      const topEspFat = [...espFat.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
+      charts.cFatEspecialidadeHorizontal = new Chart(el("cFatEspecialidadeHorizontal").getContext("2d"), {
+        type: "bar",
+        data: { labels: topEspFat.map(t => truncateLabel(t[0], 25)), datasets: [{ label: "Receita Financeira (R$)", data: topEspFat.map(t => t[1]), backgroundColor: "#F87171", borderRadius: 8 }] },
+        options: { 
+          indexAxis: "y",
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { 
+              formatter: v => formatMoney(v), 
+              font: { weight: "bold", size: 12 }, 
+              color: "#fff",
+              anchor: "center",
+              align: "center"
+            },
+            legend: { labels: { font: { weight: "bold" } }, position: "top" },
+            tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }
+          },
+          scales: { 
+            x: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } }, title: { display: true, text: "Valor (R$)", font: { weight: "bold" } } },
+            y: { grid: { display: false }, ticks: { font: { weight: "bold" } } }
+          }
+        }
       });
     }
 
@@ -1207,24 +1444,38 @@
       const mesesFila = Object.keys(filaPorMes).sort((a,b) => periodoSortValue(a)-periodoSortValue(b));
       charts.cEvolucaoFila = new Chart(el("cEvolucaoFila").getContext("2d"), {
         type: "line",
-        data: { labels: mesesFila, datasets: [{ label: "Fila por Data Corte", data: mesesFila.map(m => filaPorMes[m] || 0), borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.1)", fill: true }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+        data: { labels: mesesFila, datasets: [{ label: "Fila por Data Corte", data: mesesFila.map(m => filaPorMes[m] || 0), borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointRadius: 4 }] },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold" }, align: "top", offset: 6 },
+            legend: { labels: { font: { weight: "bold" } } }
+          },
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
+        }
       });
     }
 
     // Top Estab Fila
     const estabFila = new Map(); fila.forEach(d => estabFila.set(d.estabelecimento, (estabFila.get(d.estabelecimento) || 0) + d.fila));
     const topEstabFila = [...estabFila.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#f59e0b", { label: "Fila", horizontal: true });
+    makeBarChart("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", { label: "Fila", horizontal: true });
 
     // Evolução Realizados
     if (el("cEvolucaoRealizados")) {
       if (charts.cEvolucaoRealizados) charts.cEvolucaoRealizados.destroy();
-      const dadosRealPorMes = meses.map(m => agendados.filter(a => a.mes === m).reduce((s,d) => s+d.recepcionados, 0));
+      const dadosRealPorMes = meses.map(m => realizadosPorMes[m] || 0);
       charts.cEvolucaoRealizados = new Chart(el("cEvolucaoRealizados").getContext("2d"), {
         type: "line",
-        data: { labels: meses, datasets: [{ label: "Realizados", data: dadosRealPorMes, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+        data: { labels: meses, datasets: [{ label: "Realizados", data: dadosRealPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 5 }] },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold" }, align: "top", offset: 8 },
+            legend: { labels: { font: { weight: "bold" } } }
+          },
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
+        }
       });
     }
 
@@ -1235,15 +1486,21 @@
       if (charts.cEspecialidadeRealizados) charts.cEspecialidadeRealizados.destroy();
       charts.cEspecialidadeRealizados = new Chart(el("cEspecialidadeRealizados").getContext("2d"), {
         type: "pie",
-        data: { labels: topEspReal.map(t => truncateLabel(t[0],22)), datasets: [{ data: topEspReal.map(t => t[1]), backgroundColor: ["#0d9488","#f59e0b","#3b82f6","#8b5cf6","#ec4899","#ef4444","#10b981","#6366f1"] }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { formatter: v => v.toLocaleString("pt-BR") } } }
+        data: { labels: topEspReal.map(t => truncateLabel(t[0],22)), datasets: [{ data: topEspReal.map(t => t[1]), backgroundColor: ["#0B5E42","#F87171","#5A9EFF","#F59E0B","#8B5CF6","#EC4899","#10B981","#6366F1"] }] },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold" } },
+            legend: { labels: { font: { weight: "bold" } }, position: "bottom" }
+          } 
+        }
       });
     }
 
     // Top Produção Estab
     const estabProd = new Map(); agendados.forEach(d => estabProd.set(d.estabelecimento, (estabProd.get(d.estabelecimento) || 0) + d.recepcionados));
     const topProd = [...estabProd.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
+    makeBarChart("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0B5E42", { label: "Realizados", horizontal: true });
 
     // Faturamento Mensal
     if (el("cFaturamentoMensal")) {
@@ -1251,42 +1508,102 @@
       const fatPorMes = meses.map(m => financeiro.reduce((s,d) => s + (d.mensal[m] || 0), 0));
       charts.cFaturamentoMensal = new Chart(el("cFaturamentoMensal").getContext("2d"), {
         type: "line",
-        data: { labels: meses, datasets: [{ label: "Faturamento", data: fatPorMes, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, datalabels: { display: false } }, scales: { y: { ticks: { callback: v => formatMoneyCompact(v) } } } }
+        data: { labels: meses, datasets: [{ label: "Faturamento", data: fatPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 }] },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, 
+            datalabels: { display: true, formatter: v => formatMoneyCompact(v), font: { weight: "bold" }, align: "top", offset: 6 },
+            legend: { labels: { font: { weight: "bold" } } }
+          }, 
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } } } }
+        }
       });
     }
 
     // Fat por Especialidade
-    const espFatMap = new Map(); financeiro.forEach(d => espFatMap.set(d.especialidade || "Outros", (espFatMap.get(d.especialidade || "Outros") || 0) + d.totalFiltrado));
+    const espFatMap = new Map(); financeiro.forEach(d => espFatMap.set(d.especialidade || "Outros", (espFatMap.get(d.especialidade || "Outros") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEspFat = [...espFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
-    makeBarChart("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0d9488", { label: "Faturamento", formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { y: { ticks: { callback: v => formatMoneyCompact(v) } } } });
+    makeBarChart("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0B5E42", { label: "Faturamento", formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { y: { ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } }, grid: { display: false } }, x: { grid: { display: false }, ticks: { font: { weight: "bold" } } } } });
 
     // Fat por Estabelecimento
-    const estabFatMap = new Map(); financeiro.forEach(d => estabFatMap.set(d.estabelecimento || "Outros", (estabFatMap.get(d.estabelecimento || "Outros") || 0) + d.totalFiltrado));
+    const estabFatMap = new Map(); financeiro.forEach(d => estabFatMap.set(d.estabelecimento || "Outros", (estabFatMap.get(d.estabelecimento || "Outros") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEstabFat = [...estabFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],22)), topEstabFat.map(t => t[1]), "#f59e0b", { label: "Faturamento", horizontal: true, formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { x: { ticks: { callback: v => formatMoneyCompact(v) } } } });
-
-    // Rankings
-    makeBarChart("cRankFisicoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
-    makeBarChart("cRankFinanceiroEstab", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#f59e0b", { label: "Faturamento", horizontal: true, formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { x: { ticks: { callback: v => formatMoneyCompact(v) } } } });
-    makeBarChart("cRankEspecialidades", topEspReal.map(t => truncateLabel(t[0],25)), topEspReal.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
-    makeBarChart("cRankProcedimentos", topReal.map(t => truncateLabel(t[0],30)), topReal.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
+    makeBarChart("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],22)), topEstabFat.map(t => t[1]), "#F87171", { label: "Faturamento", horizontal: true, formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { x: { ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } }, grid: { display: false } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } } });
   }
 
-  function renderTable(fila, agendados, financeiro) {
+  let currentTableData = [];
+
+  function renderTable(agendados, faturado, financeiro, periodo) {
     const tbody = el("tBody");
     if (!tbody) return;
     const map = new Map();
-    const addRow = (desc, grupo, subgrupo, estab) => { const key = `${desc}||${grupo}||${subgrupo}||${estab}`; if (!map.has(key)) map.set(key, { descricao: desc, grupo, subgrupo, estabelecimento: estab, fila: 0, realizados: 0, faturamento: 0 }); return map.get(key); };
-    fila.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.fila += d.fila; });
+    const addRow = (desc, grupo, subgrupo, estab) => { 
+      const key = `${desc}||${grupo}||${subgrupo}||${estab}`; 
+      if (!map.has(key)) map.set(key, { descricao: desc, grupo, subgrupo, estabelecimento: estab, realizados: 0, faturadosQtd: 0, financeiroValor: 0 }); 
+      return map.get(key); 
+    };
     agendados.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.realizados += d.recepcionados; });
-    financeiro.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.faturamento += d.totalFiltrado; });
-    const rows = [...map.values()].sort((a,b) => b.faturamento - a.faturamento);
-    lastTableRows = rows;
-    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
-    tbody.innerHTML = rows.slice(0,500).map(r => `<tr><td title="${escapeHtml(r.descricao)}">${escapeHtml(truncateLabel(r.descricao,55))}</td><td>${escapeHtml(r.grupo || "-")}</td><td>${escapeHtml(r.subgrupo || "-")}</td><td>${escapeHtml(r.estabelecimento || "-")}</td><td>${r.fila.toLocaleString("pt-BR")}</td><td>${r.realizados.toLocaleString("pt-BR")}</td><td>${formatMoney(r.faturamento)}</td></tr>`).join("");
-    el("tInfo").innerText = `${rows.length.toLocaleString("pt-BR")} registros`;
-    el("tSearch").addEventListener("input", () => { const q = el("tSearch").value.toLowerCase(); document.querySelectorAll("#tBody tr").forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none"); });
+    faturado.forEach(d => { 
+      const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); 
+      const qtd = periodo ? (d.mensal[periodo] || 0) : d.total;
+      r.faturadosQtd += qtd; 
+    });
+    financeiro.forEach(d => { 
+      const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); 
+      const valor = periodo ? (d.mensal[periodo] || 0) : d.total;
+      r.financeiroValor += valor; 
+    });
+    currentTableData = [...map.values()].sort((a,b) => b.financeiroValor - a.financeiroValor);
+    lastTableRows = currentTableData;
+    renderTableBody();
+  }
+
+  function renderTableBody() {
+    const tbody = el("tBody");
+    if (!currentTableData.length) { tbody.innerHTML = '主机<td colspan="7">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    tbody.innerHTML = currentTableData.slice(0,500).map(r => `
+      <tr>
+        <td title="${escapeHtml(r.descricao)}">${escapeHtml(truncateLabel(r.descricao,60))}</td>
+        <td>${escapeHtml(r.grupo || "-")}</td>
+        <td>${escapeHtml(r.subgrupo || "-")}</td>
+        <td>${escapeHtml(r.estabelecimento || "-")}</td>
+        <td>${r.realizados.toLocaleString("pt-BR")}</td>
+        <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
+        <td>${formatMoney(r.financeiroValor)}</td>
+      </tr>
+    `).join("");
+    el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
+    el("tSearch").addEventListener("input", () => { 
+      const q = el("tSearch").value.toLowerCase(); 
+      document.querySelectorAll("#tBody tr").forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none"); 
+    });
+  }
+
+  function sortTable(colIndex) {
+    if (currentSortColumn === colIndex) {
+      currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      currentSortColumn = colIndex;
+      currentSortDirection = 'asc';
+    }
+    
+    const columns = ["descricao", "grupo", "subgrupo", "estabelecimento", "realizados", "faturadosQtd", "financeiroValor"];
+    const col = columns[colIndex];
+    
+    currentTableData.sort((a, b) => {
+      let valA = a[col];
+      let valB = b[col];
+      if (typeof valA === 'string') {
+        valA = valA.toLowerCase();
+        valB = valB.toLowerCase();
+      }
+      if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
+      if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+    
+    renderTableBody();
   }
 
   function renderFinTable(financeiro, periodo) {
@@ -1320,10 +1637,10 @@
 
   function exportExcel() {
     if (!lastTableRows.length) { toast("Sem dados para exportar", "info"); return; }
-    const data = lastTableRows.map(r => ({ Procedimento: r.descricao, Grupo: r.grupo, Subgrupo: r.subgrupo, Estabelecimento: r.estabelecimento, "Na Fila": r.fila, Realizados: r.realizados, "Faturamento (R$)": r.faturamento }));
+    const data = lastTableRows.map(r => ({ Procedimento: r.descricao, Grupo: r.grupo, Subgrupo: r.subgrupo, Estabelecimento: r.estabelecimento, Realizados: r.realizados, Faturados: r.faturadosQtd, Financeiro: r.financeiroValor }));
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
-    ws["!cols"] = [{wch:55},{wch:28},{wch:32},{wch:34},{wch:14},{wch:14},{wch:20}];
+    ws["!cols"] = [{wch:60},{wch:25},{wch:30},{wch:30},{wch:14},{wch:14},{wch:20}];
     XLSX.utils.book_append_sheet(wb, ws, "Painel Cirurgia Eletiva");
     XLSX.writeFile(wb, `cirurgia_eletiva_${new Date().toISOString().slice(0,10)}.xlsx`);
     toast("Excel exportado!", "success");
@@ -1351,3 +1668,7 @@
 </script>
 </body>
 </html>
+
+
+
+
