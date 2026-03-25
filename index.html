@@ -1,694 +1,1353 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel Diretoria de Regulação do Acesso</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Cirurgia Eletiva — Diretoria de Regulação do Acesso</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #F1F5F9;
-      color: #0F172A;
-    }
-    
-    /* CORES SOLICITADAS */
     :root {
-      --royal: #1E40AF;
-      --royal-dark: #1E3A8A;
-      --royal-light: #DBEAFE;
-      --esmeralda: #10B981;
-      --esmeralda-dark: #059669;
-      --esmeralda-light: #D1FAE5;
-      --gray-100: #F8FAFC;
-      --gray-200: #E2E8F0;
-      --gray-600: #475569;
-      --gray-900: #0F172A;
+      --primary: #0f2f4f;
+      --primary-dark: #082236;
+      --accent: #0d9488;
+      --accent-light: #14b8a6;
+      --accent-gold: #d97706;
+      --success: #059669;
+      --warning: #f59e0b;
+      --danger: #dc2626;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 1px 2px 0 rgba(0,0,0,0.03);
+      --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+      --r: 20px;
     }
-    
-    .container { max-width: 1600px; margin: 0 auto; padding: 20px; }
-    
-    /* HEADER */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
     .header {
-      background: linear-gradient(135deg, var(--royal) 0%, var(--royal-dark) 100%);
-      border-radius: 24px;
-      padding: 24px 32px;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 20px;
-    }
-    .header h1 { color: white; font-size: 24px; font-weight: 700; }
-    .header p { color: rgba(255,255,255,0.8); font-size: 14px; margin-top: 4px; }
-    .header-badge {
-      background: rgba(255,255,255,0.15);
-      padding: 10px 20px;
-      border-radius: 40px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: linear-gradient(135deg, #0a2a3b 0%, #0f2f4f 50%, #1b4a5e 100%);
       color: white;
-      font-size: 13px;
-    }
-    
-    /* FILTROS */
-    .filters {
-      background: white;
-      border-radius: 20px;
-      padding: 20px 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-      border: 1px solid var(--gray-200);
-    }
-    .filters-grid {
+      padding: 24px 32px;
       display: flex;
+      gap: 24px;
+      align-items: flex-start;
       flex-wrap: wrap;
-      gap: 16px;
-      align-items: flex-end;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
     }
-    .filter-item {
-      flex: 1;
-      min-width: 160px;
-    }
-    .filter-item label {
-      display: block;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: var(--gray-600);
-      margin-bottom: 6px;
-      letter-spacing: 0.5px;
-    }
-    .filter-item select, .filter-item input {
-      width: 100%;
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px solid var(--gray-200);
-      font-size: 13px;
-      font-weight: 500;
-      background: white;
-    }
-    .filter-item select:focus, .filter-item input:focus {
-      outline: none;
-      border-color: var(--esmeralda);
-      box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
-    }
-    .btn-clear {
-      background: var(--gray-100);
-      border: 1px solid var(--gray-200);
-      padding: 10px 20px;
-      border-radius: 40px;
-      font-weight: 600;
-      font-size: 13px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-clear:hover {
-      background: var(--gray-200);
-      border-color: var(--royal);
-    }
-    
-    /* KPIs */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-    @media (max-width: 1100px) { .kpi-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 700px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-    .kpi-card {
-      background: white;
-      border-radius: 20px;
-      padding: 18px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border: 1px solid var(--gray-200);
-      transition: all 0.2s;
-    }
-    .kpi-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.05); }
-    .kpi-left h4 { font-size: 12px; font-weight: 600; color: var(--gray-600); text-transform: uppercase; letter-spacing: 0.5px; }
-    .kpi-value { font-size: 28px; font-weight: 800; color: var(--royal); margin-top: 4px; }
-    .kpi-sub { font-size: 11px; color: var(--gray-600); margin-top: 4px; }
-    .kpi-icon {
-      width: 48px;
-      height: 48px;
-      background: var(--royal-light);
-      border-radius: 16px;
+    .h-icon {
+      width: 70px;
+      height: 70px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      color: var(--royal);
+      font-size: 32px;
+      border: 1px solid rgba(255,255,255,0.2);
     }
+    .h-info { flex: 1; min-width: 280px; }
+    .h-title { font-size: 26px; font-weight: 800; letter-spacing: -0.3px; }
+    .h-sub { font-size: 15px; opacity: 0.85; margin-top: 6px; font-weight: 500; }
+    .h-meta { font-size: 12px; opacity: 0.7; margin-top: 6px; }
+    .lastUpdate { font-size: 11px; opacity: 0.7; margin-top: 8px; }
+    .h-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      border: none;
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 13px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: rgba(255,255,255,0.1);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-1px); }
+    .btn-excel { background: rgba(13,148,136,0.3); border-color: rgba(13,148,136,0.5); }
+    .btn-excel:hover { background: rgba(13,148,136,0.5); }
+    .pill {
+      background: rgba(13,148,136,0.2);
+      border-radius: 40px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(13,148,136,0.4);
+    }
+    .dot { width: 8px; height: 8px; background: #0d9488; border-radius: 50%; box-shadow: 0 0 6px #0d9488; }
+
+    .wrap { max-width: 1600px; margin: 0 auto; padding: 24px 28px; }
+    .card {
+      background: var(--card);
+      border-radius: var(--r);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: all 0.2s ease;
+    }
+    .card:hover { box-shadow: var(--shadow-lg); }
+    .filters { padding: 20px 24px; }
+    .filtersTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .filtersTitle {
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .filtersGrid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 16px;
+    }
+    .fg { grid-column: span 3; }
+    @media (max-width: 900px) { .fg { grid-column: span 6; } }
+    @media (max-width: 600px) { .fg { grid-column: span 12; } }
+    .fg label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+    select, .ms-trigger, .search-proc-input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      border: 1.5px solid var(--border);
+      background: #fafcff;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+    }
+    select:focus, .ms-trigger:focus, .search-proc-input:focus {
+      border-color: var(--accent);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.2);
+    }
+    .search-proc-input {
+      cursor: text;
+    }
+    .btn-clear {
+      background: white;
+      border: 1px solid var(--border);
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+
+    .multiselect-wrapper { position: relative; width: 100%; }
+    .ms-trigger { display: flex; justify-content: space-between; align-items: center; }
+    .ms-trigger.open { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(13,148,136,0.2); }
+    .ms-arrow { font-size: 10px; transition: transform 0.2s; }
+    .ms-trigger.open .ms-arrow { transform: rotate(180deg); }
+    .ms-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 6px);
+      left: 0;
+      right: 0;
+      background: white;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+      z-index: 200;
+      max-height: 320px;
+      overflow: auto;
+    }
+    .ms-dropdown.open { display: block; }
+    .ms-actions { padding: 10px; display: flex; gap: 8px; border-bottom: 1px solid var(--border); }
+    .ms-btn-all, .ms-btn-clr {
+      flex: 1;
+      padding: 6px;
+      border-radius: 30px;
+      font-weight: 700;
+      font-size: 11px;
+      border: none;
+      cursor: pointer;
+    }
+    .ms-btn-all { background: rgba(13,148,136,0.1); color: var(--accent); }
+    .ms-btn-clr { background: rgba(220,38,38,0.08); color: var(--danger); }
+    .ms-search-box { padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    .ms-search-box input {
+      width: 100%;
+      padding: 8px 12px;
+      border-radius: 30px;
+      border: 1px solid var(--border);
+      font-size: 12px;
+      outline: none;
+    }
+    .ms-list { padding: 6px; max-height: 220px; overflow-y: auto; }
+    .ms-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .ms-item:hover { background: #f0fdfa; }
+    .ms-item input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .ms-empty { padding: 12px; color: var(--muted); font-size: 12px; text-align: center; }
+
+    .kpis {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 18px;
+      margin-top: 20px;
+    }
+    @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 700px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 500px) { .kpis { grid-template-columns: 1fr; } }
     
-    /* TABS */
+    .kpi {
+      background: linear-gradient(135deg, #ffffff 0%, #fefefe 100%);
+      border-radius: 24px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      transition: transform 0.2s;
+    }
+    .kpi:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+    .kpiIcon {
+      width: 56px;
+      height: 56px;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+    }
+    .kpi .label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; }
+    .kpi .val { font-size: 30px; font-weight: 800; margin-top: 4px; line-height: 1.2; }
+    .kpi .sub { font-size: 11px; color: var(--muted); margin-top: 6px; font-weight: 600; }
+    .kpi-fila .kpiIcon { background: rgba(13,148,136,0.12); color: var(--accent); }
+    .kpi-real .kpiIcon { background: rgba(5,150,105,0.12); color: var(--success); }
+    .kpi-conv .kpiIcon { background: rgba(217,119,6,0.12); color: var(--accent-gold); }
+    .kpi-fat .kpiIcon { background: rgba(15,47,79,0.12); color: var(--primary); }
+    .kpi-ticket .kpiIcon { background: rgba(139,92,246,0.12); color: #8b5cf6; }
+    .kpi-falt .kpiIcon { background: rgba(220,38,38,0.12); color: var(--danger); }
+
     .tabs {
       display: flex;
       gap: 8px;
-      background: white;
+      background: var(--card);
       padding: 6px;
       border-radius: 60px;
-      margin-bottom: 24px;
-      border: 1px solid var(--gray-200);
+      border: 1px solid var(--border);
+      margin-top: 24px;
       flex-wrap: wrap;
     }
     .tab {
+      border: none;
+      background: transparent;
       padding: 10px 24px;
       border-radius: 40px;
       font-weight: 700;
       font-size: 13px;
-      border: none;
-      background: transparent;
       cursor: pointer;
       transition: all 0.2s;
-      color: var(--gray-600);
+      color: var(--muted);
     }
-    .tab.active {
-      background: var(--royal);
-      color: white;
-      box-shadow: 0 4px 12px rgba(30,64,175,0.2);
-    }
-    .tab-content { display: none; animation: fade 0.3s ease; }
-    .tab-content.active { display: block; }
-    @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
-    
-    /* GRÁFICOS */
-    .chart-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+    .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(15,47,79,0.2); }
+    .tabContent { display: none; margin-top: 24px; }
+    .tabContent.active { display: block; }
+
+    .section { padding: 20px; }
+    .sectionTitle {
+      font-weight: 800;
+      font-size: 16px;
+      color: var(--primary);
       margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
-    @media (max-width: 900px) { .chart-row { grid-template-columns: 1fr; } }
-    .chart-card {
-      background: white;
+    .chartCard {
+      background: var(--card);
       border-radius: 24px;
       padding: 20px;
-      border: 1px solid var(--gray-200);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
     }
-    .chart-title {
-      font-size: 15px;
-      font-weight: 700;
-      color: var(--gray-900);
+    .chartHead {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .chartHead h3 { font-size: 15px; font-weight: 800; color: var(--text); }
+    .chartSub { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .chartWrap { position: relative; height: 380px; }
+    .row2eq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .row2eq { grid-template-columns: 1fr; } }
+
+    .fin-header {
+      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      border-radius: 24px;
+      padding: 20px 28px;
+      color: white;
+      margin-bottom: 20px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .fin-header-icon {
+      font-size: 28px;
+      background: rgba(255,255,255,0.15);
+      padding: 12px;
+      border-radius: 20px;
+    }
+
+    .fin-table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      margin-top: 16px;
+    }
+    .fin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .fin-table th {
+      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      color: white;
+      padding: 12px 10px;
+      text-align: right;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .fin-table th:first-child { text-align: left; position: sticky; left: 0; background: linear-gradient(135deg, #0f2f4f, #1b4a5e); }
+    .fin-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid var(--border);
+      text-align: right;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .fin-table td:first-child {
+      text-align: left;
+      font-weight: 800;
+      background: white;
+      position: sticky;
+      left: 0;
+      z-index: 1;
+    }
+    .fin-table tr.total-row td {
+      background: #f8fafc;
+      font-weight: 800;
+      color: var(--primary);
+      border-top: 2px solid var(--border);
+    }
+    .fin-table .nt-value {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .tableTop {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .search {
       display: flex;
       align-items: center;
       gap: 8px;
-      border-left: 4px solid var(--esmeralda);
-      padding-left: 12px;
+      background: #f9fafb;
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
     }
-    .chart-container { position: relative; height: 320px; }
-    
-    /* TABELAS */
-    .table-wrapper {
-      overflow-x: auto;
-      border-radius: 20px;
-      border: 1px solid var(--gray-200);
-      background: white;
+    .search input {
+      border: none;
+      background: transparent;
+      outline: none;
+      font-weight: 500;
+      min-width: 220px;
     }
     .data-table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 13px;
+      font-size: 12px;
     }
     .data-table th {
-      background: var(--gray-100);
-      padding: 14px 12px;
-      text-align: right;
-      font-weight: 700;
-      font-size: 12px;
-      color: var(--royal);
-      border-bottom: 1px solid var(--gray-200);
-    }
-    .data-table th:first-child { text-align: left; }
-    .data-table td {
+      text-align: left;
       padding: 12px;
-      border-bottom: 1px solid var(--gray-200);
-      text-align: right;
+      background: linear-gradient(135deg, #0f2f4f, #1b4a5e);
+      color: white;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
     }
-    .data-table td:first-child { text-align: left; font-weight: 500; }
-    .data-table tr:hover { background: var(--gray-100); }
-    
-    .footer {
-      margin-top: 32px;
-      padding: 20px;
-      text-align: center;
-      font-size: 12px;
-      color: var(--gray-600);
-      border-top: 1px solid var(--gray-200);
+    .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 500; }
+    .data-table tr:hover { background: #f0fdfa; }
+
+    .toastBox {
+      position: fixed;
+      top: 100px;
+      right: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-width: 420px;
+    }
+    .toast {
+      background: #1f2937;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 16px;
+      font-weight: 600;
+      font-size: 13px;
+      box-shadow: 0 12px 24px rgba(0,0,0,0.18);
+    }
+    .toast.success { border-left: 4px solid var(--success); }
+    .toast.info { border-left: 4px solid var(--accent); }
+    .toast.error { border-left: 4px solid var(--danger); }
+
+    .loading {
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent-light));
+      background-size: 200% 100%;
+      animation: shimmer 1s infinite;
+      display: none;
+    }
+    .loading.on { display: block; }
+    @keyframes shimmer {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
     }
   </style>
 </head>
 <body>
-<div class="container">
-  <!-- HEADER -->
-  <div class="header">
-    <div>
-      <h1><i class="fas fa-chart-line" style="margin-right: 10px; color: var(--esmeralda);"></i> Diretoria de Regulação do Acesso</h1>
-      <p>Painel Estratégico de Cirurgia Eletiva | Dados Consolidados</p>
+
+<header class="header">
+  <div class="h-icon"><i class="fa-solid fa-kit-medical"></i></div>
+  <div class="h-info">
+    <div class="h-title">PAINEL CIRURGIA ELETIVA</div>
+    <div class="h-sub">Diretoria de Regulação do Acesso | Análise Estratégica</div>
+    <div class="h-meta">
+      Superintendente: <b style="color:#bfdbfe">Yara Ariane M.S.Souza</b>
+      &nbsp;•&nbsp; Diretora: <b style="color:#bfdbfe">Paloma Morais</b>
+      &nbsp;•&nbsp; Desenvolvido por <b style="color:#bfdbfe">Ana P. A. Silva — Matric. 201704</b>
     </div>
-    <div class="header-badge">
-      <i class="far fa-calendar-alt"></i> Atualizado: <span id="lastUpdate">--/--/----</span>
-      <button class="btn-clear" id="btnRefresh" style="margin-left: 12px; background: rgba(255,255,255,0.2); color: white; border: none;"><i class="fas fa-sync-alt"></i></button>
+    <div class="lastUpdate" id="lastUpdate">Carregando dados...</div>
+  </div>
+  <div class="h-actions">
+    <div class="pill"><span class="dot"></span> Dados em tempo real</div>
+    <button class="btn" id="btnRefresh"><i class="fa-solid fa-rotate"></i> Atualizar</button>
+    <button class="btn btn-excel" id="btnExcel"><i class="fa-solid fa-file-excel"></i> Exportar Excel</button>
+  </div>
+</header>
+
+<div class="loading" id="loading"></div>
+<div class="toastBox" id="toastBox"></div>
+
+<main class="wrap">
+  <div class="card filters">
+    <div class="filtersTop">
+      <div class="filtersTitle"><i class="fa-solid fa-sliders-h" style="color:var(--accent)"></i> Filtros Dinâmicos</div>
+      <button class="btn-clear" id="btnClear"><i class="fa-solid fa-eraser"></i> Limpar Filtros</button>
+    </div>
+    <div class="filtersGrid">
+      <div class="fg">
+        <label><i class="fa-solid fa-layer-group"></i> GRUPO</label>
+        <select id="grupoSelect">
+          <option value="">Todos os Grupos</option>
+        </select>
+      </div>
+
+      <div class="fg">
+        <label><i class="fa-solid fa-code-branch"></i> SUBGRUPO</label>
+        <div class="multiselect-wrapper" id="msWrapperSub">
+          <div class="ms-trigger" id="msTriggerSub" onclick="toggleMsDropdownSub(event)">
+            <span class="ms-label-text" id="msLabelSub">Todos</span>
+            <i class="fa-solid fa-chevron-down ms-arrow"></i>
+          </div>
+          <div class="ms-dropdown" id="msDropdownSub">
+            <div class="ms-actions">
+              <button class="ms-btn-all" onclick="selectAllSub(event)">Selecionar Todos</button>
+              <button class="ms-btn-clr" onclick="clearSubSelection(event)">Limpar</button>
+            </div>
+            <div class="ms-search-box">
+              <input type="text" id="msSearchSub" placeholder="Buscar..." oninput="filterMsListSub()">
+            </div>
+            <div class="ms-list" id="msListSub"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label><i class="fa-solid fa-building"></i> ESTABELECIMENTO</label>
+        <div class="multiselect-wrapper" id="msWrapperEstab">
+          <div class="ms-trigger" id="msTriggerEstab" onclick="toggleMsDropdownEstab(event)">
+            <span class="ms-label-text" id="msLabelEstab">Todos</span>
+            <i class="fa-solid fa-chevron-down ms-arrow"></i>
+          </div>
+          <div class="ms-dropdown" id="msDropdownEstab">
+            <div class="ms-actions">
+              <button class="ms-btn-all" onclick="selectAllEstab(event)">Selecionar Todos</button>
+              <button class="ms-btn-clr" onclick="clearEstabSelection(event)">Limpar</button>
+            </div>
+            <div class="ms-search-box">
+              <input type="text" id="msSearchEstab" placeholder="Buscar..." oninput="filterMsListEstab()">
+            </div>
+            <div class="ms-list" id="msListEstab"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fg">
+        <label><i class="fa-solid fa-calendar"></i> PERÍODO</label>
+        <select id="periodoSelect">
+          <option value="">Todos os meses</option>
+        </select>
+      </div>
+
+      <div class="fg">
+        <label><i class="fa-solid fa-search"></i> PROCEDIMENTO / ESPECIALIDADE</label>
+        <input type="text" id="procedimentoSearch" class="search-proc-input" placeholder="Digite para filtrar...">
+      </div>
     </div>
   </div>
-  
-  <!-- FILTROS -->
-  <div class="filters">
-    <div class="filters-grid">
-      <div class="filter-item"><label>GRUPO</label><select id="filtroGrupo"><option value="">Todos</option></select></div>
-      <div class="filter-item"><label>SUBGRUPO</label><select id="filtroSubgrupo"><option value="">Todos</option></select></div>
-      <div class="filter-item"><label>ESTABELECIMENTO</label><select id="filtroEstab"><option value="">Todos</option></select></div>
-      <div class="filter-item"><label>PERÍODO (MÊS)</label><select id="filtroMes"><option value="">Todos</option></select></div>
-      <div class="filter-item"><label>PROCEDIMENTO</label><input type="text" id="filtroProc" placeholder="Buscar..."></div>
-      <div><button class="btn-clear" id="btnLimpar"><i class="fas fa-eraser"></i> Limpar</button></div>
+
+  <div class="kpis">
+    <div class="kpi kpi-fila">
+      <div class="kpiIcon"><i class="fa-solid fa-clock"></i></div>
+      <div>
+        <div class="label">Fila de Espera</div>
+        <div class="val" id="kFila">0</div>
+        <div class="sub">Procedimentos aguardando</div>
+      </div>
+    </div>
+
+    <div class="kpi kpi-real">
+      <div class="kpiIcon"><i class="fa-solid fa-scalpel"></i></div>
+      <div>
+        <div class="label">Cirurgias Realizadas</div>
+        <div class="val" id="kRealizados">0</div>
+        <div class="sub">Procedimentos executados</div>
+      </div>
+    </div>
+
+    <div class="kpi kpi-conv">
+      <div class="kpiIcon"><i class="fa-solid fa-chart-line"></i></div>
+      <div>
+        <div class="label">Taxa de Conversão</div>
+        <div class="val" id="kConversao">0%</div>
+        <div class="sub">Realizado / Fila</div>
+      </div>
+    </div>
+
+    <div class="kpi kpi-fat">
+      <div class="kpiIcon"><i class="fa-solid fa-dollar-sign"></i></div>
+      <div>
+        <div class="label">Faturamento Total</div>
+        <div class="val" id="kFaturamento">R$ 0</div>
+        <div class="sub">Acumulado no período</div>
+      </div>
+    </div>
+
+    <div class="kpi kpi-ticket">
+      <div class="kpiIcon"><i class="fa-solid fa-ticket"></i></div>
+      <div>
+        <div class="label">Ticket Médio</div>
+        <div class="val" id="kTicketMedio">R$ 0</div>
+        <div class="sub">Por cirurgia realizada</div>
+      </div>
+    </div>
+
+    <div class="kpi kpi-falt">
+      <div class="kpiIcon"><i class="fa-solid fa-user-slash"></i></div>
+      <div>
+        <div class="label">Faltosos (Absenteísmo)</div>
+        <div class="val" id="kFaltosos">0</div>
+        <div class="sub">Agendados que não compareceram</div>
+      </div>
     </div>
   </div>
-  
-  <!-- KPIs -->
-  <div class="kpi-grid">
-    <div class="kpi-card"><div><h4>AGENDADOS</h4><div class="kpi-value" id="kpiAgendados">0</div><div class="kpi-sub">Total período</div></div><div class="kpi-icon"><i class="fas fa-calendar-check"></i></div></div>
-    <div class="kpi-card"><div><h4>RECEPCIONADOS</h4><div class="kpi-value" id="kpiRecepcionados">0</div><div class="kpi-sub">Compareceram</div></div><div class="kpi-icon"><i class="fas fa-user-check"></i></div></div>
-    <div class="kpi-card"><div><h4>FATURADOS</h4><div class="kpi-value" id="kpiFaturados">0</div><div class="kpi-sub">Procedimentos</div></div><div class="kpi-icon"><i class="fas fa-file-invoice-dollar"></i></div></div>
-    <div class="kpi-card"><div><h4>RECEITA TOTAL</h4><div class="kpi-value" id="kpiReceita">R$ 0</div><div class="kpi-sub">Acumulado</div></div><div class="kpi-icon"><i class="fas fa-dollar-sign"></i></div></div>
-    <div class="kpi-card"><div><h4>TICKET MÉDIO</h4><div class="kpi-value" id="kpiTicket">R$ 0</div><div class="kpi-sub">Por procedimento</div></div><div class="kpi-icon"><i class="fas fa-ticket-alt"></i></div></div>
-    <div class="kpi-card"><div><h4>ABSENTEÍSMO</h4><div class="kpi-value" id="kpiAusencia">0%</div><div class="kpi-sub">Faltas / Agendados</div></div><div class="kpi-icon"><i class="fas fa-user-slash"></i></div></div>
-  </div>
-  
-  <!-- TABS -->
+
   <div class="tabs">
-    <button class="tab active" data-tab="visao"><i class="fas fa-chart-pie"></i> VISÃO GERAL</button>
-    <button class="tab" data-tab="fila"><i class="fas fa-hourglass-half"></i> EXECUÇÃO DA FILA DE ESPERA</button>
-    <button class="tab" data-tab="execucao"><i class="fas fa-table-list"></i> EXECUÇÃO/AGENDAMENTOS</button>
-    <button class="tab" data-tab="financeiro"><i class="fas fa-coins"></i> EVOLUÇÃO FINANCEIRA</button>
-    <button class="tab" data-tab="detalhes"><i class="fas fa-database"></i> DADOS DETALHADOS</button>
+    <button class="tab active" onclick="switchTab('estrategica', this)"><i class="fa-solid fa-chart-pie"></i> Visão Estratégica</button>
+    <button class="tab" onclick="switchTab('fila', this)"><i class="fa-solid fa-hourglass-half"></i> Análise da Fila</button>
+    <button class="tab" onclick="switchTab('producao', this)"><i class="fa-solid fa-hospital-user"></i> Produção Cirúrgica</button>
+    <button class="tab" onclick="switchTab('financeiro', this)"><i class="fa-solid fa-coins"></i> Performance Financeira</button>
+    <button class="tab" onclick="switchTab('rankings', this)"><i class="fa-solid fa-trophy"></i> Rankings</button>
+    <button class="tab" onclick="switchTab('tabela', this)"><i class="fa-solid fa-table"></i> Dados Detalhados</button>
   </div>
-  
-  <!-- ABA 1: VISÃO GERAL -->
-  <div id="visao" class="tab-content active">
-    <div class="chart-row">
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-line" style="color: var(--esmeralda);"></i> Evolução Mensal</div><div class="chart-container"><canvas id="chartEvolucao"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-bar"></i> Top Especialidades (Recepcionados)</div><div class="chart-container"><canvas id="chartTopEsp"></canvas></div></div>
+
+  <!-- ABA 1: VISÃO ESTRATÉGICA -->
+  <section id="tab-estrategica" class="tabContent active">
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Realizado</h3>
+          <div class="chartSub" id="subEvolucao">Comparativo mensal</div>
+        </div>
+        <div class="chartWrap"><canvas id="cEvolucao"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3>
+          <div class="chartSub">Fila → Agendados → Realizados</div>
+        </div>
+        <div class="chartWrap"><canvas id="cFunil"></canvas></div>
+      </div>
     </div>
-    <div class="chart-row">
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-pie"></i> Distribuição - Recepcionados vs Faturados</div><div class="chart-container"><canvas id="chartDistribuicao"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-line"></i> Ticket Médio por Especialidade</div><div class="chart-container"><canvas id="chartTicket"></canvas></div></div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top 10 Procedimentos na Fila</h3></div>
+        <div class="chartWrap"><canvas id="cTopFila"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top 10 Procedimentos Realizados</h3></div>
+        <div class="chartWrap"><canvas id="cTopRealizados"></canvas></div>
+      </div>
     </div>
-  </div>
-  
-  <!-- ABA 2: EXECUÇÃO DA FILA DE ESPERA -->
-  <div id="fila" class="tab-content">
-    <div class="chart-row">
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-line"></i> Agendados vs Recepcionados por Mês</div><div class="chart-container"><canvas id="chartFilaMes"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-building"></i> Top Estabelecimentos (Recepcionados)</div><div class="chart-container"><canvas id="chartTopEstab"></canvas></div></div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Top Especialidades (Realizados vs Faturamento)</h3></div>
+        <div class="chartWrap"><canvas id="cTopEspComp"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Complexidade</h3></div>
+        <div class="chartWrap"><canvas id="cComplexidadeFila"></canvas></div>
+      </div>
     </div>
-  </div>
-  
-  <!-- ABA 3: EXECUÇÃO/AGENDAMENTOS (TABELA MENSAL) -->
-  <div id="execucao" class="tab-content">
-    <div class="chart-card">
-      <div class="chart-title"><i class="fas fa-table"></i> Quantitativo Mensal: Recepcionados, Faturados e Valor Financeiro</div>
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead><tr><th>Mês/Ano</th><th>Recepcionados</th><th>Faturados (Qtd)</th><th>Valor Financeiro (R$)</th></tr></thead>
-          <tbody id="tabelaMensalBody"></tbody>
+  </section>
+
+  <!-- ABA 2: ANÁLISE DA FILA -->
+  <section id="tab-fila" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3></div>
+        <div class="chartWrap"><canvas id="cEvolucaoFila"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-ranking-star"></i> Top Estabelecimentos com Maior Fila</h3></div>
+        <div class="chartWrap"><canvas id="cRankFilaEstab"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 3: PRODUÇÃO CIRÚRGICA -->
+  <section id="tab-producao" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas</h3></div>
+        <div class="chartWrap"><canvas id="cEvolucaoRealizados"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cEspecialidadeRealizados"></canvas></div>
+      </div>
+    </div>
+
+    <div class="chartCard">
+      <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Top Estabelecimentos por Produção</h3></div>
+      <div class="chartWrap"><canvas id="cRankProducaoEstab"></canvas></div>
+    </div>
+  </section>
+
+  <!-- ABA 4: PERFORMANCE FINANCEIRA (igual OCI) -->
+  <section id="tab-financeiro" class="tabContent">
+    <div class="fin-header">
+      <div class="fin-header-icon"><i class="fa-solid fa-chart-line"></i></div>
+      <div>
+        <h3 style="margin:0">Faturamento Mensal Acumulado</h3>
+        <div style="font-size:12px;opacity:0.8">Evolução financeira do período</div>
+      </div>
+    </div>
+
+    <div class="chartCard">
+      <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Faturamento por Competência</h3></div>
+      <div class="chartWrap"><canvas id="cFaturamentoMensal"></canvas></div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faturamento por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cFatEspecialidade"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Faturamento por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cFatEstabelecimento"></canvas></div>
+      </div>
+    </div>
+
+    <!-- TABELA FINANCEIRA IGUAL OCI -->
+    <div class="chartCard">
+      <div class="chartHead">
+        <h3><i class="fa-solid fa-table"></i> Tabela Financeira — Faturamento por Especialidade × Competência</h3>
+        <div class="chartSub">Valores em Reais (R$) | NT = Não Transferido</div>
+      </div>
+      <div class="fin-table-wrap" id="finTableWrap">
+        <div style="padding: 20px; text-align: center;">Carregando dados financeiros...</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 5: RANKINGS -->
+  <section id="tab-rankings" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-trophy"></i> Top 10 Estabelecimentos (Físico)</h3></div>
+        <div class="chartWrap"><canvas id="cRankFisicoEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-sack-dollar"></i> Top 10 Estabelecimentos (Financeiro)</h3></div>
+        <div class="chartWrap"><canvas id="cRankFinanceiroEstab"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top 10 Especialidades (Realizado)</h3></div>
+        <div class="chartWrap"><canvas id="cRankEspecialidades"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top 10 Procedimentos (Realizado)</h3></div>
+        <div class="chartWrap"><canvas id="cRankProcedimentos"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 6: DADOS DETALHADOS -->
+  <section id="tab-tabela" class="tabContent">
+    <div class="card section">
+      <div class="tableTop">
+        <div class="sectionTitle"><i class="fa-solid fa-table"></i> Dados Consolidados</div>
+        <div class="search">
+          <i class="fa-solid fa-search"></i>
+          <input id="tSearch" placeholder="Buscar procedimento, estabelecimento...">
+        </div>
+        <div class="muted" id="tInfo">—</div>
+      </div>
+      <div style="overflow-x:auto;max-height:500px;">
+        <table class="data-table" id="tabelaPrincipal">
+          <thead>
+            <tr>
+              <th>Procedimento</th>
+              <th>Grupo</th>
+              <th>Subgrupo</th>
+              <th>Estabelecimento</th>
+              <th>Na Fila</th>
+              <th>Realizados</th>
+              <th>Faturamento (R$)</th>
+            </tr>
+          </thead>
+          <tbody id="tBody"></tbody>
         </table>
       </div>
     </div>
-  </div>
-  
-  <!-- ABA 4: EVOLUÇÃO FINANCEIRA -->
-  <div id="financeiro" class="tab-content">
-    <div class="chart-row">
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-line"></i> Faturamento Mensal (R$)</div><div class="chart-container"><canvas id="chartFatMensal"></canvas></div></div>
-      <div class="chart-card"><div class="chart-title"><i class="fas fa-chart-pie"></i> Participação por Especialidade</div><div class="chart-container"><canvas id="chartFatPie"></canvas></div></div>
-    </div>
-    <div class="chart-card">
-      <div class="chart-title"><i class="fas fa-chart-bar"></i> Faturamento por Especialidade</div>
-      <div class="chart-container" style="height: 380px;"><canvas id="chartFatBar"></canvas></div>
-    </div>
-  </div>
-  
-  <!-- ABA 5: DADOS DETALHADOS -->
-  <div id="detalhes" class="tab-content">
-    <div class="chart-card">
-      <div class="chart-title"><i class="fas fa-search"></i> Dados Detalhados</div>
-      <div class="table-wrapper" style="max-height: 500px; overflow-y: auto;">
-        <table class="data-table">
-          <thead><tr><th>Procedimento</th><th>Grupo</th><th>Estabelecimento</th><th>Agendados</th><th>Recepcionados</th><th>Faturados</th><th>Financeiro (R$)</th></tr></thead>
-          <tbody id="tabelaDetalhesBody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  
-  <div class="footer">
-    <i class="fas fa-chart-line"></i> Diretoria de Regulação do Acesso | Dados atualizados em tempo real
-  </div>
-</div>
+  </section>
+</main>
 
 <script>
   Chart.register(ChartDataLabels);
-  
-  // URLs dos dados
+
+  const el = id => document.getElementById(id);
+
+  const URL_FILA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1716569787&single=true&output=csv";
   const URL_AGENDADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1546152833&single=true&output=csv";
   const URL_FATURADO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=252919053&single=true&output=csv";
   const URL_FINANCEIRO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=269446681&single=true&output=csv";
-  
+
+  const MONTHS_ORDER = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+  const MONTH_LABELS = { jan: "Jan", fev: "Fev", mar: "Mar", abr: "Abr", mai: "Mai", jun: "Jun", jul: "Jul", ago: "Ago", set: "Set", out: "Out", nov: "Nov", dez: "Dez" };
+
+  let dadosFila = [];
   let dadosAgendados = [];
-  let dadosFinanceiro = [];
+  let dadosFinanceiro = [];  // Consolidado de FATURADO + FINANCEIRO
+  
+  let gruposMap = new Map();
+  let subgruposMap = new Map();
+  let estabelecimentosSet = new Set();
+  let procedimentosSet = new Set();
+  
+  let allPeriodos = [];
+  let filaPorMes = {};  // { "jan/25": 8445, "fev/25": 8200 }
+  
+  let selectedSubgrupos = new Set();
+  let selectedEstabelecimentos = new Set();
   let charts = {};
-  
-  function formatMoney(v) { return `R$ ${(v || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}`; }
-  function parseNumber(v) { 
-    if(!v) return 0;
-    if(typeof v === 'number') return v;
-    let s = String(v).replace(/[R$\s]/g, '').replace(/\./g, '').replace(',', '.');
-    return parseFloat(s) || 0;
+  let lastTableRows = [];
+
+  function toast(msg, type = "info") {
+    const box = el("toastBox");
+    const d = document.createElement("div");
+    d.className = `toast ${type}`;
+    let icon = "circle-info";
+    if (type === "success") icon = "circle-check";
+    if (type === "error") icon = "triangle-exclamation";
+    d.innerHTML = `<i class="fa-solid fa-${icon}"></i> ${msg}`;
+    box.appendChild(d);
+    setTimeout(() => d.remove(), 4000);
   }
-  function normalize(t) { return String(t || "").trim(); }
-  function extractMonth(p) {
-    let meses = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
-    let str = normalize(p).toLowerCase();
-    for(let i=0; i<meses.length; i++) {
-      if(str.includes(meses[i])) {
-        let ano = str.match(/\d{2,4}/);
-        let anoStr = ano ? ano[0].slice(-2) : "25";
-        return `${meses[i]}/${anoStr}`;
-      }
+
+  function normalizeText(v) { return String(v ?? "").trim(); }
+  
+  function normalizeKey(v) {
+    return normalizeText(v)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .toUpperCase()
+      .trim();
+  }
+
+  function parseNumberBR(value) {
+    if (value == null) return 0;
+    if (typeof value === "number") return Number.isFinite(value) ? value : 0;
+    let s = String(value).trim();
+    if (!s || /^sem dados$/i.test(s) || s === "-") return 0;
+    s = s.replace(/\s/g, "").replace(/R\$/gi, "");
+    const hasComma = s.includes(",");
+    const hasDot = s.includes(".");
+    if (hasComma && hasDot) {
+      if (s.lastIndexOf(",") > s.lastIndexOf(".")) s = s.replace(/\./g, "").replace(",", ".");
+      else s = s.replace(/,/g, "");
+    } else if (hasComma) s = s.replace(/\./g, "").replace(",", ".");
+    else s = s.replace(/,/g, "");
+    s = s.replace(/[^\d.-]/g, "");
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function formatMoney(v) { return (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
+  function formatMoneyCompact(v) { if (v >= 1000000) return "R$ " + (v/1000000).toFixed(1) + "M"; if (v >= 1000) return "R$ " + (v/1000).toFixed(1) + "K"; return formatMoney(v); }
+  function truncateLabel(t, max=30) { const s = String(t ?? ""); return s.length > max ? s.slice(0, max-3)+"..." : s; }
+
+  function normalizePeriodo(label) {
+    let s = normalizeText(label).toLowerCase();
+    if (!s) return "";
+    s = s.replace(/\s+/g, "").replace(/\./g, "").replace(/-/g, "/");
+    const match = s.match(/^(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/?(\d{2,4})$/i);
+    if (!match) return normalizeText(label);
+    let mes = match[1];
+    let ano = match[2];
+    if (ano.length === 4) ano = ano.slice(2);
+    return `${mes}/${ano}`;
+  }
+
+  function periodoSortValue(label) {
+    const p = normalizePeriodo(label);
+    const match = p.match(/^(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/(\d{2})$/i);
+    if (!match) return Number.MAX_SAFE_INTEGER;
+    const mesIndex = MONTHS_ORDER.indexOf(match[1].toLowerCase());
+    const ano = 2000 + parseInt(match[2], 10);
+    return ano * 100 + mesIndex;
+  }
+
+  function sortPeriodos(list) { return [...new Set(list.filter(Boolean).map(normalizePeriodo))].filter(Boolean).sort((a,b) => periodoSortValue(a) - periodoSortValue(b)); }
+
+  function keyMatches(header, alias) { return normalizeKey(header) === normalizeKey(alias); }
+
+  function getField(row, aliases = []) {
+    const keys = Object.keys(row || {});
+    for (const alias of aliases) {
+      if (alias in row) return row[alias];
+      const found = keys.find(k => keyMatches(k, alias));
+      if (found) return row[found];
     }
-    return str;
+    return "";
   }
-  
-  async function carregarDados() {
+
+  function detectHeaderIndex(rows, expectedHeaders = []) {
+    if (!rows?.length) return -1;
+    for (let i = 0; i < rows.length; i++) {
+      const row = (rows[i] || []).map(v => normalizeKey(v));
+      const score = expectedHeaders.filter(h => row.some(col => col === normalizeKey(h))).length;
+      if (score >= Math.max(2, Math.ceil(expectedHeaders.length * 0.5))) return i;
+    }
+    return -1;
+  }
+
+  async function loadCSVSmart(url, expectedHeaders = []) {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Falha HTTP ${response.status}`);
+    const text = await response.text();
+    const parsed = Papa.parse(text, { skipEmptyLines: false });
+    const rawRows = parsed.data || [];
+    const headerIndex = detectHeaderIndex(rawRows, expectedHeaders);
+    if (headerIndex === -1) throw new Error("Cabeçalho CSV não localizado.");
+    const headers = (rawRows[headerIndex] || []).map(h => normalizeText(h));
+    const dataRows = rawRows.slice(headerIndex + 1);
+    return dataRows.map(row => {
+      const obj = {};
+      headers.forEach((header, idx) => { if (header) obj[header] = row?.[idx] ?? ""; });
+      return obj;
+    }).filter(obj => Object.values(obj).some(v => normalizeText(v) !== ""));
+  }
+
+  function extractMonthlyValues(row) {
+    const mensal = {};
+    Object.keys(row).forEach(key => {
+      const periodo = normalizePeriodo(key);
+      if (/^(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/\d{2}$/i.test(periodo)) {
+        mensal[periodo] = parseNumberBR(row[key]);
+      }
+    });
+    return mensal;
+  }
+
+  async function loadAllData() {
+    el("loading").classList.add("on");
     try {
-      const respAg = await fetch(URL_AGENDADOS);
-      const txtAg = await respAg.text();
-      const csvAg = Papa.parse(txtAg, { header: true, skipEmptyLines: true });
-      dadosAgendados = csvAg.data.map(row => ({
-        descricao: normalize(row["PROCEDIMENTO DESCRIÇÃO"]),
-        grupo: normalize(row["GRUPO"]),
-        subgrupo: normalize(row["SUBGRUPO"]),
-        estabelecimento: normalize(row["PRESTADOR"] || row["ESTABELECIMENTO"]),
-        especialidade: normalize(row["ESPECIALIDADE"]),
-        mes: extractMonth(row["MÊS"]),
-        agendados: parseNumber(row["OFERTA"]),
-        recepcionados: parseNumber(row["REC"]),
-        faltosos: parseNumber(row["FAL"])
-      })).filter(d => d.descricao);
-      
-      const respFin = await fetch(URL_FINANCEIRO);
-      const txtFin = await respFin.text();
-      const csvFin = Papa.parse(txtFin, { header: true });
-      dadosFinanceiro = csvFin.data.map(row => {
-        let mensal = {};
-        Object.keys(row).forEach(k => {
-          let periodo = extractMonth(k);
-          if(periodo.match(/(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/\d{2}/)) {
-            mensal[periodo] = parseNumber(row[k]);
-          }
-        });
+      const [filaRaw, agendadosRaw, faturadoRaw, financeiroRaw] = await Promise.all([
+        loadCSVSmart(URL_FILA, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "GRUPO", "SUBGRUPO"]),
+        loadCSVSmart(URL_AGENDADOS, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "MÊS", "REC", "OFERTA"]),
+        loadCSVSmart(URL_FATURADO, ["Procedimento Descrição", "CÓDIGO DO PROCEDIMENTO", "ESTABELECIMENTO"]),
+        loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
+      ]);
+
+      // Processa FILA - captura DATA CORTE
+      dadosFila = filaRaw.map(r => {
+        let dataCorte = normalizePeriodo(getField(r, ["DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
+        if (!dataCorte || dataCorte === "sem dados") dataCorte = "";
         return {
-          descricao: normalize(row["PROCEDIMENTO DESCRIÇÃO"]),
-          especialidade: normalize(row["ESPECIALIDADE"]),
-          estabelecimento: normalize(row["ESTABELECIMENTO"]),
-          grupo: normalize(row["GRUPO"]),
-          subgrupo: normalize(row["SUBGRUPO"]),
-          mensal: mensal,
-          total: Object.values(mensal).reduce((a,b)=>a+b,0)
+          codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
+          descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])),
+          grupo: normalizeText(getField(r, ["GRUPO"])),
+          subgrupo: normalizeText(getField(r, ["SUBGRUPO"])),
+          estabelecimento: normalizeText(getField(r, ["PRESTADOR", "ESTABELECIMENTO"])),
+          fila: parseNumberBR(getField(r, ["FILA INTERNA ATUAL SUR"])),
+          complexidade: normalizeText(getField(r, ["COMPLEXIDADE"])),
+          especialidade: normalizeText(getField(r, ["ESPECIALIDADE"])),
+          dataCorte
         };
       }).filter(d => d.descricao);
-      
-      atualizarFiltros();
-      aplicarFiltros();
-      document.getElementById("lastUpdate").innerText = new Date().toLocaleString("pt-BR");
-    } catch(e) { console.error(e); alert("Erro ao carregar dados"); }
+
+      // Agrupa fila por mês de dataCorte
+      filaPorMes = {};
+      dadosFila.forEach(d => { if (d.dataCorte) filaPorMes[d.dataCorte] = (filaPorMes[d.dataCorte] || 0) + d.fila; });
+
+      // Processa AGENDADOS
+      dadosAgendados = agendadosRaw.map(r => ({
+        codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
+        descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])),
+        grupo: normalizeText(getField(r, ["GRUPO"])),
+        subgrupo: normalizeText(getField(r, ["SUBGRUPO"])),
+        estabelecimento: normalizeText(getField(r, ["PRESTADOR", "ESTABELECIMENTO"])),
+        especialidade: normalizeText(getField(r, ["ESPECIALIDADE"])),
+        complexidade: normalizeText(getField(r, ["COMPLEXIDADE"])),
+        mes: normalizePeriodo(getField(r, ["MÊS"])),
+        faltosos: parseNumberBR(getField(r, ["FAL"])),
+        recepcionados: parseNumberBR(getField(r, ["REC"])),
+        oferta: parseNumberBR(getField(r, ["OFERTA"]))
+      })).filter(d => d.descricao);
+
+      // Processa FINANCEIRO (consolidado de FATURADO + FINANCEIRO)
+      const processFinanceiro = (raw, tipo) => raw.map(r => {
+        const mensal = extractMonthlyValues(r);
+        const totalCalculado = Object.values(mensal).reduce((s,v) => s+v, 0);
+        return {
+          codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO", "CÓDIGO PROCEDIMENTO"])),
+          descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO", "Procedimento Descrição"])),
+          grupo: normalizeText(getField(r, ["GRUPO"])),
+          subgrupo: normalizeText(getField(r, ["SUBGRUPO", "SUB GRUPO"])),
+          estabelecimento: normalizeText(getField(r, ["ESTABELECIMENTO", "PRESTADOR"])),
+          especialidade: normalizeText(getField(r, ["ESPECIALIDADE", "Especialidade Descrição"])),
+          mensal,
+          total: parseNumberBR(getField(r, ["Total geral"])) || totalCalculado,
+          tipo
+        };
+      }).filter(d => d.descricao);
+
+      const faturadoProcessado = processFinanceiro(faturadoRaw, "faturado");
+      const financeiroProcessado = processFinanceiro(financeiroRaw, "financeiro");
+      dadosFinanceiro = [...faturadoProcessado, ...financeiroProcessado];
+
+      // Popula filtros
+      dadosFila.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.descricao) procedimentosSet.add(d.descricao); });
+      dadosAgendados.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.mes) allPeriodos.push(d.mes); if (d.descricao) procedimentosSet.add(d.descricao); });
+      dadosFinanceiro.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); if (d.descricao) procedimentosSet.add(d.descricao); });
+
+      allPeriodos = sortPeriodos(allPeriodos);
+      populateFilters();
+      updateLastUpdate();
+      applyFilters();
+      toast(`Dados carregados! Fila: ${dadosFila.length} | Agendados: ${dadosAgendados.length} | Financeiro: ${dadosFinanceiro.length}`, "success");
+    } catch (e) {
+      console.error(e);
+      toast(`Erro: ${e.message}`, "error");
+    } finally {
+      el("loading").classList.remove("on");
+    }
   }
-  
-  function atualizarFiltros() {
-    let grupos = new Set(), subgrupos = new Set(), estabs = new Set(), meses = new Set();
-    dadosAgendados.forEach(d => { if(d.grupo) grupos.add(d.grupo); if(d.subgrupo) subgrupos.add(d.subgrupo); if(d.estabelecimento) estabs.add(d.estabelecimento); if(d.mes) meses.add(d.mes); });
-    dadosFinanceiro.forEach(d => { if(d.grupo) grupos.add(d.grupo); if(d.subgrupo) subgrupos.add(d.subgrupo); if(d.estabelecimento) estabs.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => meses.add(m)); });
-    
-    document.getElementById("filtroGrupo").innerHTML = '<option value="">Todos</option>' + Array.from(grupos).sort().map(g => `<option>${g}</option>`).join("");
-    document.getElementById("filtroSubgrupo").innerHTML = '<option value="">Todos</option>' + Array.from(subgrupos).sort().map(s => `<option>${s}</option>`).join("");
-    document.getElementById("filtroEstab").innerHTML = '<option value="">Todos</option>' + Array.from(estabs).sort().map(e => `<option>${e}</option>`).join("");
-    let mesesOrd = Array.from(meses).sort((a,b) => a.localeCompare(b));
-    document.getElementById("filtroMes").innerHTML = '<option value="">Todos</option>' + mesesOrd.map(m => `<option>${m}</option>`).join("");
+
+  function updateLastUpdate() { el("lastUpdate").textContent = `Última atualização: ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`; }
+
+  function populateFilters() {
+    const grupoSelect = el("grupoSelect");
+    grupoSelect.innerHTML = '<option value="">Todos os Grupos</option>' + [...gruposMap.keys()].sort().map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
+    buildSubgrupoList();
+    buildEstabelecimentoList();
+    const periodoSelect = el("periodoSelect");
+    periodoSelect.innerHTML = '<option value="">Todos os meses</option>' + allPeriodos.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
   }
-  
-  function getFiltros() {
-    return {
-      grupo: document.getElementById("filtroGrupo").value,
-      subgrupo: document.getElementById("filtroSubgrupo").value,
-      estab: document.getElementById("filtroEstab").value,
-      mes: document.getElementById("filtroMes").value,
-      proc: document.getElementById("filtroProc").value.toLowerCase()
-    };
+
+  function getVisibleSubgrupos() {
+    const grupo = el("grupoSelect").value;
+    return [...subgruposMap.entries()].filter(([sub, grp]) => !grupo || grp === grupo).map(([sub]) => sub).sort();
   }
-  
-  function filtrarAgendados() {
-    let f = getFiltros();
-    return dadosAgendados.filter(d => 
-      (!f.grupo || d.grupo === f.grupo) &&
-      (!f.subgrupo || d.subgrupo === f.subgrupo) &&
-      (!f.estab || d.estabelecimento === f.estab) &&
-      (!f.mes || d.mes === f.mes) &&
-      (!f.proc || d.descricao.toLowerCase().includes(f.proc) || d.especialidade.toLowerCase().includes(f.proc))
-    );
+
+  function getVisibleEstabelecimentos() { return [...estabelecimentosSet].sort(); }
+
+  function buildSubgrupoList() {
+    const list = el("msListSub"); if (!list) return;
+    const subArray = getVisibleSubgrupos();
+    selectedSubgrupos.forEach(s => { if (!subArray.includes(s)) selectedSubgrupos.delete(s); });
+    list.innerHTML = subArray.length ? subArray.map(sub => `<div class="ms-item" data-value="${escapeHtml(sub)}"><input type="checkbox" value="${escapeHtml(sub)}" ${selectedSubgrupos.has(sub) ? "checked" : ""}><span>${escapeHtml(sub)}</span></div>`).join("") : '<div class="ms-empty">Nenhum subgrupo</div>';
+    list.querySelectorAll(".ms-item").forEach(item => { const cb = item.querySelector("input"); cb.addEventListener("change", () => { if (cb.checked) selectedSubgrupos.add(cb.value); else selectedSubgrupos.delete(cb.value); updateMsLabelSub(); applyFilters(); }); item.addEventListener("click", e => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } }); });
+    updateMsLabelSub();
   }
-  
-  function filtrarFinanceiro() {
-    let f = getFiltros();
-    return dadosFinanceiro.filter(d => 
-      (!f.grupo || d.grupo === f.grupo) &&
-      (!f.subgrupo || d.subgrupo === f.subgrupo) &&
-      (!f.estab || d.estabelecimento === f.estab) &&
-      (!f.proc || d.descricao.toLowerCase().includes(f.proc) || d.especialidade.toLowerCase().includes(f.proc))
-    ).map(d => ({
-      ...d,
-      valorFiltrado: f.mes ? (d.mensal[f.mes] || 0) : d.total
-    }));
+
+  function buildEstabelecimentoList() {
+    const list = el("msListEstab"); if (!list) return;
+    const estabArray = getVisibleEstabelecimentos();
+    selectedEstabelecimentos.forEach(s => { if (!estabArray.includes(s)) selectedEstabelecimentos.delete(s); });
+    list.innerHTML = estabArray.length ? estabArray.map(estab => `<div class="ms-item" data-value="${escapeHtml(estab)}"><input type="checkbox" value="${escapeHtml(estab)}" ${selectedEstabelecimentos.has(estab) ? "checked" : ""}><span>${escapeHtml(estab)}</span></div>`).join("") : '<div class="ms-empty">Nenhum estabelecimento</div>';
+    list.querySelectorAll(".ms-item").forEach(item => { const cb = item.querySelector("input"); cb.addEventListener("change", () => { if (cb.checked) selectedEstabelecimentos.add(cb.value); else selectedEstabelecimentos.delete(cb.value); updateMsLabelEstab(); applyFilters(); }); item.addEventListener("click", e => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } }); });
+    updateMsLabelEstab();
   }
-  
-  function aplicarFiltros() {
-    let ag = filtrarAgendados();
-    let fin = filtrarFinanceiro();
-    
-    let totalAg = ag.reduce((s,d)=>s+d.agendados,0);
-    let totalRec = ag.reduce((s,d)=>s+d.recepcionados,0);
-    let totalFat = fin.length;
-    let totalReceita = fin.reduce((s,d)=>s+d.valorFiltrado,0);
-    let ticket = totalRec > 0 ? totalReceita / totalRec : 0;
-    let totalFaltas = ag.reduce((s,d)=>s+d.faltosos,0);
-    let ausencia = totalAg > 0 ? (totalFaltas / totalAg) * 100 : 0;
-    
-    document.getElementById("kpiAgendados").innerText = totalAg.toLocaleString();
-    document.getElementById("kpiRecepcionados").innerText = totalRec.toLocaleString();
-    document.getElementById("kpiFaturados").innerText = totalFat.toLocaleString();
-    document.getElementById("kpiReceita").innerHTML = formatMoney(totalReceita);
-    document.getElementById("kpiTicket").innerHTML = formatMoney(ticket);
-    document.getElementById("kpiAusencia").innerHTML = `${ausencia.toFixed(1)}%`;
-    
-    renderGraficosVisao(ag, fin);
-    renderGraficosFila(ag);
-    renderTabelaMensal(ag, fin);
-    renderGraficosFinanceiros(fin);
-    renderTabelaDetalhes(ag, fin);
+
+  function updateMsLabelSub() { el("msLabelSub").textContent = selectedSubgrupos.size ? `${selectedSubgrupos.size} selecionado(s)` : "Todos"; }
+  function updateMsLabelEstab() { el("msLabelEstab").textContent = selectedEstabelecimentos.size ? `${selectedEstabelecimentos.size} selecionado(s)` : "Todos"; }
+  function closeAllDropdowns() { ["Sub", "Estab"].forEach(suf => { el(`msDropdown${suf}`)?.classList.remove("open"); el(`msTrigger${suf}`)?.classList.remove("open"); }); }
+  function toggleMsDropdownSub(e) { e.stopPropagation(); const dd = el("msDropdownSub"), tr = el("msTriggerSub"); const willOpen = !dd.classList.contains("open"); closeAllDropdowns(); dd.classList.toggle("open", willOpen); tr.classList.toggle("open", willOpen); }
+  function toggleMsDropdownEstab(e) { e.stopPropagation(); const dd = el("msDropdownEstab"), tr = el("msTriggerEstab"); const willOpen = !dd.classList.contains("open"); closeAllDropdowns(); dd.classList.toggle("open", willOpen); tr.classList.toggle("open", willOpen); }
+  function selectAllSub(e) { e.preventDefault(); selectedSubgrupos.clear(); getVisibleSubgrupos().forEach(s => selectedSubgrupos.add(s)); buildSubgrupoList(); applyFilters(); }
+  function clearSubSelection(e) { e.preventDefault(); selectedSubgrupos.clear(); buildSubgrupoList(); applyFilters(); }
+  function selectAllEstab(e) { e.preventDefault(); selectedEstabelecimentos.clear(); getVisibleEstabelecimentos().forEach(s => selectedEstabelecimentos.add(s)); buildEstabelecimentoList(); applyFilters(); }
+  function clearEstabSelection(e) { e.preventDefault(); selectedEstabelecimentos.clear(); buildEstabelecimentoList(); applyFilters(); }
+  function filterMsListSub() { const q = (el("msSearchSub")?.value || "").toLowerCase(); el("msListSub")?.querySelectorAll(".ms-item").forEach(item => { item.style.display = (item.querySelector("span")?.textContent?.toLowerCase() || "").includes(q) ? "" : "none"; }); }
+  function filterMsListEstab() { const q = (el("msSearchEstab")?.value || "").toLowerCase(); el("msListEstab")?.querySelectorAll(".ms-item").forEach(item => { item.style.display = (item.querySelector("span")?.textContent?.toLowerCase() || "").includes(q) ? "" : "none"; }); }
+  function handleGrupoChange() { buildSubgrupoList(); applyFilters(); }
+
+  function escapeHtml(t) { return String(t ?? "").replace(/[&<>]/g, function(m) { if (m === "&") return "&amp;"; if (m === "<") return "&lt;"; if (m === ">") return "&gt;"; return m; }); }
+
+  function applyFilters() {
+    const grupo = el("grupoSelect").value;
+    const periodo = el("periodoSelect").value;
+    const procSearch = (el("procedimentoSearch")?.value || "").toLowerCase();
+
+    const baseMatch = d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)) && (!procSearch || d.descricao.toLowerCase().includes(procSearch) || (d.especialidade || "").toLowerCase().includes(procSearch));
+
+    const filteredFila = dadosFila.filter(baseMatch);
+    const filteredAgendados = dadosAgendados.filter(d => baseMatch(d) && (!periodo || d.mes === periodo));
+    const filteredFinanceiro = dadosFinanceiro.filter(d => baseMatch(d)).map(d => ({ ...d, totalFiltrado: periodo ? (d.mensal[periodo] || 0) : d.total }));
+
+    const totalFila = filteredFila.reduce((s, d) => s + d.fila, 0);
+    const totalRealizados = filteredAgendados.reduce((s, d) => s + d.recepcionados, 0);
+    const totalOferta = filteredAgendados.reduce((s, d) => s + d.oferta, 0);
+    const totalFaturamento = filteredFinanceiro.reduce((s, d) => s + d.totalFiltrado, 0);
+    const totalFaltosos = filteredAgendados.reduce((s, d) => s + d.faltosos, 0);
+    const ticketMedio = totalRealizados > 0 ? totalFaturamento / totalRealizados : 0;
+    const conversao = totalFila > 0 ? (totalRealizados / totalFila) * 100 : 0;
+
+    el("kFila").innerText = totalFila.toLocaleString("pt-BR");
+    el("kRealizados").innerText = totalRealizados.toLocaleString("pt-BR");
+    el("kConversao").innerText = `${conversao.toFixed(1).replace(".", ",")}%`;
+    el("kFaturamento").innerText = formatMoney(totalFaturamento);
+    el("kTicketMedio").innerText = formatMoney(ticketMedio);
+    el("kFaltosos").innerText = totalFaltosos.toLocaleString("pt-BR");
+
+    renderAllCharts(filteredFila, filteredAgendados, filteredFinanceiro, totalOferta, periodo);
+    renderTable(filteredFila, filteredAgendados, filteredFinanceiro);
+    renderFinTable(filteredFinanceiro, periodo);
   }
-  
-  function renderGraficosVisao(ag, fin) {
-    let mesesMap = new Map();
-    ag.forEach(a => {
-      if(!mesesMap.has(a.mes)) mesesMap.set(a.mes, {ag:0, rec:0});
-      mesesMap.get(a.mes).ag += a.agendados;
-      mesesMap.get(a.mes).rec += a.recepcionados;
-    });
-    let meses = Array.from(mesesMap.keys()).sort();
-    let agData = meses.map(m=>mesesMap.get(m).ag);
-    let recData = meses.map(m=>mesesMap.get(m).rec);
-    if(charts.evolucao) charts.evolucao.destroy();
-    charts.evolucao = new Chart(document.getElementById("chartEvolucao"), {
-      type: 'line',
-      data: { labels: meses, datasets: [{label:'Agendados', data:agData, borderColor:'#1E40AF', backgroundColor:'rgba(30,64,175,0.05)', fill:true, tension:0.3},{label:'Recepcionados', data:recData, borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.05)', fill:true, tension:0.3}] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString()}` } } } }
-    });
-    
-    let espMap = new Map();
-    ag.forEach(a => { let esp = a.especialidade || "Outros"; espMap.set(esp, (espMap.get(esp)||0)+a.recepcionados); });
-    let topEsp = Array.from(espMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6);
-    if(charts.topEsp) charts.topEsp.destroy();
-    charts.topEsp = new Chart(document.getElementById("chartTopEsp"), {
-      type: 'bar',
-      data: { labels: topEsp.map(e=>e[0]), datasets: [{label:'Recepcionados', data: topEsp.map(e=>e[1]), backgroundColor:'#10B981', borderRadius:8}] },
-      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-    });
-    
-    if(charts.distrib) charts.distrib.destroy();
-    charts.distrib = new Chart(document.getElementById("chartDistribuicao"), {
-      type: 'doughnut',
-      data: { labels: ['Recepcionados', 'Faturados'], datasets: [{ data: [ag.reduce((s,d)=>s+d.recepcionados,0), fin.length], backgroundColor: ['#10B981', '#1E40AF'] }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { formatter: v => v.toLocaleString() } } }
-    });
-    
-    let ticketMap = new Map();
-    fin.forEach(f => {
-      let esp = f.especialidade || "Outros";
-      let qtd = ag.filter(a=>a.especialidade===esp).reduce((s,a)=>s+a.recepcionados,0);
-      if(qtd>0) ticketMap.set(esp, f.valorFiltrado/qtd);
-    });
-    let topTicket = Array.from(ticketMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6);
-    if(charts.ticket) charts.ticket.destroy();
-    charts.ticket = new Chart(document.getElementById("chartTicket"), {
-      type: 'bar',
-      data: { labels: topTicket.map(t=>t[0]), datasets: [{label:'Ticket Médio (R$)', data: topTicket.map(t=>t[1]), backgroundColor:'#1E40AF'}] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } } }, scales: { y: { ticks: { callback: v => formatMoney(v) } } } }
+
+  function makeBarChart(id, labels, values, color, opts = {}) {
+    if (!el(id)) return;
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(el(id).getContext("2d"), {
+      type: "bar",
+      data: { labels, datasets: [{ label: opts.label || "", data: values, backgroundColor: color, borderRadius: 8 }] },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        indexAxis: opts.horizontal ? "y" : "x",
+        plugins: {
+          legend: { display: !!opts.showLegend },
+          tooltip: opts.tooltip || {},
+          datalabels: { color: opts.dataLabelColor || "#374151", anchor: opts.horizontal ? "end" : "end", align: opts.horizontal ? "right" : "top", formatter: opts.formatter || (v => v.toLocaleString("pt-BR")) }
+        },
+        scales: opts.scales || {}
+      }
     });
   }
-  
-  function renderGraficosFila(ag) {
-    let mesesMap = new Map();
-    ag.forEach(a => {
-      if(!mesesMap.has(a.mes)) mesesMap.set(a.mes, {ag:0, rec:0});
-      mesesMap.get(a.mes).ag += a.agendados;
-      mesesMap.get(a.mes).rec += a.recepcionados;
-    });
-    let meses = Array.from(mesesMap.keys()).sort();
-    if(charts.filaMes) charts.filaMes.destroy();
-    charts.filaMes = new Chart(document.getElementById("chartFilaMes"), {
-      type: 'bar',
-      data: { labels: meses, datasets: [{label:'Agendados', data: meses.map(m=>mesesMap.get(m).ag), backgroundColor:'#1E40AF'},{label:'Recepcionados', data: meses.map(m=>mesesMap.get(m).rec), backgroundColor:'#10B981'}] },
-      options: { responsive: true, maintainAspectRatio: false }
-    });
+
+  function renderAllCharts(fila, agendados, financeiro, totalOferta, periodoSelecionado) {
+    const totalFila = fila.reduce((s,d) => s+d.fila, 0);
+    const totalRealizados = agendados.reduce((s,d) => s+d.recepcionados, 0);
+    const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
-    let estabMap = new Map();
-    ag.forEach(a => { estabMap.set(a.estabelecimento, (estabMap.get(a.estabelecimento)||0)+a.recepcionados); });
-    let topEstab = Array.from(estabMap.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6);
-    if(charts.topEstab) charts.topEstab.destroy();
-    charts.topEstab = new Chart(document.getElementById("chartTopEstab"), {
-      type: 'bar',
-      data: { labels: topEstab.map(e=>e[0]), datasets: [{label:'Recepcionados', data: topEstab.map(e=>e[1]), backgroundColor:'#10B981'}] },
-      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false }
-    });
-  }
-  
-  function renderTabelaMensal(ag, fin) {
-    let map = new Map();
-    ag.forEach(a => {
-      if(!map.has(a.mes)) map.set(a.mes, {rec:0, fatQtd:0, fin:0});
-      map.get(a.mes).rec += a.recepcionados;
-    });
-    fin.forEach(f => {
-      Object.entries(f.mensal).forEach(([mes, valor]) => {
-        if(!map.has(mes)) map.set(mes, {rec:0, fatQtd:0, fin:0});
-        map.get(mes).fin += valor;
-        map.get(mes).fatQtd += 1;
+    // Evolução Fila vs Realizado
+    if (el("cEvolucao")) {
+      if (charts.cEvolucao) charts.cEvolucao.destroy();
+      const dadosRealizadosPorMes = meses.map(m => agendados.filter(a => a.mes === m).reduce((s,d) => s+d.recepcionados, 0));
+      const dadosFilaPorMes = meses.map(m => filaPorMes[m] || 0);
+      charts.cEvolucao = new Chart(el("cEvolucao").getContext("2d"), {
+        type: "line",
+        data: { labels: meses, datasets: [{ label: "Fila de Espera", data: dadosFilaPorMes, borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.1)", fill: true, tension: 0.3 }, { label: "Cirurgias Realizadas", data: dadosRealizadosPorMes, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true, tension: 0.3 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
       });
-    });
-    let mesesOrd = Array.from(map.keys()).sort();
-    document.getElementById("tabelaMensalBody").innerHTML = mesesOrd.map(m => {
-      let d = map.get(m);
-      return `<tr><td>${m}</td><td>${d.rec.toLocaleString()}</td><td>${d.fatQtd.toLocaleString()}</td><td>${formatMoney(d.fin)}</td></tr>`;
-    }).join("");
+    }
+
+    // Funil
+    if (el("cFunil")) {
+      if (charts.cFunil) charts.cFunil.destroy();
+      charts.cFunil = new Chart(el("cFunil").getContext("2d"), {
+        type: "doughnut",
+        data: { labels: ["Fila", "Agendados", "Realizados"], datasets: [{ data: [totalFila, totalOferta, totalRealizados], backgroundColor: ["#f59e0b", "#3b82f6", "#0d9488"], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { color: "#fff", font: { weight: "bold" }, formatter: v => v.toLocaleString("pt-BR") } } }
+      });
+    }
+
+    // Top Fila
+    const procFila = new Map(); fila.forEach(d => procFila.set(d.descricao, (procFila.get(d.descricao) || 0) + d.fila));
+    const topFila = [...procFila.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    makeBarChart("cTopFila", topFila.map(t => truncateLabel(t[0],30)), topFila.map(t => t[1]), "#f59e0b", { label: "Na Fila", horizontal: true });
+
+    // Top Realizados
+    const procReal = new Map(); agendados.forEach(d => procReal.set(d.descricao, (procReal.get(d.descricao) || 0) + d.recepcionados));
+    const topReal = [...procReal.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    makeBarChart("cTopRealizados", topReal.map(t => truncateLabel(t[0],30)), topReal.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
+
+    // Top Especialidades Comparativo
+    if (el("cTopEspComp")) {
+      if (charts.cTopEspComp) charts.cTopEspComp.destroy();
+      const espReal = new Map(); agendados.forEach(d => espReal.set(d.especialidade || "Outros", (espReal.get(d.especialidade || "Outros") || 0) + d.recepcionados));
+      const espFat = new Map(); financeiro.forEach(d => espFat.set(d.especialidade || "Outros", (espFat.get(d.especialidade || "Outros") || 0) + d.totalFiltrado));
+      const topEsp = [...espReal.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
+      charts.cTopEspComp = new Chart(el("cTopEspComp").getContext("2d"), {
+        type: "bar",
+        data: { labels: topEsp.map(t => truncateLabel(t[0],20)), datasets: [{ label: "Realizados", data: topEsp.map(t => t[1]), backgroundColor: "#0d9488", borderRadius: 8 }, { label: "Faturamento (R$)", data: topEsp.map(t => espFat.get(t[0]) || 0), backgroundColor: "#f59e0b", borderRadius: 8, yAxisID: "y1" }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } }, scales: { y: { title: { display: true, text: "Realizados" } }, y1: { position: "right", title: { display: true, text: "Faturamento (R$)" }, ticks: { callback: v => formatMoneyCompact(v) } } } }
+      });
+    }
+
+    // Complexidade
+    if (el("cComplexidadeFila")) {
+      if (charts.cComplexidadeFila) charts.cComplexidadeFila.destroy();
+      const compMap = new Map(); fila.forEach(d => compMap.set(d.complexidade || "Não informado", (compMap.get(d.complexidade || "Não informado") || 0) + d.fila));
+      charts.cComplexidadeFila = new Chart(el("cComplexidadeFila").getContext("2d"), {
+        type: "pie",
+        data: { labels: [...compMap.keys()], datasets: [{ data: [...compMap.values()], backgroundColor: ["#0d9488", "#f59e0b", "#3b82f6", "#8b5cf6"] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { formatter: v => v.toLocaleString("pt-BR") } } }
+      });
+    }
+
+    // Evolução Fila
+    if (el("cEvolucaoFila")) {
+      if (charts.cEvolucaoFila) charts.cEvolucaoFila.destroy();
+      const mesesFila = Object.keys(filaPorMes).sort((a,b) => periodoSortValue(a)-periodoSortValue(b));
+      charts.cEvolucaoFila = new Chart(el("cEvolucaoFila").getContext("2d"), {
+        type: "line",
+        data: { labels: mesesFila, datasets: [{ label: "Fila por Data Corte", data: mesesFila.map(m => filaPorMes[m] || 0), borderColor: "#f59e0b", backgroundColor: "rgba(245,158,11,0.1)", fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+      });
+    }
+
+    // Top Estab Fila
+    const estabFila = new Map(); fila.forEach(d => estabFila.set(d.estabelecimento, (estabFila.get(d.estabelecimento) || 0) + d.fila));
+    const topEstabFila = [...estabFila.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    makeBarChart("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#f59e0b", { label: "Fila", horizontal: true });
+
+    // Evolução Realizados
+    if (el("cEvolucaoRealizados")) {
+      if (charts.cEvolucaoRealizados) charts.cEvolucaoRealizados.destroy();
+      const dadosRealPorMes = meses.map(m => agendados.filter(a => a.mes === m).reduce((s,d) => s+d.recepcionados, 0));
+      charts.cEvolucaoRealizados = new Chart(el("cEvolucaoRealizados").getContext("2d"), {
+        type: "line",
+        data: { labels: meses, datasets: [{ label: "Realizados", data: dadosRealPorMes, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+      });
+    }
+
+    // Especialidade Realizados
+    const espRealMap = new Map(); agendados.forEach(d => espRealMap.set(d.especialidade || "Outros", (espRealMap.get(d.especialidade || "Outros") || 0) + d.recepcionados));
+    const topEspReal = [...espRealMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
+    if (el("cEspecialidadeRealizados")) {
+      if (charts.cEspecialidadeRealizados) charts.cEspecialidadeRealizados.destroy();
+      charts.cEspecialidadeRealizados = new Chart(el("cEspecialidadeRealizados").getContext("2d"), {
+        type: "pie",
+        data: { labels: topEspReal.map(t => truncateLabel(t[0],22)), datasets: [{ data: topEspReal.map(t => t[1]), backgroundColor: ["#0d9488","#f59e0b","#3b82f6","#8b5cf6","#ec4899","#ef4444","#10b981","#6366f1"] }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { formatter: v => v.toLocaleString("pt-BR") } } }
+      });
+    }
+
+    // Top Produção Estab
+    const estabProd = new Map(); agendados.forEach(d => estabProd.set(d.estabelecimento, (estabProd.get(d.estabelecimento) || 0) + d.recepcionados));
+    const topProd = [...estabProd.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    makeBarChart("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
+
+    // Faturamento Mensal
+    if (el("cFaturamentoMensal")) {
+      if (charts.cFaturamentoMensal) charts.cFaturamentoMensal.destroy();
+      const fatPorMes = meses.map(m => financeiro.reduce((s,d) => s + (d.mensal[m] || 0), 0));
+      charts.cFaturamentoMensal = new Chart(el("cFaturamentoMensal").getContext("2d"), {
+        type: "line",
+        data: { labels: meses, datasets: [{ label: "Faturamento", data: fatPorMes, borderColor: "#0d9488", backgroundColor: "rgba(13,148,136,0.1)", fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, datalabels: { display: false } }, scales: { y: { ticks: { callback: v => formatMoneyCompact(v) } } } }
+      });
+    }
+
+    // Fat por Especialidade
+    const espFatMap = new Map(); financeiro.forEach(d => espFatMap.set(d.especialidade || "Outros", (espFatMap.get(d.especialidade || "Outros") || 0) + d.totalFiltrado));
+    const topEspFat = [...espFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
+    makeBarChart("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0d9488", { label: "Faturamento", formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { y: { ticks: { callback: v => formatMoneyCompact(v) } } } });
+
+    // Fat por Estabelecimento
+    const estabFatMap = new Map(); financeiro.forEach(d => estabFatMap.set(d.estabelecimento || "Outros", (estabFatMap.get(d.estabelecimento || "Outros") || 0) + d.totalFiltrado));
+    const topEstabFat = [...estabFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    makeBarChart("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],22)), topEstabFat.map(t => t[1]), "#f59e0b", { label: "Faturamento", horizontal: true, formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { x: { ticks: { callback: v => formatMoneyCompact(v) } } } });
+
+    // Rankings
+    makeBarChart("cRankFisicoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
+    makeBarChart("cRankFinanceiroEstab", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#f59e0b", { label: "Faturamento", horizontal: true, formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { x: { ticks: { callback: v => formatMoneyCompact(v) } } } });
+    makeBarChart("cRankEspecialidades", topEspReal.map(t => truncateLabel(t[0],25)), topEspReal.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
+    makeBarChart("cRankProcedimentos", topReal.map(t => truncateLabel(t[0],30)), topReal.map(t => t[1]), "#0d9488", { label: "Realizados", horizontal: true });
   }
-  
-  function renderGraficosFinanceiros(fin) {
-    let fatMensal = new Map();
-    fin.forEach(f => {
-      Object.entries(f.mensal).forEach(([mes, valor]) => { fatMensal.set(mes, (fatMensal.get(mes)||0)+valor); });
-    });
-    let meses = Array.from(fatMensal.keys()).sort();
-    if(charts.fatMensal) charts.fatMensal.destroy();
-    charts.fatMensal = new Chart(document.getElementById("chartFatMensal"), {
-      type: 'line',
-      data: { labels: meses, datasets: [{label:'Faturamento (R$)', data: meses.map(m=>fatMensal.get(m)), borderColor:'#10B981', backgroundColor:'rgba(16,185,129,0.1)', fill:true, tension:0.3}] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } } }, scales: { y: { ticks: { callback: v => formatMoney(v) } } } }
-    });
-    
-    let espFat = new Map();
-    fin.forEach(f => { let esp = f.especialidade || "Outros"; espFat.set(esp, (espFat.get(esp)||0)+f.valorFiltrado); });
-    let topEsp = Array.from(espFat.entries()).sort((a,b)=>b[1]-a[1]).slice(0,6);
-    if(charts.fatPie) charts.fatPie.destroy();
-    charts.fatPie = new Chart(document.getElementById("chartFatPie"), {
-      type: 'pie',
-      data: { labels: topEsp.map(e=>e[0]), datasets: [{data: topEsp.map(e=>e[1]), backgroundColor: ['#1E40AF','#10B981','#F59E0B','#3B82F6','#8B5CF6','#EC4899']}] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => `${ctx.label}: ${formatMoney(ctx.raw)}` } } } }
-    });
-    
-    if(charts.fatBar) charts.fatBar.destroy();
-    charts.fatBar = new Chart(document.getElementById("chartFatBar"), {
-      type: 'bar',
-      data: { labels: topEsp.map(e=>e[0]), datasets: [{label:'Receita (R$)', data: topEsp.map(e=>e[1]), backgroundColor:'#1E40AF', borderRadius:8}] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } } }, scales: { y: { ticks: { callback: v => formatMoney(v) } } } }
-    });
+
+  function renderTable(fila, agendados, financeiro) {
+    const tbody = el("tBody");
+    if (!tbody) return;
+    const map = new Map();
+    const addRow = (desc, grupo, subgrupo, estab) => { const key = `${desc}||${grupo}||${subgrupo}||${estab}`; if (!map.has(key)) map.set(key, { descricao: desc, grupo, subgrupo, estabelecimento: estab, fila: 0, realizados: 0, faturamento: 0 }); return map.get(key); };
+    fila.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.fila += d.fila; });
+    agendados.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.realizados += d.recepcionados; });
+    financeiro.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.faturamento += d.totalFiltrado; });
+    const rows = [...map.values()].sort((a,b) => b.faturamento - a.faturamento);
+    lastTableRows = rows;
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    tbody.innerHTML = rows.slice(0,500).map(r => `<tr><td title="${escapeHtml(r.descricao)}">${escapeHtml(truncateLabel(r.descricao,55))}</td><td>${escapeHtml(r.grupo || "-")}</td><td>${escapeHtml(r.subgrupo || "-")}</td><td>${escapeHtml(r.estabelecimento || "-")}</td><td>${r.fila.toLocaleString("pt-BR")}</td><td>${r.realizados.toLocaleString("pt-BR")}</td><td>${formatMoney(r.faturamento)}</td></tr>`).join("");
+    el("tInfo").innerText = `${rows.length.toLocaleString("pt-BR")} registros`;
+    el("tSearch").addEventListener("input", () => { const q = el("tSearch").value.toLowerCase(); document.querySelectorAll("#tBody tr").forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none"); });
   }
-  
-  function renderTabelaDetalhes(ag, fin) {
-    let map = new Map();
-    ag.forEach(a => {
-      let key = `${a.descricao}|${a.grupo}|${a.estabelecimento}`;
-      if(!map.has(key)) map.set(key, {desc:a.descricao, grupo:a.grupo, estab:a.estabelecimento, ag:0, rec:0, fatQtd:0, fin:0});
-      let obj = map.get(key);
-      obj.ag += a.agendados;
-      obj.rec += a.recepcionados;
+
+  function renderFinTable(financeiro, periodo) {
+    const wrap = el("finTableWrap");
+    if (!wrap) return;
+    if (!financeiro.length) { wrap.innerHTML = "<div style='padding:20px;text-align:center'>Nenhum dado financeiro</div>"; return; }
+    const meses = periodo ? [periodo] : allPeriodos;
+    const espMap = new Map();
+    financeiro.forEach(d => {
+      const esp = d.especialidade || "Não informado";
+      if (!espMap.has(esp)) espMap.set(esp, {});
+      meses.forEach(m => { espMap.get(esp)[m] = (espMap.get(esp)[m] || 0) + (d.mensal[m] || 0); });
     });
-    fin.forEach(f => {
-      let key = `${f.descricao}|${f.grupo}|${f.estabelecimento}`;
-      if(!map.has(key)) map.set(key, {desc:f.descricao, grupo:f.grupo, estab:f.estabelecimento, ag:0, rec:0, fatQtd:0, fin:0});
-      let obj = map.get(key);
-      obj.fin += f.valorFiltrado;
-      obj.fatQtd += 1;
+    const sortedEsp = [...espMap.entries()].sort((a,b) => {
+      const totalA = Object.values(a[1]).reduce((s,v)=>s+v,0);
+      const totalB = Object.values(b[1]).reduce((s,v)=>s+v,0);
+      return totalB - totalA;
     });
-    let rows = Array.from(map.values()).sort((a,b)=>b.fin - a.fin);
-    document.getElementById("tabelaDetalhesBody").innerHTML = rows.slice(0,200).map(r => `
-      <tr>
-        <td>${r.desc.substring(0,70)}</td>
-        <td>${r.grupo || '-'}</td>
-        <td>${r.estab || '-'}</td>
-        <td>${r.ag.toLocaleString()}</td>
-        <td>${r.rec.toLocaleString()}</td>
-        <td>${r.fatQtd.toLocaleString()}</td>
-        <td>${formatMoney(r.fin)}</td>
-      </tr>
-    `).join("");
+    const totals = {};
+    meses.forEach(m => totals[m] = 0);
+    let grandTotal = 0;
+    sortedEsp.forEach(([esp, vals]) => { meses.forEach(m => { totals[m] += vals[m] || 0; grandTotal += vals[m] || 0; }); });
+    let html = '<table class="fin-table"><thead><tr><th>Especialidade</th>' + meses.map(m => `<th>${m}</th>`).join("") + '<th>Total</th></tr></thead><tbody>';
+    sortedEsp.forEach(([esp, vals]) => {
+      const totalEsp = meses.reduce((s,m) => s + (vals[m] || 0), 0);
+      html += `<tr><td>${escapeHtml(esp)}</td>` + meses.map(m => `<td>${(vals[m] || 0) > 0 ? formatMoney(vals[m]) : "<span class='nt-value'>NT</span>"}</td>`).join("") + `<td><strong>${formatMoney(totalEsp)}</strong></td></tr>`;
+    });
+    html += `<tr class="total-row"><td><strong>TOTAL GERAL</strong></td>${meses.map(m => `<td><strong>${formatMoney(totals[m])}</strong></td>`).join("")}<td><strong>${formatMoney(grandTotal)}</strong></td></tr></tbody></table>`;
+    wrap.innerHTML = html;
   }
-  
-  // Eventos
-  document.querySelectorAll('.tab').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById(btn.dataset.tab).classList.add('active');
-      setTimeout(() => { Object.values(charts).forEach(c => c?.resize()); }, 100);
-    });
+
+  function exportExcel() {
+    if (!lastTableRows.length) { toast("Sem dados para exportar", "info"); return; }
+    const data = lastTableRows.map(r => ({ Procedimento: r.descricao, Grupo: r.grupo, Subgrupo: r.subgrupo, Estabelecimento: r.estabelecimento, "Na Fila": r.fila, Realizados: r.realizados, "Faturamento (R$)": r.faturamento }));
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.json_to_sheet(data);
+    ws["!cols"] = [{wch:55},{wch:28},{wch:32},{wch:34},{wch:14},{wch:14},{wch:20}];
+    XLSX.utils.book_append_sheet(wb, ws, "Painel Cirurgia Eletiva");
+    XLSX.writeFile(wb, `cirurgia_eletiva_${new Date().toISOString().slice(0,10)}.xlsx`);
+    toast("Excel exportado!", "success");
+  }
+
+  function switchTab(id, btn) {
+    document.querySelectorAll(".tabContent").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    el(`tab-${id}`)?.classList.add("active");
+    btn?.classList.add("active");
+    setTimeout(() => Object.values(charts).forEach(c => c?.resize?.()), 120);
+  }
+
+  window.addEventListener("DOMContentLoaded", () => {
+    loadAllData();
+    el("btnRefresh").addEventListener("click", () => { loadAllData(); });
+    el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEstabelecimentos.clear(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; el("procedimentoSearch").value = ""; el("msSearchSub").value = ""; el("msSearchEstab").value = ""; buildSubgrupoList(); buildEstabelecimentoList(); applyFilters(); toast("Filtros limpos", "info"); });
+    el("btnExcel").addEventListener("click", exportExcel);
+    el("periodoSelect").addEventListener("change", applyFilters);
+    el("procedimentoSearch").addEventListener("input", applyFilters);
+    document.addEventListener("click", () => closeAllDropdowns());
+    el("msDropdownSub")?.addEventListener("click", e => e.stopPropagation());
+    el("msDropdownEstab")?.addEventListener("click", e => e.stopPropagation());
   });
-  
-  document.getElementById("btnLimpar").addEventListener('click', () => {
-    document.getElementById("filtroGrupo").value = "";
-    document.getElementById("filtroSubgrupo").value = "";
-    document.getElementById("filtroEstab").value = "";
-    document.getElementById("filtroMes").value = "";
-    document.getElementById("filtroProc").value = "";
-    aplicarFiltros();
-  });
-  
-  document.getElementById("btnRefresh").addEventListener('click', () => carregarDados());
-  document.getElementById("filtroGrupo").addEventListener('change', aplicarFiltros);
-  document.getElementById("filtroSubgrupo").addEventListener('change', aplicarFiltros);
-  document.getElementById("filtroEstab").addEventListener('change', aplicarFiltros);
-  document.getElementById("filtroMes").addEventListener('change', aplicarFiltros);
-  document.getElementById("filtroProc").addEventListener('input', aplicarFiltros);
-  
-  carregarDados();
 </script>
 </body>
 </html>
