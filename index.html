@@ -566,8 +566,6 @@
         <label><i class="fa-solid fa-layer-group"></i> Grupo SIGTAP</label>
         <select id="grupoSelect">
           <option value="">Todos os Grupos</option>
-          <option value="03">03 - Consultas / Atendimentos / Acompanhamentos</option>
-          <option value="04">04 - Procedimentos cirúrgicos</option>
         </select>
       </div>
 
@@ -744,15 +742,23 @@
 
   <!-- ABA 2: EXECUÇÃO DA FILA DE ESPERA -->
   <section id="tab-execucao_fila" class="tabContent">
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3></div>
-        <div class="chartWrap"><canvas id="cEvolucaoFila"></canvas></div>
+    <div class="chartCard full-width">
+      <div class="chartHead">
+        <h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3>
+        <div class="chartSub">Evolução mensal da fila de espera</div>
       </div>
+      <div class="chartWrap" style="height: 450px;"><canvas id="cEvolucaoFila"></canvas></div>
+    </div>
 
+    <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-ranking-star"></i> Top Estabelecimentos com Maior Fila</h3></div>
         <div class="chartWrap"><canvas id="cRankFilaEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top Especialidades com Maior Fila</h3></div>
+        <div class="chartWrap"><canvas id="cRankFilaEspecialidade"></canvas></div>
       </div>
     </div>
   </section>
@@ -906,10 +912,20 @@
 
   const MONTHS_ORDER = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
-  // Mapeamento SIGTAP para grupos e subgrupos
+  // Mapeamento SIGTAP completo
   const GRUPOS_SIGTAP = {
     "03": "03 - Consultas / Atendimentos / Acompanhamentos",
-    "04": "04 - Procedimentos cirúrgicos"
+    "04": "04 - Procedimentos cirúrgicos",
+    "9900001026": "9900001026 - Multiplas Otorrino",
+    "9900001027": "9900001027 - Multiplas Urologia",
+    "9900001028": "9900001028 - Multiplas Ginecologia",
+    "9900001029": "9900001029 - Multiplas Cirurgia Geral",
+    "9900001030": "9900001030 - Multiplas Ortopedia",
+    "9900001052": "9900001052 - Sequenciais Otorrino",
+    "9900001053": "9900001053 - Sequenciais Urologia",
+    "9900001054": "9900001054 - Sequenciais Ginecologia",
+    "9900001055": "9900001055 - Sequenciais Cirurgia Geral",
+    "9900001056": "9900001056 - Sequenciais Ortopedia"
   };
 
   const SUBGRUPOS_SIGTAP = {
@@ -947,6 +963,22 @@
     }
   };
 
+  // Estabelecimentos que possuem dados financeiros/faturados
+  const ESTABELECIMENTOS_FINANCEIROS = new Set([
+    "HOSPITAL MUNICIPAL DE CONTAGEM",
+    "HOSPITAL SÃO JOSÉ",
+    "HOSPITAL SANTA RITA",
+    "CENTRO MATERNO INFANTIL"
+  ]);
+
+  // Especialidades que possuem dados financeiros/faturados
+  const ESPECIALIDADES_FINANCEIRAS = new Set([
+    "CIRURGIA GERAL",
+    "CIRURGIA PEDIÁTRICA",
+    "CIRURGIA PLÁSTICA",
+    "NEUROCIRURGIA"
+  ]);
+
   let dadosFila = [];
   let dadosAgendados = [];
   let dadosFaturado = [];
@@ -969,6 +1001,8 @@
   let faturadosPorEstab = new Map();
   let ofertasPorEstab = new Map();
   let faltososPorEstab = new Map();
+  let filaPorEspecialidade = new Map();
+  let filaPorEstab = new Map();
   
   let selectedSubgrupos = new Set();
   let selectedEspecialidades = new Set();
@@ -1086,7 +1120,7 @@
     }).filter(obj => Object.values(obj).some(v => normalizeText(v) !== ""));
   }
 
-  function extractMonthlyValues(row) {
+  function extractMonthlyValues(row, isFinanceiro = false) {
     const mensal = {};
     Object.keys(row).forEach(key => {
       const periodo = normalizePeriodo(key);
@@ -1097,13 +1131,14 @@
     return mensal;
   }
 
-  // Função para extrair código do grupo do texto (ex: "03 - Consultas" -> "03")
   function extractGrupoCodigo(grupoTexto) {
     const match = String(grupoTexto || "").match(/^(\d{2})/);
-    return match ? match[1] : grupoTexto;
+    if (match) return match[1];
+    if (grupoTexto && grupoTexto.includes("Multiplas")) return grupoTexto.split(" - ")[0];
+    if (grupoTexto && grupoTexto.includes("Sequenciais")) return grupoTexto.split(" - ")[0];
+    return grupoTexto;
   }
 
-  // Função para extrair código do subgrupo do texto (ex: "0301 - Consultas" -> "0301")
   function extractSubgrupoCodigo(subgrupoTexto) {
     const match = String(subgrupoTexto || "").match(/^(\d{4})/);
     return match ? match[1] : subgrupoTexto;
@@ -1119,6 +1154,7 @@
         loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
       ]);
 
+      // Processa FILA
       dadosFila = filaRaw.map(r => {
         let dataCorte = normalizePeriodo(getField(r, ["DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
         if (!dataCorte || dataCorte === "sem dados") dataCorte = "";
@@ -1128,6 +1164,7 @@
         let subgrupoCodigo = extractSubgrupoCodigo(subgrupoOriginal);
         let grupoNome = GRUPOS_SIGTAP[grupoCodigo] || grupoOriginal;
         let subgrupoNome = (SUBGRUPOS_SIGTAP[grupoCodigo]?.[subgrupoCodigo]) || subgrupoOriginal;
+        let filaValue = parseNumberBR(getField(r, ["FILA INTERNA ATUAL SUR"]));
         return {
           codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
           descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])),
@@ -1136,7 +1173,7 @@
           subgrupo: subgrupoNome,
           subgrupoCodigo: subgrupoCodigo,
           estabelecimento: normalizeText(getField(r, ["PRESTADOR", "ESTABELECIMENTO"])),
-          fila: parseNumberBR(getField(r, ["FILA INTERNA ATUAL SUR"])),
+          fila: filaValue,
           complexidade: normalizeText(getField(r, ["COMPLEXIDADE"])),
           especialidade: normalizeText(getField(r, ["ESPECIALIDADE"])),
           dataCorte
@@ -1144,8 +1181,15 @@
       }).filter(d => d.descricao);
 
       filaPorMes = {};
-      dadosFila.forEach(d => { if (d.dataCorte) filaPorMes[d.dataCorte] = (filaPorMes[d.dataCorte] || 0) + d.fila; });
+      filaPorEspecialidade.clear();
+      filaPorEstab.clear();
+      dadosFila.forEach(d => { 
+        if (d.dataCorte) filaPorMes[d.dataCorte] = (filaPorMes[d.dataCorte] || 0) + d.fila;
+        if (d.especialidade) filaPorEspecialidade.set(d.especialidade, (filaPorEspecialidade.get(d.especialidade) || 0) + d.fila);
+        if (d.estabelecimento) filaPorEstab.set(d.estabelecimento, (filaPorEstab.get(d.estabelecimento) || 0) + d.fila);
+      });
 
+      // Processa AGENDADOS
       dadosAgendados = agendadosRaw.map(r => {
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
         let subgrupoOriginal = normalizeText(getField(r, ["SUBGRUPO"]));
@@ -1198,8 +1242,10 @@
         if (d.especialidade) especialidadesSet.add(d.especialidade);
         if (d.grupoCodigo) gruposSet.add(d.grupoCodigo);
         if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo);
+        if (d.mes) allPeriodos.push(d.mes);
       });
 
+      // Processa FATURADO
       dadosFaturado = faturadoRaw.map(r => {
         const mensal = extractMonthlyValues(r);
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
@@ -1208,6 +1254,13 @@
         let subgrupoCodigo = extractSubgrupoCodigo(subgrupoOriginal);
         let grupoNome = GRUPOS_SIGTAP[grupoCodigo] || grupoOriginal;
         let subgrupoNome = (SUBGRUPOS_SIGTAP[grupoCodigo]?.[subgrupoCodigo]) || subgrupoOriginal;
+        let estabelecimento = normalizeText(getField(r, ["ESTABELECIMENTO", "PRESTADOR"]));
+        let especialidade = normalizeText(getField(r, ["ESPECIALIDADE", "Especialidade Descrição"]));
+        
+        // Filtra apenas estabelecimentos e especialidades que possuem dados
+        if (estabelecimento && !ESTABELECIMENTOS_FINANCEIROS.has(estabelecimento.toUpperCase())) return null;
+        if (especialidade && !ESPECIALIDADES_FINANCEIRAS.has(especialidade.toUpperCase())) return null;
+        
         return {
           codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
           descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO", "Procedimento Descrição"])),
@@ -1215,14 +1268,20 @@
           grupoCodigo: grupoCodigo,
           subgrupo: subgrupoNome,
           subgrupoCodigo: subgrupoCodigo,
-          estabelecimento: normalizeText(getField(r, ["ESTABELECIMENTO", "PRESTADOR"])),
-          especialidade: normalizeText(getField(r, ["ESPECIALIDADE", "Especialidade Descrição"])),
+          estabelecimento: estabelecimento,
+          especialidade: especialidade,
           mensal,
           total: Object.values(mensal).reduce((s,v) => s+v, 0)
         };
-      }).filter(d => d.descricao);
+      }).filter(d => d && d.descricao);
       
-      dadosFaturado.forEach(d => { if (d.especialidade) especialidadesSet.add(d.especialidade); if (d.grupoCodigo) gruposSet.add(d.grupoCodigo); if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo); });
+      dadosFaturado.forEach(d => { 
+        if (d.especialidade) especialidadesSet.add(d.especialidade); 
+        if (d.grupoCodigo) gruposSet.add(d.grupoCodigo); 
+        if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo);
+        if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento);
+        Object.keys(d.mensal).forEach(m => allPeriodos.push(m));
+      });
 
       faturadosPorMes = {};
       faturadosQtdPorMes = {};
@@ -1237,14 +1296,22 @@
         }
       });
 
+      // Processa FINANCEIRO
       dadosFinanceiro = financeiroRaw.map(r => {
-        const mensal = extractMonthlyValues(r);
+        const mensal = extractMonthlyValues(r, true);
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
         let subgrupoOriginal = normalizeText(getField(r, ["SUBGRUPO"]));
         let grupoCodigo = extractGrupoCodigo(grupoOriginal);
         let subgrupoCodigo = extractSubgrupoCodigo(subgrupoOriginal);
         let grupoNome = GRUPOS_SIGTAP[grupoCodigo] || grupoOriginal;
         let subgrupoNome = (SUBGRUPOS_SIGTAP[grupoCodigo]?.[subgrupoCodigo]) || subgrupoOriginal;
+        let estabelecimento = normalizeText(getField(r, ["ESTABELECIMENTO"]));
+        let especialidade = normalizeText(getField(r, ["ESPECIALIDADE"]));
+        
+        // Filtra apenas estabelecimentos e especialidades que possuem dados
+        if (estabelecimento && !ESTABELECIMENTOS_FINANCEIROS.has(estabelecimento.toUpperCase())) return null;
+        if (especialidade && !ESPECIALIDADES_FINANCEIRAS.has(especialidade.toUpperCase())) return null;
+        
         return {
           codigo: normalizeText(getField(r, ["CÓDIGO PROCEDIMENTO"])),
           descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])),
@@ -1252,20 +1319,22 @@
           grupoCodigo: grupoCodigo,
           subgrupo: subgrupoNome,
           subgrupoCodigo: subgrupoCodigo,
-          estabelecimento: normalizeText(getField(r, ["ESTABELECIMENTO"])),
-          especialidade: normalizeText(getField(r, ["ESPECIALIDADE"])),
+          estabelecimento: estabelecimento,
+          especialidade: especialidade,
           mensal,
           total: Object.values(mensal).reduce((s,v) => s+v, 0)
         };
-      }).filter(d => d.descricao);
+      }).filter(d => d && d.descricao);
       
-      dadosFinanceiro.forEach(d => { if (d.especialidade) especialidadesSet.add(d.especialidade); if (d.grupoCodigo) gruposSet.add(d.grupoCodigo); if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo); });
+      dadosFinanceiro.forEach(d => { 
+        if (d.especialidade) especialidadesSet.add(d.especialidade); 
+        if (d.grupoCodigo) gruposSet.add(d.grupoCodigo); 
+        if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo);
+        if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento);
+        Object.keys(d.mensal).forEach(m => allPeriodos.push(m));
+      });
 
-      dadosFila.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.especialidade) especialidadesSet.add(d.especialidade); });
-      dadosAgendados.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.mes) allPeriodos.push(d.mes); });
-      dadosFaturado.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); });
-      dadosFinanceiro.forEach(d => { if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); });
-
+      // Coleta todos os períodos
       allPeriodos = sortPeriodos(allPeriodos);
       
       const tableMonthFilter = el("tableMonthFilter");
@@ -1489,7 +1558,7 @@
     let barPercentage = 0.7;
     let categoryPercentage = 0.8;
     
-    if (id === "cRankFilaEstab" || id === "cFaturadosPorEstab") {
+    if (id === "cRankFilaEstab" || id === "cRankFilaEspecialidade" || id === "cFaturadosPorEstab") {
       barPercentage = 0.8;
       categoryPercentage = 0.85;
     }
@@ -1720,9 +1789,13 @@
       });
     }
 
-    const estabFila = new Map(); fila.forEach(d => estabFila.set(d.estabelecimento, (estabFila.get(d.estabelecimento) || 0) + d.fila));
-    const topEstabFila = [...estabFila.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    // Top Estabelecimentos com Maior Fila
+    const topEstabFila = [...filaPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
     makeBarChartWithValueInside("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", "Fila");
+
+    // Top Especialidades com Maior Fila
+    const topEspFila = [...filaPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    makeBarChartWithValueInside("cRankFilaEspecialidade", topEspFila.map(t => truncateLabel(t[0],25)), topEspFila.map(t => t[1]), "#5A9EFF", "Fila");
 
     if (el("cEvolucaoRealizados")) {
       if (charts.cEvolucaoRealizados) charts.cEvolucaoRealizados.destroy();
@@ -1827,18 +1900,18 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '器<td colspan="8">Nenhum dado</td>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
-      <tr>
-        <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
-        <td>${escapeHtml(r.grupo || "-")}</td>
-        <td>${escapeHtml(r.subgrupo || "-")}</td>
-        <td>${escapeHtml(r.estabelecimento || "-")}</td>
-        <td>${escapeHtml(r.mes || "-")}</td>
-        <td>${r.realizados.toLocaleString("pt-BR")}</td>
-        <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
-        <td>${formatMoney(r.financeiroValor)}</td>
-      </tr>
+        <tr>
+          <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
+          <td>${escapeHtml(r.grupo || "-")}</td>
+          <td>${escapeHtml(r.subgrupo || "-")}</td>
+          <td>${escapeHtml(r.estabelecimento || "-")}</td>
+          <td>${escapeHtml(r.mes || "-")}</td>
+          <td>${r.realizados.toLocaleString("pt-BR")}</td>
+          <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
+          <td>${formatMoney(r.financeiroValor)}</td>
+        </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
     const searchInput = el("tSearch");
