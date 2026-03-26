@@ -21,6 +21,7 @@
       --accent-light: #CD7A4A;
       --blue-light: #5A9EFF;
       --blue-medium: #3B82F6;
+      --blue-dark: #1e3a5f;
       --red-light: #F87171;
       --red-medium: #EF4444;
       --success: #0B5E42;
@@ -234,11 +235,11 @@
 
     .kpis {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 20px;
       margin-top: 20px;
     }
-    @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 1100px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
     @media (max-width: 700px) { .kpis { grid-template-columns: 1fr; } }
     
     .kpi {
@@ -268,6 +269,7 @@
     .kpi-fila .kpiIcon { background: rgba(11,94,66,0.12); color: var(--success); }
     .kpi-real .kpiIcon { background: rgba(11,94,66,0.12); color: var(--success); }
     .kpi-fat .kpiIcon { background: rgba(11,94,66,0.12); color: var(--success); }
+    .kpi-faturados-qtd .kpiIcon { background: rgba(90,158,255,0.12); color: var(--blue-light); }
     .kpi-falt .kpiIcon { background: rgba(248,113,113,0.12); color: var(--danger); }
 
     .tabs {
@@ -324,7 +326,7 @@
     }
     .chartHead h3 { font-size: 15px; font-weight: 800; color: var(--text); }
     .chartSub { font-size: 12px; color: var(--muted); font-weight: 600; }
-    .chartWrap { position: relative; height: 380px; }
+    .chartWrap { position: relative; height: 420px; }
     .row2eq { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     .full-width { grid-template-columns: 1fr; }
     @media (max-width: 900px) { .row2eq { grid-template-columns: 1fr; } }
@@ -403,6 +405,8 @@
       flex-wrap: wrap;
       gap: 12px;
       margin-bottom: 16px;
+      background: white;
+      padding: 10px 0;
     }
     .search {
       display: flex;
@@ -420,6 +424,12 @@
       font-weight: 500;
       min-width: 220px;
     }
+    
+    .table-container {
+      overflow-x: auto;
+      max-height: 500px;
+      position: relative;
+    }
     .data-table {
       width: 100%;
       border-collapse: collapse;
@@ -435,6 +445,9 @@
       text-transform: uppercase;
       cursor: pointer;
       user-select: none;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .data-table th:hover { background: linear-gradient(135deg, #0B5E42, #0B3B2F); }
     .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 500; }
@@ -496,6 +509,24 @@
       border: 1px solid var(--border);
       font-weight: 500;
       min-width: 250px;
+    }
+    
+    .month-filter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f9fafb;
+      padding: 8px 16px;
+      border-radius: 40px;
+      border: 1px solid var(--border);
+    }
+    .month-filter select {
+      border: none;
+      background: transparent;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 6px 12px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -610,15 +641,6 @@
       </div>
     </div>
 
-    <div class="kpi kpi-fat">
-      <div class="kpiIcon"><i class="fa-solid fa-file-invoice"></i></div>
-      <div>
-        <div class="label">Faturados</div>
-        <div class="val" id="kFaturados">0</div>
-        <div class="sub">Procedimentos faturados</div>
-      </div>
-    </div>
-
     <div class="kpi kpi-falt">
       <div class="kpiIcon"><i class="fa-solid fa-user-slash"></i></div>
       <div>
@@ -627,12 +649,30 @@
         <div class="sub">Ofertas que não compareceram</div>
       </div>
     </div>
+
+    <div class="kpi kpi-faturados-qtd">
+      <div class="kpiIcon"><i class="fa-solid fa-file-invoice"></i></div>
+      <div>
+        <div class="label">Faturados (Qtd)</div>
+        <div class="val" id="kFaturadosQtd">0</div>
+        <div class="sub">Procedimentos faturados</div>
+      </div>
+    </div>
+
+    <div class="kpi kpi-fat">
+      <div class="kpiIcon"><i class="fa-solid fa-coins"></i></div>
+      <div>
+        <div class="label">Financeiro (R$)</div>
+        <div class="val" id="kFinanceiro">R$ 0</div>
+        <div class="sub">Valor total faturado</div>
+      </div>
+    </div>
   </div>
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('visao_geral', this)"><i class="fa-solid fa-chart-pie"></i> Visão Geral</button>
     <button class="tab" onclick="switchTab('execucao_fila', this)"><i class="fa-solid fa-hourglass-half"></i> Execução da Fila de Espera</button>
-    <button class="tab" onclick="switchTab('execucao_agendamentos', this)"><i class="fa-solid fa-table-list"></i> Execução/Ofertas</button>
+    <button class="tab" onclick="switchTab('execucao_agendamentos', this)"><i class="fa-solid fa-table-list"></i> Execução/Cirurgias Realizadas</button>
     <button class="tab" onclick="switchTab('execucao_estabelecimento', this)"><i class="fa-solid fa-building"></i> Execução por Estabelecimento</button>
     <button class="tab" onclick="switchTab('evolucao_financeira', this)"><i class="fa-solid fa-coins"></i> Evolução Financeira</button>
     <button class="tab" onclick="switchTab('dados_detalhados', this)"><i class="fa-solid fa-database"></i> Dados Detalhados</button>
@@ -668,7 +708,7 @@
 
     <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top Especialidades (Realizados vs Faturados)</h3></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top Especialidades (Realizados vs Faturados Qtd)</h3></div>
         <div class="chartWrap"><canvas id="cTopEspComp"></canvas></div>
       </div>
 
@@ -694,7 +734,7 @@
     </div>
   </section>
 
-  <!-- ABA 3: EXECUÇÃO/Ofertas -->
+  <!-- ABA 3: EXECUÇÃO/Cirurgias Realizadas -->
   <section id="tab-execucao_agendamentos" class="tabContent">
     <div class="chartCard">
       <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas</h3></div>
@@ -708,7 +748,7 @@
       </div>
 
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Top Estabelecimentos por Produção</h3></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Top Estabelecimentos por Cirurgias Realizadas (Físico)</h3></div>
         <div class="chartWrap"><canvas id="cRankProducaoEstab"></canvas></div>
       </div>
     </div>
@@ -737,7 +777,7 @@
       </div>
 
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faturados por Estabelecimento</h3></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Financeiro por Estabelecimento</h3></div>
         <div class="chartWrap"><canvas id="cFaturadosPorEstab"></canvas></div>
       </div>
     </div>
@@ -760,31 +800,31 @@
     <div class="fin-header">
       <div class="fin-header-icon"><i class="fa-solid fa-chart-line"></i></div>
       <div>
-        <h3 style="margin:0">Faturamento Mensal Acumulado</h3>
+        <h3 style="margin:0">Financeiro Mensal Acumulado</h3>
         <div style="font-size:12px;opacity:0.8">Evolução financeira do período</div>
       </div>
     </div>
 
     <div class="chartCard">
-      <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Faturamento por Competência</h3></div>
+      <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Financeiro por Competência</h3></div>
       <div class="chartWrap"><canvas id="cFaturamentoMensal"></canvas></div>
     </div>
 
     <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faturamento por Especialidade</h3></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Financeiro por Especialidade</h3></div>
         <div class="chartWrap"><canvas id="cFatEspecialidade"></canvas></div>
       </div>
 
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Faturamento por Estabelecimento</h3></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Financeiro por Estabelecimento</h3></div>
         <div class="chartWrap"><canvas id="cFatEstabelecimento"></canvas></div>
       </div>
     </div>
 
     <div class="chartCard">
       <div class="chartHead">
-        <h3><i class="fa-solid fa-table"></i> Tabela Financeira — Faturamento por Especialidade × Competência</h3>
+        <h3><i class="fa-solid fa-table"></i> Tabela Financeira — Financeiro por Especialidade × Competência</h3>
         <div class="chartSub">Valores em Reais (R$) | NT = Não Transferido</div>
       </div>
       <div class="fin-table-wrap" id="finTableWrap">
@@ -798,13 +838,19 @@
     <div class="card section">
       <div class="tableTop">
         <div class="sectionTitle"><i class="fa-solid fa-table"></i> Dados Consolidados</div>
+        <div class="month-filter">
+          <i class="fa-solid fa-calendar"></i>
+          <select id="tableMonthFilter">
+            <option value="">Todos os meses</option>
+          </select>
+        </div>
         <div class="search">
           <i class="fa-solid fa-search"></i>
           <input id="tSearch" placeholder="Buscar procedimento, estabelecimento...">
         </div>
         <div class="muted" id="tInfo">—</div>
       </div>
-      <div style="overflow-x:auto;max-height:500px;">
+      <div class="table-container">
         <table class="data-table" id="tabelaPrincipal">
           <thead>
             <tr>
@@ -851,6 +897,7 @@
   let ofertasPorMes = {};
   let faltososPorMes = {};
   let faturadosPorMes = {};
+  let faturadosQtdPorMes = {};
   
   let realizadosPorEstab = new Map();
   let faturadosPorEstab = new Map();
@@ -863,6 +910,7 @@
   let lastTableRows = [];
   let currentSortColumn = 0;
   let currentSortDirection = 'asc';
+  let currentTableMonthFilter = '';
 
   function toast(msg, type = "info") {
     const box = el("toastBox");
@@ -987,7 +1035,7 @@
     try {
       const [filaRaw, agendadosRaw, faturadoRaw, financeiroRaw] = await Promise.all([
         loadCSVSmart(URL_FILA, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "GRUPO", "SUBGRUPO"]),
-        loadCSVSmart(URL_AGENDADOS, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "MÊS", "REC", "OFERTA"]),
+        loadCSVSmart(URL_AGENDADOS, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "MÊS", "REC", "FAL", "OFERTA"]),
         loadCSVSmart(URL_FATURADO, ["Procedimento Descrição", "CÓDIGO DO PROCEDIMENTO", "ESTABELECIMENTO"]),
         loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
       ]);
@@ -1024,6 +1072,13 @@
         recepcionados: parseNumberBR(getField(r, ["REC"])),
         oferta: parseNumberBR(getField(r, ["OFERTA"]))
       })).filter(d => d.descricao);
+      
+      dadosAgendados.forEach(d => {
+        const ofertaCalculada = d.recepcionados + d.faltosos;
+        if (d.oferta !== ofertaCalculada && (d.recepcionados > 0 || d.faltosos > 0)) {
+          d.oferta = ofertaCalculada;
+        }
+      });
 
       realizadosPorMes = {};
       ofertasPorMes = {};
@@ -1060,10 +1115,12 @@
       }).filter(d => d.descricao);
 
       faturadosPorMes = {};
+      faturadosQtdPorMes = {};
       faturadosPorEstab.clear();
       dadosFaturado.forEach(d => {
         Object.entries(d.mensal).forEach(([mes, qtd]) => {
           faturadosPorMes[mes] = (faturadosPorMes[mes] || 0) + qtd;
+          faturadosQtdPorMes[mes] = (faturadosQtdPorMes[mes] || 0) + qtd;
         });
         if (d.estabelecimento) {
           faturadosPorEstab.set(d.estabelecimento, (faturadosPorEstab.get(d.estabelecimento) || 0) + d.total);
@@ -1091,7 +1148,15 @@
 
       allPeriodos = sortPeriodos(allPeriodos);
       
-      // Popular select de estabelecimentos para a aba de execução por estabelecimento
+      const tableMonthFilter = el("tableMonthFilter");
+      if (tableMonthFilter) {
+        tableMonthFilter.innerHTML = '<option value="">Todos os meses</option>' + allPeriodos.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
+        tableMonthFilter.addEventListener("change", () => {
+          currentTableMonthFilter = tableMonthFilter.value;
+          renderTable();
+        });
+      }
+      
       const estabSelect = el("estabSelecionado");
       if (estabSelect) {
         const estabList = [...estabelecimentosSet].sort();
@@ -1138,7 +1203,7 @@
         options: { 
           responsive: true, maintainAspectRatio: false, 
           plugins: { 
-            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 10 }, align: "top", offset: 4 },
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 4 },
             tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
             legend: { labels: { font: { weight: "bold" } } }
           },
@@ -1213,61 +1278,109 @@
     const totalFila = filteredFila.reduce((s, d) => s + d.fila, 0);
     const totalRealizados = filteredAgendados.reduce((s, d) => s + d.recepcionados, 0);
     const totalFaturadosQtd = filteredFaturado.reduce((s, d) => s + (periodo ? (d.mensal[periodo] || 0) : d.total), 0);
+    const totalFinanceiro = filteredFinanceiro.reduce((s, d) => s + (periodo ? (d.mensal[periodo] || 0) : d.total), 0);
     const totalFaltosos = filteredAgendados.reduce((s, d) => s + d.faltosos, 0);
 
     el("kFila").innerText = totalFila.toLocaleString("pt-BR");
     el("kRealizados").innerText = totalRealizados.toLocaleString("pt-BR");
-    el("kFaturados").innerText = totalFaturadosQtd.toLocaleString("pt-BR");
     el("kFaltosos").innerText = totalFaltosos.toLocaleString("pt-BR");
+    el("kFaturadosQtd").innerText = totalFaturadosQtd.toLocaleString("pt-BR");
+    el("kFinanceiro").innerText = formatMoney(totalFinanceiro);
 
     renderAllCharts(filteredFila, filteredAgendados, filteredFaturado, filteredFinanceiro, periodo);
-    renderTable(filteredAgendados, filteredFaturado, filteredFinanceiro, periodo);
+    renderTable();
     renderFinTable(filteredFinanceiro, periodo);
     renderGraficosPorEstabelecimento();
   }
 
   function renderGraficosPorEstabelecimento() {
-    // Realizados por Estabelecimento
     const topRealizados = [...realizadosPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChart("cRealizadosPorEstab", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", { label: "Realizados", horizontal: true });
+    makeBarChartWithValueInside("cRealizadosPorEstab", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", "Realizados");
     
-    // Faturados por Estabelecimento
-    const topFaturados = [...faturadosPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChart("cFaturadosPorEstab", topFaturados.map(t => truncateLabel(t[0],25)), topFaturados.map(t => t[1]), "#5A9EFF", { label: "Faturados", horizontal: true });
+    const topFinanceiro = [...faturadosPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cFaturadosPorEstab", topFinanceiro.map(t => truncateLabel(t[0],25)), topFinanceiro.map(t => t[1]), "#1e3a5f", "Financeiro", true);
     
-    // Ofertas por Estabelecimento
     const topOfertas = [...ofertasPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChart("cOfertasPorEstab", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", { label: "Ofertas", horizontal: true });
+    makeBarChartWithValueInside("cOfertasPorEstab", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", "Ofertas");
     
-    // Faltosos por Estabelecimento
     const topFaltosos = [...faltososPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChart("cFaltososPorEstab", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", { label: "Faltosos", horizontal: true });
+    makeBarChartWithValueInside("cFaltososPorEstab", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
   }
 
-  function makeBarChart(id, labels, values, color, opts = {}) {
+  function makeBarChartWithValueInside(id, labels, values, color, label, isMoney = false) {
     if (!el(id)) return;
     if (charts[id]) charts[id].destroy();
+    
+    const barPercentage = (id === "cRankFilaEstab" || id === "cFaturadosPorEstab") ? 0.8 : 0.7;
+    const categoryPercentage = (id === "cRankFilaEstab" || id === "cFaturadosPorEstab") ? 0.85 : 0.8;
+    
     charts[id] = new Chart(el(id).getContext("2d"), {
       type: "bar",
-      data: { labels, datasets: [{ label: opts.label || "", data: values, backgroundColor: color, borderRadius: 8 }] },
+      data: { labels, datasets: [{ label: label, data: values, backgroundColor: color, borderRadius: 12, barPercentage: barPercentage, categoryPercentage: categoryPercentage }] },
       options: {
         responsive: true, maintainAspectRatio: false,
-        indexAxis: opts.horizontal ? "y" : "x",
+        indexAxis: "y",
+        layout: { padding: { left: 10, right: 10 } },
         plugins: {
-          legend: { display: !!opts.showLegend, labels: { font: { weight: "bold" } } },
-          tooltip: opts.tooltip || {},
+          legend: { display: true, labels: { font: { weight: "bold", size: 12 } }, position: "top" },
+          tooltip: { callbacks: { label: ctx => isMoney ? formatMoney(ctx.raw) : ctx.raw.toLocaleString("pt-BR") } },
           datalabels: { 
-            color: opts.dataLabelColor || "#1F2937", 
-            font: { weight: "bold", size: 11 },
-            anchor: opts.horizontal ? "end" : "end", 
-            align: opts.horizontal ? "right" : "top", 
-            formatter: opts.formatter || (v => v.toLocaleString("pt-BR")) 
+            color: "#ffffff", 
+            font: { weight: "bold", size: 14 },
+            anchor: "center",
+            align: "center",
+            formatter: (v) => isMoney ? formatMoney(v) : v.toLocaleString("pt-BR")
           }
         },
-        scales: opts.scales || { 
-          x: { grid: { display: false }, ticks: { font: { weight: "bold" } } },
-          y: { grid: { display: false }, ticks: { font: { weight: "bold" } } }
+        scales: { 
+          x: { 
+            grid: { display: false }, 
+            ticks: { 
+              font: { weight: "bold", size: 11 },
+              callback: (v) => isMoney ? formatMoneyCompact(v) : v.toLocaleString("pt-BR")
+            } 
+          }, 
+          y: { grid: { display: false }, ticks: { font: { weight: "bold", size: 11 } } }
         }
+      }
+    });
+  }
+
+  function makeDoughnutChartWithPercentages(id, labels, values, colors) {
+    if (!el(id)) return;
+    if (charts[id]) charts[id].destroy();
+    const total = values.reduce((a,b) => a+b, 0);
+    charts[id] = new Chart(el(id).getContext("2d"), {
+      type: "doughnut",
+      data: { labels: labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+      options: { 
+        responsive: true, maintainAspectRatio: false,
+        cutout: "60%",
+        plugins: { 
+          datalabels: { 
+            color: "#fff", 
+            font: { weight: "bold", size: 14 },
+            formatter: (value) => {
+              const percent = ((value / total) * 100).toFixed(1);
+              return percent > 5 ? `${percent}%` : "";
+            }
+          },
+          legend: { 
+            labels: { 
+              font: { weight: "bold", size: 11 }, 
+              generateLabels: (chart) => {
+                const data = chart.data;
+                return data.labels.map((label, i) => ({
+                  text: `${label}: ${data.datasets[0].data[i].toLocaleString("pt-BR")} (${((data.datasets[0].data[i] / total) * 100).toFixed(1)}%)`,
+                  fillStyle: data.datasets[0].backgroundColor[i],
+                  hidden: false,
+                  index: i
+                }));
+              }
+            }, 
+            position: "bottom" 
+          } 
+        } 
       }
     });
   }
@@ -1279,7 +1392,6 @@
     const totalFaltosos = agendados.reduce((s,d) => s+d.faltosos, 0);
     const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
-    // Evolução com 4 linhas
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
       const dadosFilaPorMes = meses.map(m => filaPorMes[m] || 0);
@@ -1316,60 +1428,20 @@
       });
     }
 
-    // Funil com Faltosos
     if (el("cFunil")) {
-      if (charts.cFunil) charts.cFunil.destroy();
-      charts.cFunil = new Chart(el("cFunil").getContext("2d"), {
-        type: "doughnut",
-        data: { labels: ["Fila", "Ofertas", "Realizados", "Faltosos"], datasets: [{ data: [totalFila, totalOferta, totalRealizados, totalFaltosos], backgroundColor: ["#F87171", "#5A9EFF", "#0B5E42", "#F59E0B"], borderWidth: 0 }] },
-        options: { 
-          responsive: true, maintainAspectRatio: false, 
-          plugins: { 
-            datalabels: { color: "#fff", font: { weight: "bold", size: 12 }, formatter: v => v.toLocaleString("pt-BR") },
-            legend: { labels: { font: { weight: "bold" } }, position: "bottom" }
-          } 
-        }
-      });
+      makeDoughnutChartWithPercentages("cFunil", ["Fila", "Ofertas", "Realizados", "Faltosos"], 
+        [totalFila, totalOferta, totalRealizados, totalFaltosos], 
+        ["#F87171", "#5A9EFF", "#0B5E42", "#F59E0B"]);
     }
 
-    // Complexidade
     if (el("cComplexidadeFila")) {
-      if (charts.cComplexidadeFila) charts.cComplexidadeFila.destroy();
       const compMap = new Map(); fila.forEach(d => compMap.set(d.complexidade || "Não informado", (compMap.get(d.complexidade || "Não informado") || 0) + d.fila));
       const labels = [...compMap.keys()];
       const values = [...compMap.values()];
-      const total = values.reduce((a,b) => a+b, 0);
-      charts.cComplexidadeFila = new Chart(el("cComplexidadeFila").getContext("2d"), {
-        type: "doughnut",
-        data: { labels: labels, datasets: [{ data: values, backgroundColor: ["#5A9EFF", "#F87171", "#0B5E42", "#F59E0B"], borderWidth: 0 }] },
-        options: { 
-          responsive: true, maintainAspectRatio: false,
-          cutout: "60%",
-          plugins: { 
-            datalabels: { 
-              color: "#fff", 
-              font: { weight: "bold", size: 13 },
-              formatter: (value) => `${((value / total) * 100).toFixed(1)}%`
-            },
-            legend: { 
-              labels: { font: { weight: "bold" } }, 
-              position: "bottom",
-              generateLabels: (chart) => {
-                const data = chart.data;
-                return data.labels.map((label, i) => ({
-                  text: `${label}: ${data.datasets[0].data[i].toLocaleString("pt-BR")}`,
-                  fillStyle: data.datasets[0].backgroundColor[i],
-                  hidden: false,
-                  index: i
-                }));
-              }
-            }
-          } 
-        }
-      });
+      const colors = ["#5A9EFF", "#F87171", "#0B5E42", "#F59E0B", "#8B5CF6", "#EC4899"];
+      makeDoughnutChartWithPercentages("cComplexidadeFila", labels, values, colors.slice(0, labels.length));
     }
 
-    // Top Especialidades (Realizados vs Faturados Qtd)
     if (el("cTopEspComp")) {
       if (charts.cTopEspComp) charts.cTopEspComp.destroy();
       const espReal = new Map(); agendados.forEach(d => espReal.set(d.especialidade || "Outros", (espReal.get(d.especialidade || "Outros") || 0) + d.recepcionados));
@@ -1384,27 +1456,34 @@
         data: { 
           labels: topEsp.map(t => truncateLabel(t[0], 25)), 
           datasets: [
-            { label: "Realizados", data: topEsp.map(t => t[1]), backgroundColor: "#0B5E42", borderRadius: 8 },
-            { label: "Faturados (Qtd)", data: topEsp.map(t => espFatQtd.get(t[0]) || 0), backgroundColor: "#5A9EFF", borderRadius: 8 }
+            { label: "Realizados", data: topEsp.map(t => t[1]), backgroundColor: "#0B5E42", borderRadius: 12, barPercentage: 0.7, categoryPercentage: 0.8 },
+            { label: "Faturados (Qtd)", data: topEsp.map(t => espFatQtd.get(t[0]) || 0), backgroundColor: "#5A9EFF", borderRadius: 12, barPercentage: 0.7, categoryPercentage: 0.8 }
           ] 
         },
         options: { 
           indexAxis: "y",
-          responsive: true, maintainAspectRatio: false, 
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { left: 10, right: 10 } },
           plugins: { 
-            datalabels: { display: false },
-            legend: { labels: { font: { weight: "bold" } }, position: "top" },
+            datalabels: { 
+              display: true,
+              color: "#ffffff",
+              font: { weight: "bold", size: 14 },
+              anchor: "center",
+              align: "center",
+              formatter: (value) => value.toLocaleString("pt-BR")
+            },
+            legend: { labels: { font: { weight: "bold", size: 12 } }, position: "top" },
             tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } }
           },
           scales: { 
-            x: { grid: { display: false }, ticks: { font: { weight: "bold" } }, title: { display: true, text: "Quantidade", font: { weight: "bold" } } },
-            y: { grid: { display: false }, ticks: { font: { weight: "bold" } } }
+            x: { grid: { display: false }, ticks: { font: { weight: "bold", size: 11 } }, title: { display: true, text: "Quantidade", font: { weight: "bold" } } },
+            y: { grid: { display: false }, ticks: { font: { weight: "bold", size: 11 } } }
           }
         }
       });
     }
 
-    // Receita Financeira por Especialidade com valor dentro da barra
     if (el("cFatEspecialidadeHorizontal")) {
       if (charts.cFatEspecialidadeHorizontal) charts.cFatEspecialidadeHorizontal.destroy();
       const espFat = new Map(); financeiro.forEach(d => {
@@ -1415,30 +1494,30 @@
       const topEspFat = [...espFat.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
       charts.cFatEspecialidadeHorizontal = new Chart(el("cFatEspecialidadeHorizontal").getContext("2d"), {
         type: "bar",
-        data: { labels: topEspFat.map(t => truncateLabel(t[0], 25)), datasets: [{ label: "Receita Financeira (R$)", data: topEspFat.map(t => t[1]), backgroundColor: "#F87171", borderRadius: 8 }] },
+        data: { labels: topEspFat.map(t => truncateLabel(t[0], 25)), datasets: [{ label: "Receita Financeira (R$)", data: topEspFat.map(t => t[1]), backgroundColor: "#F87171", borderRadius: 12, barPercentage: 0.7, categoryPercentage: 0.8 }] },
         options: { 
           indexAxis: "y",
-          responsive: true, maintainAspectRatio: false, 
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { left: 10, right: 10 } },
           plugins: { 
             datalabels: { 
               formatter: v => formatMoney(v), 
-              font: { weight: "bold", size: 12 }, 
+              font: { weight: "bold", size: 14 }, 
               color: "#fff",
               anchor: "center",
               align: "center"
             },
-            legend: { labels: { font: { weight: "bold" } }, position: "top" },
+            legend: { labels: { font: { weight: "bold", size: 12 } }, position: "top" },
             tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }
           },
           scales: { 
-            x: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } }, title: { display: true, text: "Valor (R$)", font: { weight: "bold" } } },
-            y: { grid: { display: false }, ticks: { font: { weight: "bold" } } }
+            x: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold", size: 11 } }, title: { display: true, text: "Valor (R$)", font: { weight: "bold" } } },
+            y: { grid: { display: false }, ticks: { font: { weight: "bold", size: 11 } } }
           }
         }
       });
     }
 
-    // Evolução Fila
     if (el("cEvolucaoFila")) {
       if (charts.cEvolucaoFila) charts.cEvolucaoFila.destroy();
       const mesesFila = Object.keys(filaPorMes).sort((a,b) => periodoSortValue(a)-periodoSortValue(b));
@@ -1448,7 +1527,7 @@
         options: { 
           responsive: true, maintainAspectRatio: false, 
           plugins: { 
-            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold" }, align: "top", offset: 6 },
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 6 },
             legend: { labels: { font: { weight: "bold" } } }
           },
           scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
@@ -1456,12 +1535,10 @@
       });
     }
 
-    // Top Estab Fila
     const estabFila = new Map(); fila.forEach(d => estabFila.set(d.estabelecimento, (estabFila.get(d.estabelecimento) || 0) + d.fila));
     const topEstabFila = [...estabFila.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", { label: "Fila", horizontal: true });
+    makeBarChartWithValueInside("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", "Fila");
 
-    // Evolução Realizados
     if (el("cEvolucaoRealizados")) {
       if (charts.cEvolucaoRealizados) charts.cEvolucaoRealizados.destroy();
       const dadosRealPorMes = meses.map(m => realizadosPorMes[m] || 0);
@@ -1471,7 +1548,7 @@
         options: { 
           responsive: true, maintainAspectRatio: false, 
           plugins: { 
-            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold" }, align: "top", offset: 8 },
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 8 },
             legend: { labels: { font: { weight: "bold" } } }
           },
           scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
@@ -1479,41 +1556,30 @@
       });
     }
 
-    // Especialidade Realizados
     const espRealMap = new Map(); agendados.forEach(d => espRealMap.set(d.especialidade || "Outros", (espRealMap.get(d.especialidade || "Outros") || 0) + d.recepcionados));
     const topEspReal = [...espRealMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
     if (el("cEspecialidadeRealizados")) {
-      if (charts.cEspecialidadeRealizados) charts.cEspecialidadeRealizados.destroy();
-      charts.cEspecialidadeRealizados = new Chart(el("cEspecialidadeRealizados").getContext("2d"), {
-        type: "pie",
-        data: { labels: topEspReal.map(t => truncateLabel(t[0],22)), datasets: [{ data: topEspReal.map(t => t[1]), backgroundColor: ["#0B5E42","#F87171","#5A9EFF","#F59E0B","#8B5CF6","#EC4899","#10B981","#6366F1"] }] },
-        options: { 
-          responsive: true, maintainAspectRatio: false, 
-          plugins: { 
-            datalabels: { formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold" } },
-            legend: { labels: { font: { weight: "bold" } }, position: "bottom" }
-          } 
-        }
-      });
+      makeDoughnutChartWithPercentages("cEspecialidadeRealizados", 
+        topEspReal.map(t => truncateLabel(t[0],22)), 
+        topEspReal.map(t => t[1]), 
+        ["#0B5E42","#F87171","#5A9EFF","#F59E0B","#8B5CF6","#EC4899","#10B981","#6366F1"]);
     }
 
-    // Top Produção Estab
     const estabProd = new Map(); agendados.forEach(d => estabProd.set(d.estabelecimento, (estabProd.get(d.estabelecimento) || 0) + d.recepcionados));
     const topProd = [...estabProd.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0B5E42", { label: "Realizados", horizontal: true });
+    makeBarChartWithValueInside("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0B5E42", "Realizados");
 
-    // Faturamento Mensal
     if (el("cFaturamentoMensal")) {
       if (charts.cFaturamentoMensal) charts.cFaturamentoMensal.destroy();
       const fatPorMes = meses.map(m => financeiro.reduce((s,d) => s + (d.mensal[m] || 0), 0));
       charts.cFaturamentoMensal = new Chart(el("cFaturamentoMensal").getContext("2d"), {
         type: "line",
-        data: { labels: meses, datasets: [{ label: "Faturamento", data: fatPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 }] },
+        data: { labels: meses, datasets: [{ label: "Financeiro", data: fatPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 }] },
         options: { 
           responsive: true, maintainAspectRatio: false, 
           plugins: { 
             tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, 
-            datalabels: { display: true, formatter: v => formatMoneyCompact(v), font: { weight: "bold" }, align: "top", offset: 6 },
+            datalabels: { display: true, formatter: v => formatMoneyCompact(v), font: { weight: "bold", size: 11 }, align: "top", offset: 6 },
             legend: { labels: { font: { weight: "bold" } } }
           }, 
           scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } } } }
@@ -1521,37 +1587,40 @@
       });
     }
 
-    // Fat por Especialidade
     const espFatMap = new Map(); financeiro.forEach(d => espFatMap.set(d.especialidade || "Outros", (espFatMap.get(d.especialidade || "Outros") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEspFat = [...espFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
-    makeBarChart("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0B5E42", { label: "Faturamento", formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { y: { ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } }, grid: { display: false } }, x: { grid: { display: false }, ticks: { font: { weight: "bold" } } } } });
-
-    // Fat por Estabelecimento
-    const estabFatMap = new Map(); financeiro.forEach(d => estabFatMap.set(d.estabelecimento || "Outros", (estabFatMap.get(d.estabelecimento || "Outros") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
+    makeBarChartWithValueInside("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0B5E42", "Financeiro", true);
+    
+    const estabFatMap = new Map(); financeiro.forEach(d => estabFatMap.set(d.estabelecimento || "Não informado", (estabFatMap.get(d.estabelecimento || "Não informado") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEstabFat = [...estabFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChart("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],22)), topEstabFat.map(t => t[1]), "#F87171", { label: "Faturamento", horizontal: true, formatter: v => formatMoneyCompact(v), tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, scales: { x: { ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } }, grid: { display: false } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } } });
+    makeBarChartWithValueInside("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#0B5E42", "Financeiro", true);
   }
 
   let currentTableData = [];
 
-  function renderTable(agendados, faturado, financeiro, periodo) {
+  function renderTable() {
     const tbody = el("tBody");
     if (!tbody) return;
     const map = new Map();
+    
+    const filteredAgendados = currentTableMonthFilter ? dadosAgendados.filter(d => d.mes === currentTableMonthFilter) : dadosAgendados;
+    const filteredFaturadoTable = currentTableMonthFilter ? dadosFaturado.filter(d => d.mensal[currentTableMonthFilter] !== undefined) : dadosFaturado;
+    const filteredFinanceiroTable = currentTableMonthFilter ? dadosFinanceiro.filter(d => d.mensal[currentTableMonthFilter] !== undefined) : dadosFinanceiro;
+    
     const addRow = (desc, grupo, subgrupo, estab) => { 
       const key = `${desc}||${grupo}||${subgrupo}||${estab}`; 
       if (!map.has(key)) map.set(key, { descricao: desc, grupo, subgrupo, estabelecimento: estab, realizados: 0, faturadosQtd: 0, financeiroValor: 0 }); 
       return map.get(key); 
     };
-    agendados.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.realizados += d.recepcionados; });
-    faturado.forEach(d => { 
+    filteredAgendados.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.realizados += d.recepcionados; });
+    filteredFaturadoTable.forEach(d => { 
       const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); 
-      const qtd = periodo ? (d.mensal[periodo] || 0) : d.total;
+      const qtd = currentTableMonthFilter ? (d.mensal[currentTableMonthFilter] || 0) : d.total;
       r.faturadosQtd += qtd; 
     });
-    financeiro.forEach(d => { 
+    filteredFinanceiroTable.forEach(d => { 
       const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); 
-      const valor = periodo ? (d.mensal[periodo] || 0) : d.total;
+      const valor = currentTableMonthFilter ? (d.mensal[currentTableMonthFilter] || 0) : d.total;
       r.financeiroValor += valor; 
     });
     currentTableData = [...map.values()].sort((a,b) => b.financeiroValor - a.financeiroValor);
@@ -1561,23 +1630,28 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '主机<td colspan="7">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '器<td colspan="7">Nenhum dado</tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
-      <tr>
-        <td title="${escapeHtml(r.descricao)}">${escapeHtml(truncateLabel(r.descricao,60))}</td>
-        <td>${escapeHtml(r.grupo || "-")}</td>
-        <td>${escapeHtml(r.subgrupo || "-")}</td>
-        <td>${escapeHtml(r.estabelecimento || "-")}</td>
-        <td>${r.realizados.toLocaleString("pt-BR")}</td>
-        <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
-        <td>${formatMoney(r.financeiroValor)}</td>
-      </tr>
+        <tr>
+          <td title="${escapeHtml(r.descricao)}">${escapeHtml(truncateLabel(r.descricao,60))}</td>
+          <td>${escapeHtml(r.grupo || "-")}</td>
+          <td>${escapeHtml(r.subgrupo || "-")}</td>
+          <td>${escapeHtml(r.estabelecimento || "-")}</td>
+          <td>${r.realizados.toLocaleString("pt-BR")}</td>
+          <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
+          <td>${formatMoney(r.financeiroValor)}</td>
+         </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
-    el("tSearch").addEventListener("input", () => { 
+    const searchInput = el("tSearch");
+    const originalListener = searchInput._listener;
+    if (originalListener) searchInput.removeEventListener("input", originalListener);
+    const newListener = () => { 
       const q = el("tSearch").value.toLowerCase(); 
       document.querySelectorAll("#tBody tr").forEach(r => r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none"); 
-    });
+    };
+    searchInput._listener = newListener;
+    searchInput.addEventListener("input", newListener);
   }
 
   function sortTable(colIndex) {
@@ -1637,7 +1711,15 @@
 
   function exportExcel() {
     if (!lastTableRows.length) { toast("Sem dados para exportar", "info"); return; }
-    const data = lastTableRows.map(r => ({ Procedimento: r.descricao, Grupo: r.grupo, Subgrupo: r.subgrupo, Estabelecimento: r.estabelecimento, Realizados: r.realizados, Faturados: r.faturadosQtd, Financeiro: r.financeiroValor }));
+    const data = lastTableRows.map(r => ({ 
+      Procedimento: r.descricao, 
+      Grupo: r.grupo, 
+      Subgrupo: r.subgrupo, 
+      Estabelecimento: r.estabelecimento, 
+      Realizados: r.realizados, 
+      Faturados_Qtd: r.faturadosQtd, 
+      Financeiro_R: r.financeiroValor 
+    }));
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
     ws["!cols"] = [{wch:60},{wch:25},{wch:30},{wch:30},{wch:14},{wch:14},{wch:20}];
@@ -1657,7 +1739,7 @@
   window.addEventListener("DOMContentLoaded", () => {
     loadAllData();
     el("btnRefresh").addEventListener("click", () => { loadAllData(); });
-    el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEstabelecimentos.clear(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; el("procedimentoSearch").value = ""; el("msSearchSub").value = ""; el("msSearchEstab").value = ""; buildSubgrupoList(); buildEstabelecimentoList(); applyFilters(); toast("Filtros limpos", "info"); });
+    el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEstabelecimentos.clear(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; el("procedimentoSearch").value = ""; el("msSearchSub").value = ""; el("msSearchEstab").value = ""; currentTableMonthFilter = ""; if(el("tableMonthFilter")) el("tableMonthFilter").value = ""; buildSubgrupoList(); buildEstabelecimentoList(); applyFilters(); toast("Filtros limpos", "info"); });
     el("btnExcel").addEventListener("click", exportExcel);
     el("periodoSelect").addEventListener("change", applyFilters);
     el("procedimentoSearch").addEventListener("input", applyFilters);
@@ -1668,7 +1750,3 @@
 </script>
 </body>
 </html>
-
-
-
-
