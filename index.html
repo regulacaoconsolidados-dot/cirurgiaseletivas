@@ -711,6 +711,18 @@
 
     <div class="row2eq">
       <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top Especialidades (Realizados vs Faturados Qtd)</h3></div>
+        <div class="chartWrap"><canvas id="cTopEspComp"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cFatEspecialidadeHorizontal"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
         <div class="chartHead">
           <h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3>
           <div class="chartSub">Fila → Ofertas → Realizados → Faltosos</div>
@@ -724,18 +736,6 @@
           <div class="chartSub">Procedimentos na fila por nível de complexidade</div>
         </div>
         <div class="chartWrap"><canvas id="cComplexidadeFila"></canvas></div>
-      </div>
-    </div>
-
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Top Especialidades (Realizados vs Faturados Qtd)</h3></div>
-        <div class="chartWrap"><canvas id="cTopEspComp"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Especialidade</h3></div>
-        <div class="chartWrap"><canvas id="cFatEspecialidadeHorizontal"></canvas></div>
       </div>
     </div>
   </section>
@@ -879,9 +879,10 @@
               <th onclick="sortTable(1)">Grupo <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(2)">Subgrupo <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(3)">Estabelecimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
-              <th onclick="sortTable(4)">Realizados (REC) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
-              <th onclick="sortTable(5)">Faturados (Qtd) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
-              <th onclick="sortTable(6)">Financeiro (R$) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(4)">Mês <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(5)">Realizados (REC) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(6)">Faturados (Qtd) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(7)">Financeiro (R$) <i class="fa-solid fa-arrow-up-wide-short"></i></th>
             </tr>
           </thead>
           <tbody id="tBody"></tbody>
@@ -1218,6 +1219,7 @@
     const faltososData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.faltosos, 0));
     
     if (el("cEvolucaoPorEstab")) {
+      if (charts.cEvolucaoPorEstab) charts.cEvolucaoPorEstab.destroy();
       charts.cEvolucaoPorEstab = new Chart(el("cEvolucaoPorEstab").getContext("2d"), {
         type: "line",
         data: { 
@@ -1341,20 +1343,43 @@
     renderAllCharts(filteredFila, filteredAgendados, filteredFaturado, filteredFinanceiro, periodo);
     renderTable();
     renderFinTable(filteredFinanceiro, periodo);
-    renderGraficosPorEstabelecimento();
+    renderGraficosPorEstabelecimento(filteredAgendados, filteredFaturado, filteredFinanceiro);
   }
 
-  function renderGraficosPorEstabelecimento() {
-    const topRealizados = [...realizadosPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+  function renderGraficosPorEstabelecimento(agendadosFiltrados, faturadoFiltrados, financeiroFiltrados) {
+    if (!agendadosFiltrados) agendadosFiltrados = dadosAgendados;
+    if (!faturadoFiltrados) faturadoFiltrados = dadosFaturado;
+    if (!financeiroFiltrados) financeiroFiltrados = dadosFinanceiro;
+    
+    const realizadosPorEstabFiltrado = new Map();
+    const ofertasPorEstabFiltrado = new Map();
+    const faltososPorEstabFiltrado = new Map();
+    const faturadosPorEstabFiltrado = new Map();
+    
+    agendadosFiltrados.forEach(d => {
+      if (d.estabelecimento) {
+        realizadosPorEstabFiltrado.set(d.estabelecimento, (realizadosPorEstabFiltrado.get(d.estabelecimento) || 0) + d.recepcionados);
+        ofertasPorEstabFiltrado.set(d.estabelecimento, (ofertasPorEstabFiltrado.get(d.estabelecimento) || 0) + d.oferta);
+        faltososPorEstabFiltrado.set(d.estabelecimento, (faltososPorEstabFiltrado.get(d.estabelecimento) || 0) + d.faltosos);
+      }
+    });
+    
+    faturadoFiltrados.forEach(d => {
+      if (d.estabelecimento) {
+        faturadosPorEstabFiltrado.set(d.estabelecimento, (faturadosPorEstabFiltrado.get(d.estabelecimento) || 0) + d.total);
+      }
+    });
+    
+    const topRealizados = [...realizadosPorEstabFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
     makeBarChartWithValueInside("cRealizadosPorEstab", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", "Realizados");
     
-    const topFinanceiro = [...faturadosPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    const topFinanceiro = [...faturadosPorEstabFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
     makeBarChartWithValueInside("cFaturadosPorEstab", topFinanceiro.map(t => truncateLabel(t[0],25)), topFinanceiro.map(t => t[1]), "#1e3a5f", "Financeiro", true);
     
-    const topOfertas = [...ofertasPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    const topOfertas = [...ofertasPorEstabFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
     makeBarChartWithValueInside("cOfertasPorEstab", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", "Ofertas");
     
-    const topFaltosos = [...faltososPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    const topFaltosos = [...faltososPorEstabFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
     makeBarChartWithValueInside("cFaltososPorEstab", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
   }
 
@@ -1668,21 +1693,33 @@
     const filteredFaturadoTable = currentTableMonthFilter ? dadosFaturado.filter(d => d.mensal[currentTableMonthFilter] !== undefined) : dadosFaturado;
     const filteredFinanceiroTable = currentTableMonthFilter ? dadosFinanceiro.filter(d => d.mensal[currentTableMonthFilter] !== undefined) : dadosFinanceiro;
     
-    const addRow = (esp, grupo, subgrupo, estab) => { 
-      const key = `${esp}||${grupo}||${subgrupo}||${estab}`; 
-      if (!map.has(key)) map.set(key, { especialidade: esp, grupo, subgrupo, estabelecimento: estab, realizados: 0, faturadosQtd: 0, financeiroValor: 0 }); 
+    const addRow = (esp, grupo, subgrupo, estab, mes) => { 
+      const key = `${esp}||${grupo}||${subgrupo}||${estab}||${mes}`; 
+      if (!map.has(key)) map.set(key, { especialidade: esp, grupo, subgrupo, estabelecimento: estab, mes: mes, realizados: 0, faturadosQtd: 0, financeiroValor: 0 }); 
       return map.get(key); 
     };
-    filteredAgendados.forEach(d => { const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento); r.realizados += d.recepcionados; });
+    filteredAgendados.forEach(d => { const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento, d.mes || "Sem mês"); r.realizados += d.recepcionados; });
     filteredFaturadoTable.forEach(d => { 
-      const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento); 
-      const qtd = currentTableMonthFilter ? (d.mensal[currentTableMonthFilter] || 0) : d.total;
-      r.faturadosQtd += qtd; 
+      if (currentTableMonthFilter) {
+        const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento, currentTableMonthFilter);
+        r.faturadosQtd += d.mensal[currentTableMonthFilter] || 0;
+      } else {
+        Object.entries(d.mensal).forEach(([mes, qtd]) => {
+          const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento, mes);
+          r.faturadosQtd += qtd;
+        });
+      }
     });
     filteredFinanceiroTable.forEach(d => { 
-      const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento); 
-      const valor = currentTableMonthFilter ? (d.mensal[currentTableMonthFilter] || 0) : d.total;
-      r.financeiroValor += valor; 
+      if (currentTableMonthFilter) {
+        const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento, currentTableMonthFilter);
+        r.financeiroValor += d.mensal[currentTableMonthFilter] || 0;
+      } else {
+        Object.entries(d.mensal).forEach(([mes, valor]) => {
+          const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento, mes);
+          r.financeiroValor += valor;
+        });
+      }
     });
     currentTableData = [...map.values()].sort((a,b) => b.financeiroValor - a.financeiroValor);
     lastTableRows = currentTableData;
@@ -1691,17 +1728,18 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '器<td colspan="7">Nenhum dado</tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
         <tr>
           <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
           <td>${escapeHtml(r.grupo || "-")}</td>
           <td>${escapeHtml(r.subgrupo || "-")}</td>
           <td>${escapeHtml(r.estabelecimento || "-")}</td>
+          <td>${escapeHtml(r.mes || "-")}</td>
           <td>${r.realizados.toLocaleString("pt-BR")}</td>
           <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
           <td>${formatMoney(r.financeiroValor)}</td>
-         </tr>
+        </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
     const searchInput = el("tSearch");
@@ -1723,7 +1761,7 @@
       currentSortDirection = 'asc';
     }
     
-    const columns = ["especialidade", "grupo", "subgrupo", "estabelecimento", "realizados", "faturadosQtd", "financeiroValor"];
+    const columns = ["especialidade", "grupo", "subgrupo", "estabelecimento", "mes", "realizados", "faturadosQtd", "financeiroValor"];
     const col = columns[colIndex];
     
     currentTableData.sort((a, b) => {
@@ -1776,14 +1814,15 @@
       Especialidade: r.especialidade,
       Grupo: r.grupo, 
       Subgrupo: r.subgrupo, 
-      Estabelecimento: r.estabelecimento, 
+      Estabelecimento: r.estabelecimento,
+      Mes: r.mes,
       Realizados: r.realizados, 
       Faturados_Qtd: r.faturadosQtd, 
       Financeiro_R: r.financeiroValor 
     }));
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
-    ws["!cols"] = [{wch:60},{wch:25},{wch:30},{wch:30},{wch:14},{wch:14},{wch:20}];
+    ws["!cols"] = [{wch:60},{wch:25},{wch:30},{wch:30},{wch:14},{wch:14},{wch:14},{wch:20}];
     XLSX.utils.book_append_sheet(wb, ws, "Painel Cirurgia Eletiva");
     XLSX.writeFile(wb, `cirurgia_eletiva_${new Date().toISOString().slice(0,10)}.xlsx`);
     toast("Excel exportado!", "success");
