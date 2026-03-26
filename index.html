@@ -137,9 +137,10 @@
       grid-template-columns: repeat(12, 1fr);
       gap: 16px;
     }
-    .fg { grid-column: span 3; }
-    @media (max-width: 900px) { .fg { grid-column: span 6; } }
-    @media (max-width: 600px) { .fg { grid-column: span 12; } }
+    .fg { grid-column: span 2; }
+    @media (max-width: 1100px) { .fg { grid-column: span 4; } }
+    @media (max-width: 700px) { .fg { grid-column: span 6; } }
+    @media (max-width: 500px) { .fg { grid-column: span 12; } }
     .fg label {
       font-size: 11px;
       font-weight: 800;
@@ -589,6 +590,26 @@
       </div>
 
       <div class="fg">
+        <label><i class="fa-solid fa-tag"></i> Especialidade</label>
+        <div class="multiselect-wrapper" id="msWrapperEsp">
+          <div class="ms-trigger" id="msTriggerEsp" onclick="toggleMsDropdownEsp(event)">
+            <span class="ms-label-text" id="msLabelEsp">Todos</span>
+            <i class="fa-solid fa-chevron-down ms-arrow"></i>
+          </div>
+          <div class="ms-dropdown" id="msDropdownEsp">
+            <div class="ms-actions">
+              <button class="ms-btn-all" onclick="selectAllEsp(event)">Selecionar Todos</button>
+              <button class="ms-btn-clr" onclick="clearEspSelection(event)">Limpar</button>
+            </div>
+            <div class="ms-search-box">
+              <input type="text" id="msSearchEsp" placeholder="Buscar..." oninput="filterMsListEsp()">
+            </div>
+            <div class="ms-list" id="msListEsp"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="fg">
         <label><i class="fa-solid fa-building"></i> Estabelecimento</label>
         <div class="multiselect-wrapper" id="msWrapperEstab">
           <div class="ms-trigger" id="msTriggerEstab" onclick="toggleMsDropdownEstab(event)">
@@ -616,7 +637,7 @@
       </div>
 
       <div class="fg">
-        <label><i class="fa-solid fa-search"></i> Procedimento / Especialidade</label>
+        <label><i class="fa-solid fa-search"></i> Procedimento</label>
         <input type="text" id="procedimentoSearch" class="search-proc-input" placeholder="Digite para filtrar...">
       </div>
     </div>
@@ -846,7 +867,7 @@
         </div>
         <div class="search">
           <i class="fa-solid fa-search"></i>
-          <input id="tSearch" placeholder="Buscar procedimento, estabelecimento...">
+          <input id="tSearch" placeholder="Buscar especialidade, estabelecimento...">
         </div>
         <div class="muted" id="tInfo">—</div>
       </div>
@@ -854,7 +875,7 @@
         <table class="data-table" id="tabelaPrincipal">
           <thead>
             <tr>
-              <th onclick="sortTable(0)">Procedimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(0)">Especialidade <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(1)">Grupo <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(2)">Subgrupo <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(3)">Estabelecimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
@@ -889,6 +910,7 @@
   
   let gruposMap = new Map();
   let subgruposMap = new Map();
+  let especialidadesSet = new Set();
   let estabelecimentosSet = new Set();
   
   let allPeriodos = [];
@@ -905,6 +927,7 @@
   let faltososPorEstab = new Map();
   
   let selectedSubgrupos = new Set();
+  let selectedEspecialidades = new Set();
   let selectedEstabelecimentos = new Set();
   let charts = {};
   let lastTableRows = [];
@@ -1098,6 +1121,7 @@
           ofertasPorEstab.set(d.estabelecimento, (ofertasPorEstab.get(d.estabelecimento) || 0) + d.oferta);
           faltososPorEstab.set(d.estabelecimento, (faltososPorEstab.get(d.estabelecimento) || 0) + d.faltosos);
         }
+        if (d.especialidade) especialidadesSet.add(d.especialidade);
       });
 
       dadosFaturado = faturadoRaw.map(r => {
@@ -1113,6 +1137,8 @@
           total: Object.values(mensal).reduce((s,v) => s+v, 0)
         };
       }).filter(d => d.descricao);
+      
+      dadosFaturado.forEach(d => { if (d.especialidade) especialidadesSet.add(d.especialidade); });
 
       faturadosPorMes = {};
       faturadosQtdPorMes = {};
@@ -1140,8 +1166,10 @@
           total: Object.values(mensal).reduce((s,v) => s+v, 0)
         };
       }).filter(d => d.descricao);
+      
+      dadosFinanceiro.forEach(d => { if (d.especialidade) especialidadesSet.add(d.especialidade); });
 
-      dadosFila.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); });
+      dadosFila.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.especialidade) especialidadesSet.add(d.especialidade); });
       dadosAgendados.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); if (d.mes) allPeriodos.push(d.mes); });
       dadosFaturado.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); });
       dadosFinanceiro.forEach(d => { if (d.grupo) gruposMap.set(d.grupo, true); if (d.subgrupo) subgruposMap.set(d.subgrupo, d.grupo || ""); if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento); Object.keys(d.mensal).forEach(m => allPeriodos.push(m)); });
@@ -1219,6 +1247,7 @@
     const grupoSelect = el("grupoSelect");
     grupoSelect.innerHTML = '<option value="">Todos os Grupos</option>' + [...gruposMap.keys()].sort().map(g => `<option value="${escapeHtml(g)}">${escapeHtml(g)}</option>`).join("");
     buildSubgrupoList();
+    buildEspecialidadeList();
     buildEstabelecimentoList();
     const periodoSelect = el("periodoSelect");
     periodoSelect.innerHTML = '<option value="">Todos os meses</option>' + allPeriodos.map(p => `<option value="${escapeHtml(p)}">${escapeHtml(p)}</option>`).join("");
@@ -1229,6 +1258,7 @@
     return [...subgruposMap.entries()].filter(([sub, grp]) => !grupo || grp === grupo).map(([sub]) => sub).sort();
   }
 
+  function getVisibleEspecialidades() { return [...especialidadesSet].sort(); }
   function getVisibleEstabelecimentos() { return [...estabelecimentosSet].sort(); }
 
   function buildSubgrupoList() {
@@ -1238,6 +1268,15 @@
     list.innerHTML = subArray.length ? subArray.map(sub => `<div class="ms-item" data-value="${escapeHtml(sub)}"><input type="checkbox" value="${escapeHtml(sub)}" ${selectedSubgrupos.has(sub) ? "checked" : ""}><span>${escapeHtml(sub)}</span></div>`).join("") : '<div class="ms-empty">Nenhum subgrupo</div>';
     list.querySelectorAll(".ms-item").forEach(item => { const cb = item.querySelector("input"); cb.addEventListener("change", () => { if (cb.checked) selectedSubgrupos.add(cb.value); else selectedSubgrupos.delete(cb.value); updateMsLabelSub(); applyFilters(); }); item.addEventListener("click", e => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } }); });
     updateMsLabelSub();
+  }
+
+  function buildEspecialidadeList() {
+    const list = el("msListEsp"); if (!list) return;
+    const espArray = getVisibleEspecialidades();
+    selectedEspecialidades.forEach(s => { if (!espArray.includes(s)) selectedEspecialidades.delete(s); });
+    list.innerHTML = espArray.length ? espArray.map(esp => `<div class="ms-item" data-value="${escapeHtml(esp)}"><input type="checkbox" value="${escapeHtml(esp)}" ${selectedEspecialidades.has(esp) ? "checked" : ""}><span>${escapeHtml(esp)}</span></div>`).join("") : '<div class="ms-empty">Nenhuma especialidade</div>';
+    list.querySelectorAll(".ms-item").forEach(item => { const cb = item.querySelector("input"); cb.addEventListener("change", () => { if (cb.checked) selectedEspecialidades.add(cb.value); else selectedEspecialidades.delete(cb.value); updateMsLabelEsp(); applyFilters(); }); item.addEventListener("click", e => { if (e.target !== cb) { cb.checked = !cb.checked; cb.dispatchEvent(new Event("change")); } }); });
+    updateMsLabelEsp();
   }
 
   function buildEstabelecimentoList() {
@@ -1250,15 +1289,23 @@
   }
 
   function updateMsLabelSub() { el("msLabelSub").textContent = selectedSubgrupos.size ? `${selectedSubgrupos.size} selecionado(s)` : "Todos"; }
+  function updateMsLabelEsp() { el("msLabelEsp").textContent = selectedEspecialidades.size ? `${selectedEspecialidades.size} selecionado(s)` : "Todos"; }
   function updateMsLabelEstab() { el("msLabelEstab").textContent = selectedEstabelecimentos.size ? `${selectedEstabelecimentos.size} selecionado(s)` : "Todos"; }
-  function closeAllDropdowns() { ["Sub", "Estab"].forEach(suf => { el(`msDropdown${suf}`)?.classList.remove("open"); el(`msTrigger${suf}`)?.classList.remove("open"); }); }
+  
+  function closeAllDropdowns() { ["Sub", "Esp", "Estab"].forEach(suf => { el(`msDropdown${suf}`)?.classList.remove("open"); el(`msTrigger${suf}`)?.classList.remove("open"); }); }
   function toggleMsDropdownSub(e) { e.stopPropagation(); const dd = el("msDropdownSub"), tr = el("msTriggerSub"); const willOpen = !dd.classList.contains("open"); closeAllDropdowns(); dd.classList.toggle("open", willOpen); tr.classList.toggle("open", willOpen); }
+  function toggleMsDropdownEsp(e) { e.stopPropagation(); const dd = el("msDropdownEsp"), tr = el("msTriggerEsp"); const willOpen = !dd.classList.contains("open"); closeAllDropdowns(); dd.classList.toggle("open", willOpen); tr.classList.toggle("open", willOpen); }
   function toggleMsDropdownEstab(e) { e.stopPropagation(); const dd = el("msDropdownEstab"), tr = el("msTriggerEstab"); const willOpen = !dd.classList.contains("open"); closeAllDropdowns(); dd.classList.toggle("open", willOpen); tr.classList.toggle("open", willOpen); }
+  
   function selectAllSub(e) { e.preventDefault(); selectedSubgrupos.clear(); getVisibleSubgrupos().forEach(s => selectedSubgrupos.add(s)); buildSubgrupoList(); applyFilters(); }
   function clearSubSelection(e) { e.preventDefault(); selectedSubgrupos.clear(); buildSubgrupoList(); applyFilters(); }
+  function selectAllEsp(e) { e.preventDefault(); selectedEspecialidades.clear(); getVisibleEspecialidades().forEach(s => selectedEspecialidades.add(s)); buildEspecialidadeList(); applyFilters(); }
+  function clearEspSelection(e) { e.preventDefault(); selectedEspecialidades.clear(); buildEspecialidadeList(); applyFilters(); }
   function selectAllEstab(e) { e.preventDefault(); selectedEstabelecimentos.clear(); getVisibleEstabelecimentos().forEach(s => selectedEstabelecimentos.add(s)); buildEstabelecimentoList(); applyFilters(); }
   function clearEstabSelection(e) { e.preventDefault(); selectedEstabelecimentos.clear(); buildEstabelecimentoList(); applyFilters(); }
+  
   function filterMsListSub() { const q = (el("msSearchSub")?.value || "").toLowerCase(); el("msListSub")?.querySelectorAll(".ms-item").forEach(item => { item.style.display = (item.querySelector("span")?.textContent?.toLowerCase() || "").includes(q) ? "" : "none"; }); }
+  function filterMsListEsp() { const q = (el("msSearchEsp")?.value || "").toLowerCase(); el("msListEsp")?.querySelectorAll(".ms-item").forEach(item => { item.style.display = (item.querySelector("span")?.textContent?.toLowerCase() || "").includes(q) ? "" : "none"; }); }
   function filterMsListEstab() { const q = (el("msSearchEstab")?.value || "").toLowerCase(); el("msListEstab")?.querySelectorAll(".ms-item").forEach(item => { item.style.display = (item.querySelector("span")?.textContent?.toLowerCase() || "").includes(q) ? "" : "none"; }); }
 
   function escapeHtml(t) { return String(t ?? "").replace(/[&<>]/g, function(m) { if (m === "&") return "&amp;"; if (m === "<") return "&lt;"; if (m === ">") return "&gt;"; return m; }); }
@@ -1268,7 +1315,11 @@
     const periodo = el("periodoSelect").value;
     const procSearch = (el("procedimentoSearch")?.value || "").toLowerCase();
 
-    const baseMatch = d => (!grupo || d.grupo === grupo) && (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) && (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)) && (!procSearch || d.descricao.toLowerCase().includes(procSearch) || (d.especialidade || "").toLowerCase().includes(procSearch));
+    const baseMatch = d => (!grupo || d.grupo === grupo) && 
+                           (selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo)) &&
+                           (selectedEspecialidades.size === 0 || selectedEspecialidades.has(d.especialidade)) &&
+                           (selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento)) &&
+                           (!procSearch || d.descricao.toLowerCase().includes(procSearch));
 
     const filteredFila = dadosFila.filter(baseMatch);
     const filteredAgendados = dadosAgendados.filter(d => baseMatch(d) && (!periodo || d.mes === periodo));
@@ -1311,8 +1362,18 @@
     if (!el(id)) return;
     if (charts[id]) charts[id].destroy();
     
-    const barPercentage = (id === "cRankFilaEstab" || id === "cFaturadosPorEstab") ? 0.8 : 0.7;
-    const categoryPercentage = (id === "cRankFilaEstab" || id === "cFaturadosPorEstab") ? 0.85 : 0.8;
+    let barPercentage = 0.7;
+    let categoryPercentage = 0.8;
+    
+    if (id === "cRankFilaEstab" || id === "cFaturadosPorEstab") {
+      barPercentage = 0.8;
+      categoryPercentage = 0.85;
+    }
+    
+    if (id === "cTopEspComp") {
+      barPercentage = 0.85;
+      categoryPercentage = 0.9;
+    }
     
     charts[id] = new Chart(el(id).getContext("2d"), {
       type: "bar",
@@ -1456,8 +1517,8 @@
         data: { 
           labels: topEsp.map(t => truncateLabel(t[0], 25)), 
           datasets: [
-            { label: "Realizados", data: topEsp.map(t => t[1]), backgroundColor: "#0B5E42", borderRadius: 12, barPercentage: 0.7, categoryPercentage: 0.8 },
-            { label: "Faturados (Qtd)", data: topEsp.map(t => espFatQtd.get(t[0]) || 0), backgroundColor: "#5A9EFF", borderRadius: 12, barPercentage: 0.7, categoryPercentage: 0.8 }
+            { label: "Realizados", data: topEsp.map(t => t[1]), backgroundColor: "#0B5E42", borderRadius: 12, barPercentage: 0.85, categoryPercentage: 0.9 },
+            { label: "Faturados (Qtd)", data: topEsp.map(t => espFatQtd.get(t[0]) || 0), backgroundColor: "#5A9EFF", borderRadius: 12, barPercentage: 0.85, categoryPercentage: 0.9 }
           ] 
         },
         options: { 
@@ -1607,19 +1668,19 @@
     const filteredFaturadoTable = currentTableMonthFilter ? dadosFaturado.filter(d => d.mensal[currentTableMonthFilter] !== undefined) : dadosFaturado;
     const filteredFinanceiroTable = currentTableMonthFilter ? dadosFinanceiro.filter(d => d.mensal[currentTableMonthFilter] !== undefined) : dadosFinanceiro;
     
-    const addRow = (desc, grupo, subgrupo, estab) => { 
-      const key = `${desc}||${grupo}||${subgrupo}||${estab}`; 
-      if (!map.has(key)) map.set(key, { descricao: desc, grupo, subgrupo, estabelecimento: estab, realizados: 0, faturadosQtd: 0, financeiroValor: 0 }); 
+    const addRow = (esp, grupo, subgrupo, estab) => { 
+      const key = `${esp}||${grupo}||${subgrupo}||${estab}`; 
+      if (!map.has(key)) map.set(key, { especialidade: esp, grupo, subgrupo, estabelecimento: estab, realizados: 0, faturadosQtd: 0, financeiroValor: 0 }); 
       return map.get(key); 
     };
-    filteredAgendados.forEach(d => { const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); r.realizados += d.recepcionados; });
+    filteredAgendados.forEach(d => { const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento); r.realizados += d.recepcionados; });
     filteredFaturadoTable.forEach(d => { 
-      const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); 
+      const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento); 
       const qtd = currentTableMonthFilter ? (d.mensal[currentTableMonthFilter] || 0) : d.total;
       r.faturadosQtd += qtd; 
     });
     filteredFinanceiroTable.forEach(d => { 
-      const r = addRow(d.descricao, d.grupo, d.subgrupo, d.estabelecimento); 
+      const r = addRow(d.especialidade || "Não informado", d.grupo, d.subgrupo, d.estabelecimento); 
       const valor = currentTableMonthFilter ? (d.mensal[currentTableMonthFilter] || 0) : d.total;
       r.financeiroValor += valor; 
     });
@@ -1633,7 +1694,7 @@
     if (!currentTableData.length) { tbody.innerHTML = '器<td colspan="7">Nenhum dado</tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
         <tr>
-          <td title="${escapeHtml(r.descricao)}">${escapeHtml(truncateLabel(r.descricao,60))}</td>
+          <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
           <td>${escapeHtml(r.grupo || "-")}</td>
           <td>${escapeHtml(r.subgrupo || "-")}</td>
           <td>${escapeHtml(r.estabelecimento || "-")}</td>
@@ -1662,7 +1723,7 @@
       currentSortDirection = 'asc';
     }
     
-    const columns = ["descricao", "grupo", "subgrupo", "estabelecimento", "realizados", "faturadosQtd", "financeiroValor"];
+    const columns = ["especialidade", "grupo", "subgrupo", "estabelecimento", "realizados", "faturadosQtd", "financeiroValor"];
     const col = columns[colIndex];
     
     currentTableData.sort((a, b) => {
@@ -1712,7 +1773,7 @@
   function exportExcel() {
     if (!lastTableRows.length) { toast("Sem dados para exportar", "info"); return; }
     const data = lastTableRows.map(r => ({ 
-      Procedimento: r.descricao, 
+      Especialidade: r.especialidade,
       Grupo: r.grupo, 
       Subgrupo: r.subgrupo, 
       Estabelecimento: r.estabelecimento, 
@@ -1739,12 +1800,13 @@
   window.addEventListener("DOMContentLoaded", () => {
     loadAllData();
     el("btnRefresh").addEventListener("click", () => { loadAllData(); });
-    el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEstabelecimentos.clear(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; el("procedimentoSearch").value = ""; el("msSearchSub").value = ""; el("msSearchEstab").value = ""; currentTableMonthFilter = ""; if(el("tableMonthFilter")) el("tableMonthFilter").value = ""; buildSubgrupoList(); buildEstabelecimentoList(); applyFilters(); toast("Filtros limpos", "info"); });
+    el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEspecialidades.clear(); selectedEstabelecimentos.clear(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; el("procedimentoSearch").value = ""; el("msSearchSub").value = ""; el("msSearchEsp").value = ""; el("msSearchEstab").value = ""; currentTableMonthFilter = ""; if(el("tableMonthFilter")) el("tableMonthFilter").value = ""; buildSubgrupoList(); buildEspecialidadeList(); buildEstabelecimentoList(); applyFilters(); toast("Filtros limpos", "info"); });
     el("btnExcel").addEventListener("click", exportExcel);
     el("periodoSelect").addEventListener("change", applyFilters);
     el("procedimentoSearch").addEventListener("input", applyFilters);
     document.addEventListener("click", () => closeAllDropdowns());
     el("msDropdownSub")?.addEventListener("click", e => e.stopPropagation());
+    el("msDropdownEsp")?.addEventListener("click", e => e.stopPropagation());
     el("msDropdownEstab")?.addEventListener("click", e => e.stopPropagation());
   });
 </script>
