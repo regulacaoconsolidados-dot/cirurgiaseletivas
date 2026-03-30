@@ -741,17 +741,17 @@
       <div class="chartCard">
         <div class="chartHead">
           <h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3>
-          <div class="chartSub">Fila → Ofertas → Realizados → Faltosos</div>
+          <div class="chartSub">Ofertas → Realizados → Faltosos</div>
         </div>
         <div class="chartWrap"><canvas id="cFunil"></canvas></div>
       </div>
 
       <div class="chartCard">
         <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Complexidade</h3>
-          <div class="chartSub">Procedimentos na fila por nível de complexidade</div>
+          <h3><i class="fa-solid fa-chart-bar"></i> Total Geral da Fila de Espera Atual por Especialidade</h3>
+          <div class="chartSub">Distribuição da fila por especialidade</div>
         </div>
-        <div class="chartWrap"><canvas id="cComplexidadeFila"></canvas></div>
+        <div class="chartWrap"><canvas id="cFilaPorEspecialidadeGeral"></canvas></div>
       </div>
     </div>
   </section>
@@ -794,8 +794,17 @@
   <!-- ABA 3: EXECUÇÃO/Cirurgias Realizadas -->
   <section id="tab-execucao_agendamentos" class="tabContent">
     <div class="chartCard">
-      <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas</h3></div>
-      <div class="chartWrap"><canvas id="cEvolucaoRealizados"></canvas></div>
+      <div class="chartHead">
+        <h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas por Estabelecimento</h3>
+        <div class="chartSub">Selecione um estabelecimento para visualizar a evolução mensal</div>
+      </div>
+      <div class="estab-selector-highlight">
+        <label><i class="fa-solid fa-building"></i> Escolha o Estabelecimento:</label>
+        <select id="estabSelecionadoRealizados">
+          <option value="">Carregando estabelecimentos...</option>
+        </select>
+      </div>
+      <div class="chartWrap"><canvas id="cEvolucaoRealizadosPorEstab"></canvas></div>
     </div>
 
     <div class="row2eq">
@@ -1199,7 +1208,6 @@
         loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
       ]);
 
-      // Processamento da FILA DE ESPERA
       dadosFila = filaRaw.map(r => {
         let dataCorte = normalizePeriodo(getField(r, ["Data Corte/ Fila de Espera", "DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
         if (!dataCorte || dataCorte === "sem dados") dataCorte = "";
@@ -1398,6 +1406,17 @@
         });
       }
       
+      const estabSelectRealizados = el("estabSelecionadoRealizados");
+      if (estabSelectRealizados) {
+        const estabList = [...estabelecimentosSet].sort();
+        estabSelectRealizados.innerHTML = '<option value="">Selecione um estabelecimento</option>' + 
+          estabList.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
+        estabSelectRealizados.addEventListener("change", () => {
+          if (charts.cEvolucaoRealizadosPorEstab) charts.cEvolucaoRealizadosPorEstab.destroy();
+          renderEvolucaoRealizadosPorEstab(estabSelectRealizados.value);
+        });
+      }
+      
       populateFilters();
       updateLastUpdate();
       applyFilters();
@@ -1408,6 +1427,36 @@
       toast(`Erro: ${e.message}`, "error");
     } finally {
       el("loading").classList.remove("on");
+    }
+  }
+
+  function renderEvolucaoRealizadosPorEstab(estabelecimento) {
+    if (!estabelecimento) return;
+    
+    const dadosEstab = dadosAgendados.filter(d => d.estabelecimento === estabelecimento);
+    const meses = allPeriodos;
+    const realizadosData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.recepcionados, 0));
+    
+    if (el("cEvolucaoRealizadosPorEstab")) {
+      if (charts.cEvolucaoRealizadosPorEstab) charts.cEvolucaoRealizadosPorEstab.destroy();
+      charts.cEvolucaoRealizadosPorEstab = new Chart(el("cEvolucaoRealizadosPorEstab").getContext("2d"), {
+        type: "line",
+        data: { 
+          labels: meses, 
+          datasets: [
+            { label: "Cirurgias Realizadas", data: realizadosData, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 }
+          ] 
+        },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 4 },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
+            legend: { labels: { font: { weight: "bold" } } }
+          },
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
+        }
+      });
     }
   }
 
@@ -1610,16 +1659,16 @@
     makeBarChartWithValueInside("cFaltososPorEstab", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
   }
 
-  function makeBarChartWithValueInside(id, labels, values, color, label, isMoney = false) {
+  function makeBarChartWithValueInside(id, labels, values, color, label, isMoney = false, barPercentageParam = 0.7) {
     if (!el(id)) return;
     if (charts[id]) charts[id].destroy();
     
-    let barPercentage = 0.7;
-    let categoryPercentage = 0.8;
+    let barPercentage = barPercentageParam;
+    let categoryPercentage = 0.85;
     
     if (id === "cRankFilaEstab" || id === "cRankFilaEspecialidade" || id === "cFaturadosPorEstab" || id === "cFinanceiroPorEspecialidade" || id === "cFilaPorSubgrupo") {
-      barPercentage = 0.8;
-      categoryPercentage = 0.85;
+      barPercentage = 0.9;
+      categoryPercentage = 0.95;
     }
     
     if (id === "cTopEspComp") {
@@ -1699,22 +1748,36 @@
   }
 
   function renderAllCharts(fila, agendados, faturado, financeiro, periodoSelecionado) {
-    const totalFila = fila.reduce((s,d) => s+d.fila, 0);
     const totalOferta = agendados.reduce((s,d) => s+d.oferta, 0);
     const totalRealizados = agendados.reduce((s,d) => s+d.recepcionados, 0);
     const totalFaltosos = agendados.reduce((s,d) => s+d.faltosos, 0);
     const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
-    // Gráfico de evolução (já existente)
+    // Gráfico de evolução - agora com dados filtrados corretamente
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
+      
+      // Para cada mês, calcular os valores filtrados
       const dadosFilaPorMes = meses.map(m => {
         const dadosFilaFiltrados = fila.filter(d => d.dataCorte === m);
         return dadosFilaFiltrados.reduce((s,d) => s + d.fila, 0);
       });
-      const dadosRealizadosPorMes = meses.map(m => realizadosPorMes[m] || 0);
-      const dadosOfertasPorMes = meses.map(m => ofertasPorMes[m] || 0);
-      const dadosFaltososPorMes = meses.map(m => faltososPorMes[m] || 0);
+      
+      const dadosRealizadosPorMes = meses.map(m => {
+        const dadosAgendadosFiltrados = agendados.filter(d => d.mes === m);
+        return dadosAgendadosFiltrados.reduce((s,d) => s + d.recepcionados, 0);
+      });
+      
+      const dadosOfertasPorMes = meses.map(m => {
+        const dadosAgendadosFiltrados = agendados.filter(d => d.mes === m);
+        return dadosAgendadosFiltrados.reduce((s,d) => s + d.oferta, 0);
+      });
+      
+      const dadosFaltososPorMes = meses.map(m => {
+        const dadosAgendadosFiltrados = agendados.filter(d => d.mes === m);
+        return dadosAgendadosFiltrados.reduce((s,d) => s + d.faltosos, 0);
+      });
+      
       charts.cEvolucao = new Chart(el("cEvolucao").getContext("2d"), {
         type: "line",
         data: { 
@@ -1745,20 +1808,33 @@
       });
     }
 
-    // Funil Cirúrgico
+    // Funil Cirúrgico - removido o item FILA
     if (el("cFunil")) {
-      makeDoughnutChartWithPercentages("cFunil", ["Fila", "Ofertas", "Realizados", "Faltosos"], 
-        [totalFila, totalOferta, totalRealizados, totalFaltosos], 
-        ["#F87171", "#5A9EFF", "#0B5E42", "#F59E0B"]);
+      makeDoughnutChartWithPercentages("cFunil", ["Ofertas", "Realizados", "Faltosos"], 
+        [totalOferta, totalRealizados, totalFaltosos], 
+        ["#5A9EFF", "#0B5E42", "#F59E0B"]);
     }
 
-    // Complexidade Fila (Visão Geral)
-    if (el("cComplexidadeFila")) {
-      const compMap = new Map(); fila.forEach(d => compMap.set(d.complexidade || "Não informado", (compMap.get(d.complexidade || "Não informado") || 0) + d.fila));
-      const labels = [...compMap.keys()];
-      const values = [...compMap.values()];
-      const colors = ["#5A9EFF", "#F87171", "#0B5E42", "#F59E0B", "#8B5CF6", "#EC4899"];
-      makeDoughnutChartWithPercentages("cComplexidadeFila", labels, values, colors.slice(0, labels.length));
+    // NOVO GRÁFICO: Total Geral da Fila de Espera Atual por Especialidade
+    if (el("cFilaPorEspecialidadeGeral")) {
+      const filaPorEspFiltrada = new Map();
+      fila.forEach(d => {
+        if (d.especialidade) {
+          filaPorEspFiltrada.set(d.especialidade, (filaPorEspFiltrada.get(d.especialidade) || 0) + d.fila);
+        }
+      });
+      const todasEspFila = [...filaPorEspFiltrada.entries()].sort((a,b) => b[1]-a[1]);
+      if (todasEspFila.length > 0) {
+        makeBarChartWithValueInside("cFilaPorEspecialidadeGeral", todasEspFila.map(t => truncateLabel(t[0], 30)), todasEspFila.map(t => t[1]), "#5A9EFF", "Fila de Espera", false, 0.85);
+      } else {
+        const ctx = el("cFilaPorEspecialidadeGeral").getContext("2d");
+        if (charts.cFilaPorEspecialidadeGeral) charts.cFilaPorEspecialidadeGeral.destroy();
+        charts.cFilaPorEspecialidadeGeral = new Chart(ctx, {
+          type: "bar",
+          data: { labels: ["Sem dados"], datasets: [{ label: "Fila de Espera", data: [0], backgroundColor: "#5A9EFF" }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+        });
+      }
     }
 
     // Top Especialidades (Realizados vs Faturados)
@@ -1859,29 +1935,29 @@
 
     // Top Estabelecimentos com Maior Fila
     const topEstabFila = [...filaPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChartWithValueInside("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", "Fila");
+    makeBarChartWithValueInside("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", "Fila", false, 0.85);
 
-    // Top Especialidades com Maior Fila - TODAS as especialidades (sem limite)
+    // Top Especialidades com Maior Fila - TODAS as especialidades
     const todasEspecialidadesFila = [...filaPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]);
-    makeBarChartWithValueInside("cRankFilaEspecialidade", todasEspecialidadesFila.map(t => truncateLabel(t[0],25)), todasEspecialidadesFila.map(t => t[1]), "#5A9EFF", "Fila");
+    makeBarChartWithValueInside("cRankFilaEspecialidade", todasEspecialidadesFila.map(t => truncateLabel(t[0],25)), todasEspecialidadesFila.map(t => t[1]), "#5A9EFF", "Fila", false, 0.85);
 
-    // NOVO GRÁFICO: Fila de Espera por Subgrupo (cor diferente - verde azulado)
+    // Fila de Espera por Subgrupo - com barras mais largas e cor verde escuro
     const todasSubgruposFila = [...filaPorSubgrupo.entries()].sort((a,b) => b[1]-a[1]);
     if (todasSubgruposFila.length > 0) {
-      makeBarChartWithValueInside("cFilaPorSubgrupo", todasSubgruposFila.map(t => truncateLabel(t[0],35)), todasSubgruposFila.map(t => t[1]), "#3B82F6", "Fila por Subgrupo");
+      makeBarChartWithValueInside("cFilaPorSubgrupo", todasSubgruposFila.map(t => truncateLabel(t[0],35)), todasSubgruposFila.map(t => t[1]), "#0B5E42", "Fila por Subgrupo", false, 0.9);
     } else {
       if (el("cFilaPorSubgrupo")) {
         const ctx = el("cFilaPorSubgrupo").getContext("2d");
         if (charts.cFilaPorSubgrupo) charts.cFilaPorSubgrupo.destroy();
         charts.cFilaPorSubgrupo = new Chart(ctx, {
           type: "bar",
-          data: { labels: ["Sem dados"], datasets: [{ label: "Fila por Subgrupo", data: [0], backgroundColor: "#3B82F6" }] },
+          data: { labels: ["Sem dados"], datasets: [{ label: "Fila por Subgrupo", data: [0], backgroundColor: "#0B5E42" }] },
           options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
         });
       }
     }
 
-    // NOVO GRÁFICO: Fila de Espera por Complexidade (Rosca)
+    // Fila de Espera por Complexidade (Rosca)
     const complexidadeData = [...filaPorComplexidade.entries()].sort((a,b) => b[1]-a[1]);
     if (complexidadeData.length > 0) {
       const coresComplexidade = ["#8B5CF6", "#EC4899", "#10B981", "#F59E0B", "#EF4444", "#3B82F6", "#0B5E42"];
@@ -1901,24 +1977,6 @@
       }
     }
 
-    // Evolução das Cirurgias Realizadas
-    if (el("cEvolucaoRealizados")) {
-      if (charts.cEvolucaoRealizados) charts.cEvolucaoRealizados.destroy();
-      const dadosRealPorMes = meses.map(m => realizadosPorMes[m] || 0);
-      charts.cEvolucaoRealizados = new Chart(el("cEvolucaoRealizados").getContext("2d"), {
-        type: "line",
-        data: { labels: meses, datasets: [{ label: "Realizados", data: dadosRealPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 5 }] },
-        options: { 
-          responsive: true, maintainAspectRatio: false, 
-          plugins: { 
-            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 8 },
-            legend: { labels: { font: { weight: "bold" } } }
-          },
-          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
-        }
-      });
-    }
-
     // Distribuição por Especialidade (Rosca)
     const espRealMap = new Map(); agendados.forEach(d => espRealMap.set(d.especialidade || "Outros", (espRealMap.get(d.especialidade || "Outros") || 0) + d.recepcionados));
     const topEspReal = [...espRealMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
@@ -1932,7 +1990,7 @@
     // Top Estabelecimentos por Cirurgias Realizadas
     const estabProd = new Map(); agendados.forEach(d => estabProd.set(d.estabelecimento, (estabProd.get(d.estabelecimento) || 0) + d.recepcionados));
     const topProd = [...estabProd.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChartWithValueInside("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0B5E42", "Realizados");
+    makeBarChartWithValueInside("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0B5E42", "Realizados", false, 0.85);
 
     // Faturamento Mensal
     if (el("cFaturamentoMensal")) {
@@ -1956,12 +2014,12 @@
     // Financeiro por Especialidade
     const espFatMap = new Map(); financeiro.forEach(d => espFatMap.set(d.especialidade || "Outros", (espFatMap.get(d.especialidade || "Outros") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEspFat = [...espFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
-    makeBarChartWithValueInside("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0B5E42", "Financeiro", true);
+    makeBarChartWithValueInside("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0B5E42", "Financeiro", true, 0.7);
     
     // Financeiro por Estabelecimento
     const estabFatMap = new Map(); financeiro.forEach(d => estabFatMap.set(d.estabelecimento || "Não informado", (estabFatMap.get(d.estabelecimento || "Não informado") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEstabFat = [...estabFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChartWithValueInside("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#0B5E42", "Financeiro", true);
+    makeBarChartWithValueInside("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#0B5E42", "Financeiro", true, 0.7);
   }
 
   let currentTableData = [];
@@ -2010,7 +2068,7 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '十大<td colspan="8">Nenhum dado</tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
           <tr>
             <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
