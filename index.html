@@ -707,10 +707,10 @@
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('visao_geral', this)"><i class="fa-solid fa-chart-pie"></i> Visão Geral</button>
-    <button class="tab" onclick="switchTab('execucao_fila', this)"><i class="fa-solid fa-hourglass-half"></i> Execução da Fila de Espera</button>
-    <button class="tab" onclick="switchTab('execucao_agendamentos', this)"><i class="fa-solid fa-table-list"></i> Execução/Cirurgias Realizadas</button>
-    <button class="tab" onclick="switchTab('execucao_especialidade', this)"><i class="fa-solid fa-stethoscope"></i> Execução por Especialidade</button>
-    <button class="tab" onclick="switchTab('execucao_estabelecimento', this)"><i class="fa-solid fa-building"></i> Execução por Estabelecimento</button>
+    <button class="tab" onclick="switchTab('consolidado_fila', this)"><i class="fa-solid fa-hourglass-half"></i> Consolidado/Fila de Espera</button>
+    <button class="tab" onclick="switchTab('consolidado_realizadas', this)"><i class="fa-solid fa-table-list"></i> Consolidado/Cirurgias Realizadas</button>
+    <button class="tab" onclick="switchTab('consolidado_especialidades', this)"><i class="fa-solid fa-stethoscope"></i> Consolidado/Especialidades</button>
+    <button class="tab" onclick="switchTab('consolidado_estabelecimento', this)"><i class="fa-solid fa-building"></i> Consolidado/Estabelecimento</button>
     <button class="tab" onclick="switchTab('evolucao_financeira', this)"><i class="fa-solid fa-coins"></i> Evolução Financeira</button>
     <button class="tab" onclick="switchTab('dados_detalhados', this)"><i class="fa-solid fa-database"></i> Dados Detalhados</button>
   </div>
@@ -756,8 +756,8 @@
     </div>
   </section>
 
-  <!-- ABA 2: EXECUÇÃO DA FILA DE ESPERA -->
-  <section id="tab-execucao_fila" class="tabContent">
+  <!-- ABA 2: CONSOLIDADO/FILA DE ESPERA -->
+  <section id="tab-consolidado_fila" class="tabContent">
     <div class="chartCard full-width">
       <div class="chartHead">
         <h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3>
@@ -768,22 +768,17 @@
 
     <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-ranking-star"></i> Top Estabelecimentos com Maior Fila</h3></div>
-        <div class="chartWrap"><canvas id="cRankFilaEstab"></canvas></div>
-      </div>
-
-      <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top Especialidades com Maior Fila</h3></div>
         <div class="chartWrap"><canvas id="cRankFilaEspecialidade"></canvas></div>
       </div>
-    </div>
 
-    <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Fila de Espera por Subgrupo</h3></div>
         <div class="chartWrap"><canvas id="cFilaPorSubgrupo"></canvas></div>
       </div>
+    </div>
 
+    <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Fila de Espera por Complexidade</h3></div>
         <div class="chartWrap"><canvas id="cFilaComplexidadeRosca"></canvas></div>
@@ -791,8 +786,8 @@
     </div>
   </section>
 
-  <!-- ABA 3: EXECUÇÃO/Cirurgias Realizadas -->
-  <section id="tab-execucao_agendamentos" class="tabContent">
+  <!-- ABA 3: CONSOLIDADO/CIRURGIAS REALIZADAS -->
+  <section id="tab-consolidado_realizadas" class="tabContent">
     <div class="chartCard">
       <div class="chartHead">
         <h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas por Estabelecimento</h3>
@@ -820,8 +815,8 @@
     </div>
   </section>
 
-  <!-- ABA 4: EXECUÇÃO POR ESPECIALIDADE -->
-  <section id="tab-execucao_especialidade" class="tabContent">
+  <!-- ABA 4: CONSOLIDADO/ESPECIALIDADES -->
+  <section id="tab-consolidado_especialidades" class="tabContent">
     <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Especialidade</h3></div>
@@ -847,8 +842,8 @@
     </div>
   </section>
 
-  <!-- ABA 5: EXECUÇÃO POR ESTABELECIMENTO -->
-  <section id="tab-execucao_estabelecimento" class="tabContent">
+  <!-- ABA 5: CONSOLIDADO/ESTABELECIMENTO -->
+  <section id="tab-consolidado_estabelecimento" class="tabContent">
     <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Estabelecimento</h3></div>
@@ -1757,7 +1752,6 @@
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
       
-      // Para cada mês, calcular os valores filtrados
       const dadosFilaPorMes = meses.map(m => {
         const dadosFilaFiltrados = fila.filter(d => d.dataCorte === m);
         return dadosFilaFiltrados.reduce((s,d) => s + d.fila, 0);
@@ -1808,14 +1802,14 @@
       });
     }
 
-    // Funil Cirúrgico - removido o item FILA
+    // Funil Cirúrgico
     if (el("cFunil")) {
       makeDoughnutChartWithPercentages("cFunil", ["Ofertas", "Realizados", "Faltosos"], 
         [totalOferta, totalRealizados, totalFaltosos], 
         ["#5A9EFF", "#0B5E42", "#F59E0B"]);
     }
 
-    // NOVO GRÁFICO: Total Geral da Fila de Espera Atual por Especialidade
+    // GRÁFICO: Total Geral da Fila de Espera Atual por Especialidade - COR AZUL ESCURO
     if (el("cFilaPorEspecialidadeGeral")) {
       const filaPorEspFiltrada = new Map();
       fila.forEach(d => {
@@ -1825,13 +1819,13 @@
       });
       const todasEspFila = [...filaPorEspFiltrada.entries()].sort((a,b) => b[1]-a[1]);
       if (todasEspFila.length > 0) {
-        makeBarChartWithValueInside("cFilaPorEspecialidadeGeral", todasEspFila.map(t => truncateLabel(t[0], 30)), todasEspFila.map(t => t[1]), "#5A9EFF", "Fila de Espera", false, 0.85);
+        makeBarChartWithValueInside("cFilaPorEspecialidadeGeral", todasEspFila.map(t => truncateLabel(t[0], 30)), todasEspFila.map(t => t[1]), "#1e3a5f", "Fila de Espera", false, 0.85);
       } else {
         const ctx = el("cFilaPorEspecialidadeGeral").getContext("2d");
         if (charts.cFilaPorEspecialidadeGeral) charts.cFilaPorEspecialidadeGeral.destroy();
         charts.cFilaPorEspecialidadeGeral = new Chart(ctx, {
           type: "bar",
-          data: { labels: ["Sem dados"], datasets: [{ label: "Fila de Espera", data: [0], backgroundColor: "#5A9EFF" }] },
+          data: { labels: ["Sem dados"], datasets: [{ label: "Fila de Espera", data: [0], backgroundColor: "#1e3a5f" }] },
           options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
         });
       }
@@ -1932,10 +1926,6 @@
         }
       });
     }
-
-    // Top Estabelecimentos com Maior Fila
-    const topEstabFila = [...filaPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChartWithValueInside("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", "Fila", false, 0.85);
 
     // Top Especialidades com Maior Fila - TODAS as especialidades
     const todasEspecialidadesFila = [...filaPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]);
@@ -2068,7 +2058,7 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '十大<td colspan="8">Nenhum dado</td>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
           <tr>
             <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
