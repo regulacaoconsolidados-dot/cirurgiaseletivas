@@ -35,6 +35,8 @@
       --shadow: 0 4px 6px -2px rgba(0,0,0,0.05), 0 1px 2px 0 rgba(0,0,0,0.03);
       --shadow-lg: 0 20px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
       --r: 20px;
+      --green-light: #d1fae5;
+      --green-light-bg: #ecfdf5;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -332,6 +334,39 @@
     .full-width { grid-template-columns: 1fr; }
     @media (max-width: 900px) { .row2eq { grid-template-columns: 1fr; } }
 
+    /* Estilo do filtro verde claro para o gráfico de estabelecimento */
+    .estab-selector-highlight {
+      background: var(--green-light-bg);
+      border: 2px solid #10b981;
+      border-radius: 20px;
+      padding: 18px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+      transition: all 0.2s ease;
+    }
+    .estab-selector-highlight label {
+      font-weight: 800;
+      color: var(--primary);
+      font-size: 14px;
+      margin-right: 16px;
+    }
+    .estab-selector-highlight select {
+      padding: 12px 20px;
+      border-radius: 16px;
+      border: 1.5px solid #10b981;
+      background: white;
+      font-weight: 600;
+      min-width: 280px;
+      cursor: pointer;
+      font-size: 14px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .estab-selector-highlight select:focus {
+      outline: none;
+      border-color: #0B5E42;
+      box-shadow: 0 0 0 3px rgba(11,94,66,0.2);
+    }
+
     .fin-header {
       background: linear-gradient(135deg, #0B3B2F, #0B5E42);
       border-radius: 24px;
@@ -490,28 +525,6 @@
       100% { background-position: 200% 0; }
     }
 
-    .estab-selector {
-      margin-bottom: 20px;
-      padding: 15px;
-      background: #f9fafb;
-      border-radius: 16px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      flex-wrap: wrap;
-    }
-    .estab-selector label {
-      font-weight: 700;
-      color: var(--primary);
-    }
-    .estab-selector select {
-      padding: 8px 16px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      font-weight: 500;
-      min-width: 250px;
-    }
-    
     .month-filter {
       display: flex;
       align-items: center;
@@ -694,6 +707,7 @@
     <button class="tab active" onclick="switchTab('visao_geral', this)"><i class="fa-solid fa-chart-pie"></i> Visão Geral</button>
     <button class="tab" onclick="switchTab('execucao_fila', this)"><i class="fa-solid fa-hourglass-half"></i> Execução da Fila de Espera</button>
     <button class="tab" onclick="switchTab('execucao_agendamentos', this)"><i class="fa-solid fa-table-list"></i> Execução/Cirurgias Realizadas</button>
+    <button class="tab" onclick="switchTab('execucao_especialidade', this)"><i class="fa-solid fa-stethoscope"></i> Execução por Especialidade</button>
     <button class="tab" onclick="switchTab('execucao_estabelecimento', this)"><i class="fa-solid fa-building"></i> Execução por Estabelecimento</button>
     <button class="tab" onclick="switchTab('evolucao_financeira', this)"><i class="fa-solid fa-coins"></i> Evolução Financeira</button>
     <button class="tab" onclick="switchTab('dados_detalhados', this)"><i class="fa-solid fa-database"></i> Dados Detalhados</button>
@@ -783,14 +797,55 @@
     </div>
   </section>
 
-  <!-- ABA 4: EXECUÇÃO POR ESTABELECIMENTO -->
+  <!-- ABA 4: EXECUÇÃO POR ESPECIALIDADE (NOVO TÓPICO) -->
+  <section id="tab-execucao_especialidade" class="tabContent">
+    <div class="chartCard">
+      <div class="chartHead">
+        <h3><i class="fa-solid fa-chart-line"></i> Evolução Temporal por Especialidade</h3>
+        <div class="chartSub">Selecione uma especialidade para visualizar a evolução mensal</div>
+      </div>
+      <div class="estab-selector-highlight">
+        <label><i class="fa-solid fa-stethoscope"></i> Escolha a Especialidade:</label>
+        <select id="especialidadeSelecionada">
+          <option value="">Carregando especialidades...</option>
+        </select>
+      </div>
+      <div class="chartWrap"><canvas id="cEvolucaoPorEspecialidade"></canvas></div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cRealizadosPorEspecialidade"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Financeiro por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cFinanceiroPorEspecialidade"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Ofertas por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cOfertasPorEspecialidade"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faltosos por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cFaltososPorEspecialidade"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA 5: EXECUÇÃO POR ESTABELECIMENTO -->
   <section id="tab-execucao_estabelecimento" class="tabContent">
     <div class="chartCard">
       <div class="chartHead">
         <h3><i class="fa-solid fa-chart-line"></i> Evolução Temporal por Estabelecimento</h3>
         <div class="chartSub">Selecione um estabelecimento para visualizar a evolução mensal</div>
       </div>
-      <div class="estab-selector">
+      <div class="estab-selector-highlight">
         <label><i class="fa-solid fa-building"></i> Escolha o Estabelecimento:</label>
         <select id="estabSelecionado">
           <option value="">Carregando estabelecimentos...</option>
@@ -824,7 +879,7 @@
     </div>
   </section>
 
-  <!-- ABA 5: EVOLUÇÃO FINANCEIRA -->
+  <!-- ABA 6: EVOLUÇÃO FINANCEIRA -->
   <section id="tab-evolucao_financeira" class="tabContent">
     <div class="fin-header">
       <div class="fin-header-icon"><i class="fa-solid fa-chart-line"></i></div>
@@ -862,7 +917,7 @@
     </div>
   </section>
 
-  <!-- ABA 6: DADOS DETALHADOS -->
+  <!-- ABA 7: DADOS DETALHADOS -->
   <section id="tab-dados_detalhados" class="tabContent">
     <div class="card section">
       <div class="tableTop">
@@ -912,7 +967,6 @@
 
   const MONTHS_ORDER = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 
-  // Mapeamento SIGTAP completo
   const GRUPOS_SIGTAP = {
     "03": "03 - Consultas / Atendimentos / Acompanhamentos",
     "04": "04 - Procedimentos cirúrgicos",
@@ -963,7 +1017,6 @@
     }
   };
 
-  // Estabelecimentos que possuem dados financeiros/faturados
   const ESTABELECIMENTOS_FINANCEIROS = new Set([
     "HOSPITAL MUNICIPAL DE CONTAGEM",
     "HOSPITAL SÃO JOSÉ",
@@ -971,7 +1024,6 @@
     "CENTRO MATERNO INFANTIL"
   ]);
 
-  // Especialidades que possuem dados financeiros/faturados
   const ESPECIALIDADES_FINANCEIRAS = new Set([
     "CIRURGIA GERAL",
     "CIRURGIA PEDIÁTRICA",
@@ -1003,6 +1055,11 @@
   let faltososPorEstab = new Map();
   let filaPorEspecialidade = new Map();
   let filaPorEstab = new Map();
+  
+  let realizadosPorEspecialidade = new Map();
+  let ofertasPorEspecialidade = new Map();
+  let faltososPorEspecialidade = new Map();
+  let financeiroPorEspecialidade = new Map();
   
   let selectedSubgrupos = new Set();
   let selectedEspecialidades = new Set();
@@ -1154,7 +1211,6 @@
         loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
       ]);
 
-      // Processa FILA
       dadosFila = filaRaw.map(r => {
         let dataCorte = normalizePeriodo(getField(r, ["DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
         if (!dataCorte || dataCorte === "sem dados") dataCorte = "";
@@ -1189,7 +1245,6 @@
         if (d.estabelecimento) filaPorEstab.set(d.estabelecimento, (filaPorEstab.get(d.estabelecimento) || 0) + d.fila);
       });
 
-      // Processa AGENDADOS
       dadosAgendados = agendadosRaw.map(r => {
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
         let subgrupoOriginal = normalizeText(getField(r, ["SUBGRUPO"]));
@@ -1227,6 +1282,9 @@
       realizadosPorEstab.clear();
       ofertasPorEstab.clear();
       faltososPorEstab.clear();
+      realizadosPorEspecialidade.clear();
+      ofertasPorEspecialidade.clear();
+      faltososPorEspecialidade.clear();
       
       dadosAgendados.forEach(d => { 
         if (d.mes) {
@@ -1239,13 +1297,17 @@
           ofertasPorEstab.set(d.estabelecimento, (ofertasPorEstab.get(d.estabelecimento) || 0) + d.oferta);
           faltososPorEstab.set(d.estabelecimento, (faltososPorEstab.get(d.estabelecimento) || 0) + d.faltosos);
         }
-        if (d.especialidade) especialidadesSet.add(d.especialidade);
+        if (d.especialidade) {
+          realizadosPorEspecialidade.set(d.especialidade, (realizadosPorEspecialidade.get(d.especialidade) || 0) + d.recepcionados);
+          ofertasPorEspecialidade.set(d.especialidade, (ofertasPorEspecialidade.get(d.especialidade) || 0) + d.oferta);
+          faltososPorEspecialidade.set(d.especialidade, (faltososPorEspecialidade.get(d.especialidade) || 0) + d.faltosos);
+          especialidadesSet.add(d.especialidade);
+        }
         if (d.grupoCodigo) gruposSet.add(d.grupoCodigo);
         if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo);
         if (d.mes) allPeriodos.push(d.mes);
       });
 
-      // Processa FATURADO
       dadosFaturado = faturadoRaw.map(r => {
         const mensal = extractMonthlyValues(r);
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
@@ -1257,7 +1319,6 @@
         let estabelecimento = normalizeText(getField(r, ["ESTABELECIMENTO", "PRESTADOR"]));
         let especialidade = normalizeText(getField(r, ["ESPECIALIDADE", "Especialidade Descrição"]));
         
-        // Filtra apenas estabelecimentos e especialidades que possuem dados
         if (estabelecimento && !ESTABELECIMENTOS_FINANCEIROS.has(estabelecimento.toUpperCase())) return null;
         if (especialidade && !ESPECIALIDADES_FINANCEIRAS.has(especialidade.toUpperCase())) return null;
         
@@ -1296,7 +1357,6 @@
         }
       });
 
-      // Processa FINANCEIRO
       dadosFinanceiro = financeiroRaw.map(r => {
         const mensal = extractMonthlyValues(r, true);
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
@@ -1308,7 +1368,6 @@
         let estabelecimento = normalizeText(getField(r, ["ESTABELECIMENTO"]));
         let especialidade = normalizeText(getField(r, ["ESPECIALIDADE"]));
         
-        // Filtra apenas estabelecimentos e especialidades que possuem dados
         if (estabelecimento && !ESTABELECIMENTOS_FINANCEIROS.has(estabelecimento.toUpperCase())) return null;
         if (especialidade && !ESPECIALIDADES_FINANCEIRAS.has(especialidade.toUpperCase())) return null;
         
@@ -1327,14 +1386,16 @@
       }).filter(d => d && d.descricao);
       
       dadosFinanceiro.forEach(d => { 
-        if (d.especialidade) especialidadesSet.add(d.especialidade); 
+        if (d.especialidade) {
+          financeiroPorEspecialidade.set(d.especialidade, (financeiroPorEspecialidade.get(d.especialidade) || 0) + d.total);
+          especialidadesSet.add(d.especialidade);
+        }
         if (d.grupoCodigo) gruposSet.add(d.grupoCodigo); 
         if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo);
         if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento);
         Object.keys(d.mensal).forEach(m => allPeriodos.push(m));
       });
 
-      // Coleta todos os períodos
       allPeriodos = sortPeriodos(allPeriodos);
       
       const tableMonthFilter = el("tableMonthFilter");
@@ -1357,9 +1418,21 @@
         });
       }
       
+      const especialidadeSelect = el("especialidadeSelecionada");
+      if (especialidadeSelect) {
+        const espList = [...especialidadesSet].sort();
+        especialidadeSelect.innerHTML = '<option value="">Selecione uma especialidade</option>' + 
+          espList.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
+        especialidadeSelect.addEventListener("change", () => {
+          if (charts.cEvolucaoPorEspecialidade) charts.cEvolucaoPorEspecialidade.destroy();
+          renderEvolucaoPorEspecialidade(especialidadeSelect.value);
+        });
+      }
+      
       populateFilters();
       updateLastUpdate();
       applyFilters();
+      renderGraficosPorEspecialidade();
       toast(`Dados carregados!`, "success");
     } catch (e) {
       console.error(e);
@@ -1401,6 +1474,54 @@
         }
       });
     }
+  }
+
+  function renderEvolucaoPorEspecialidade(especialidade) {
+    if (!especialidade) return;
+    
+    const dadosEsp = dadosAgendados.filter(d => d.especialidade === especialidade);
+    const meses = allPeriodos;
+    const realizadosData = meses.map(m => dadosEsp.filter(d => d.mes === m).reduce((s,d) => s + d.recepcionados, 0));
+    const ofertasData = meses.map(m => dadosEsp.filter(d => d.mes === m).reduce((s,d) => s + d.oferta, 0));
+    const faltososData = meses.map(m => dadosEsp.filter(d => d.mes === m).reduce((s,d) => s + d.faltosos, 0));
+    
+    if (el("cEvolucaoPorEspecialidade")) {
+      if (charts.cEvolucaoPorEspecialidade) charts.cEvolucaoPorEspecialidade.destroy();
+      charts.cEvolucaoPorEspecialidade = new Chart(el("cEvolucaoPorEspecialidade").getContext("2d"), {
+        type: "line",
+        data: { 
+          labels: meses, 
+          datasets: [
+            { label: "Realizados", data: realizadosData, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 },
+            { label: "Ofertas", data: ofertasData, borderColor: "#5A9EFF", backgroundColor: "rgba(90,158,255,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#5A9EFF", pointRadius: 4 },
+            { label: "Faltosos", data: faltososData, borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointRadius: 4 }
+          ] 
+        },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 4 },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
+            legend: { labels: { font: { weight: "bold" } } }
+          },
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
+        }
+      });
+    }
+  }
+
+  function renderGraficosPorEspecialidade() {
+    const topRealizados = [...realizadosPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cRealizadosPorEspecialidade", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", "Realizados");
+    
+    const topFinanceiro = [...financeiroPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cFinanceiroPorEspecialidade", topFinanceiro.map(t => truncateLabel(t[0],25)), topFinanceiro.map(t => t[1]), "#1e3a5f", "Financeiro", true);
+    
+    const topOfertas = [...ofertasPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cOfertasPorEspecialidade", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", "Ofertas");
+    
+    const topFaltosos = [...faltososPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cFaltososPorEspecialidade", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
   }
 
   function updateLastUpdate() { el("lastUpdate").textContent = `Última atualização: ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`; }
@@ -1512,6 +1633,43 @@
     renderTable();
     renderFinTable(filteredFinanceiro, periodo);
     renderGraficosPorEstabelecimento(filteredAgendados, filteredFaturado, filteredFinanceiro);
+    renderGraficosPorEspecialidadeFiltrados(filteredAgendados, filteredFinanceiro);
+  }
+
+  function renderGraficosPorEspecialidadeFiltrados(agendadosFiltrados, financeiroFiltrados) {
+    if (!agendadosFiltrados) agendadosFiltrados = dadosAgendados;
+    if (!financeiroFiltrados) financeiroFiltrados = dadosFinanceiro;
+    
+    const realizadosPorEspFiltrado = new Map();
+    const ofertasPorEspFiltrado = new Map();
+    const faltososPorEspFiltrado = new Map();
+    const financeiroPorEspFiltrado = new Map();
+    
+    agendadosFiltrados.forEach(d => {
+      if (d.especialidade) {
+        realizadosPorEspFiltrado.set(d.especialidade, (realizadosPorEspFiltrado.get(d.especialidade) || 0) + d.recepcionados);
+        ofertasPorEspFiltrado.set(d.especialidade, (ofertasPorEspFiltrado.get(d.especialidade) || 0) + d.oferta);
+        faltososPorEspFiltrado.set(d.especialidade, (faltososPorEspFiltrado.get(d.especialidade) || 0) + d.faltosos);
+      }
+    });
+    
+    financeiroFiltrados.forEach(d => {
+      if (d.especialidade) {
+        financeiroPorEspFiltrado.set(d.especialidade, (financeiroPorEspFiltrado.get(d.especialidade) || 0) + d.total);
+      }
+    });
+    
+    const topRealizados = [...realizadosPorEspFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cRealizadosPorEspecialidade", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", "Realizados");
+    
+    const topFinanceiro = [...financeiroPorEspFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cFinanceiroPorEspecialidade", topFinanceiro.map(t => truncateLabel(t[0],25)), topFinanceiro.map(t => t[1]), "#1e3a5f", "Financeiro", true);
+    
+    const topOfertas = [...ofertasPorEspFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cOfertasPorEspecialidade", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", "Ofertas");
+    
+    const topFaltosos = [...faltososPorEspFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cFaltososPorEspecialidade", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
   }
 
   function renderGraficosPorEstabelecimento(agendadosFiltrados, faturadoFiltrados, financeiroFiltrados) {
@@ -1558,7 +1716,7 @@
     let barPercentage = 0.7;
     let categoryPercentage = 0.8;
     
-    if (id === "cRankFilaEstab" || id === "cRankFilaEspecialidade" || id === "cFaturadosPorEstab") {
+    if (id === "cRankFilaEstab" || id === "cRankFilaEspecialidade" || id === "cFaturadosPorEstab" || id === "cFinanceiroPorEspecialidade") {
       barPercentage = 0.8;
       categoryPercentage = 0.85;
     }
@@ -1789,11 +1947,9 @@
       });
     }
 
-    // Top Estabelecimentos com Maior Fila
     const topEstabFila = [...filaPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
     makeBarChartWithValueInside("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", "Fila");
 
-    // Top Especialidades com Maior Fila
     const topEspFila = [...filaPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
     makeBarChartWithValueInside("cRankFilaEspecialidade", topEspFila.map(t => truncateLabel(t[0],25)), topEspFila.map(t => t[1]), "#5A9EFF", "Fila");
 
@@ -1900,9 +2056,9 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '器<td colspan="8">Nenhum dado</td>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
-        <tr>
+         <tr>
           <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
           <td>${escapeHtml(r.grupo || "-")}</td>
           <td>${escapeHtml(r.subgrupo || "-")}</td>
@@ -1911,7 +2067,7 @@
           <td>${r.realizados.toLocaleString("pt-BR")}</td>
           <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
           <td>${formatMoney(r.financeiroValor)}</td>
-        </tr>
+         </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
     const searchInput = el("tSearch");
