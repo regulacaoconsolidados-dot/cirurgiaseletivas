@@ -777,6 +777,18 @@
         <div class="chartWrap"><canvas id="cRankFilaEspecialidade"></canvas></div>
       </div>
     </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Fila de Espera por Subgrupo</h3></div>
+        <div class="chartWrap"><canvas id="cFilaPorSubgrupo"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Fila de Espera por Complexidade</h3></div>
+        <div class="chartWrap"><canvas id="cFilaComplexidadeRosca"></canvas></div>
+      </div>
+    </div>
   </section>
 
   <!-- ABA 3: EXECUÇÃO/Cirurgias Realizadas -->
@@ -934,7 +946,6 @@
 
   const el = id => document.getElementById(id);
 
-  // URLs atualizadas para as planilhas
   const URL_FILA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1716569787&single=true&output=csv";
   const URL_AGENDADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1546152833&single=true&output=csv";
   const URL_FATURADO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=252919053&single=true&output=csv";
@@ -1016,6 +1027,8 @@
   let faltososPorEstab = new Map();
   let filaPorEspecialidade = new Map();
   let filaPorEstab = new Map();
+  let filaPorSubgrupo = new Map();
+  let filaPorComplexidade = new Map();
   
   let realizadosPorEspecialidade = new Map();
   let ofertasPorEspecialidade = new Map();
@@ -1186,7 +1199,7 @@
         loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
       ]);
 
-      // Processamento da FILA DE ESPERA com as novas nomenclaturas
+      // Processamento da FILA DE ESPERA
       dadosFila = filaRaw.map(r => {
         let dataCorte = normalizePeriodo(getField(r, ["Data Corte/ Fila de Espera", "DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
         if (!dataCorte || dataCorte === "sem dados") dataCorte = "";
@@ -1215,10 +1228,15 @@
       filaPorMes = {};
       filaPorEspecialidade.clear();
       filaPorEstab.clear();
+      filaPorSubgrupo.clear();
+      filaPorComplexidade.clear();
+      
       dadosFila.forEach(d => { 
         if (d.dataCorte) filaPorMes[d.dataCorte] = (filaPorMes[d.dataCorte] || 0) + d.fila;
         if (d.especialidade) filaPorEspecialidade.set(d.especialidade, (filaPorEspecialidade.get(d.especialidade) || 0) + d.fila);
         if (d.estabelecimento) filaPorEstab.set(d.estabelecimento, (filaPorEstab.get(d.estabelecimento) || 0) + d.fila);
+        if (d.subgrupo) filaPorSubgrupo.set(d.subgrupo, (filaPorSubgrupo.get(d.subgrupo) || 0) + d.fila);
+        if (d.complexidade) filaPorComplexidade.set(d.complexidade, (filaPorComplexidade.get(d.complexidade) || 0) + d.fila);
       });
 
       dadosAgendados = agendadosRaw.map(r => {
@@ -1284,7 +1302,6 @@
         if (d.mes) allPeriodos.push(d.mes);
       });
 
-      // Processamento do FATURADO
       dadosFaturado = [];
       faturadoRaw.forEach(r => {
         const mensal = extractMonthlyValues(r);
@@ -1600,7 +1617,7 @@
     let barPercentage = 0.7;
     let categoryPercentage = 0.8;
     
-    if (id === "cRankFilaEstab" || id === "cRankFilaEspecialidade" || id === "cFaturadosPorEstab" || id === "cFinanceiroPorEspecialidade") {
+    if (id === "cRankFilaEstab" || id === "cRankFilaEspecialidade" || id === "cFaturadosPorEstab" || id === "cFinanceiroPorEspecialidade" || id === "cFilaPorSubgrupo") {
       barPercentage = 0.8;
       categoryPercentage = 0.85;
     }
@@ -1688,6 +1705,7 @@
     const totalFaltosos = agendados.reduce((s,d) => s+d.faltosos, 0);
     const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
+    // Gráfico de evolução (já existente)
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
       const dadosFilaPorMes = meses.map(m => {
@@ -1727,12 +1745,14 @@
       });
     }
 
+    // Funil Cirúrgico
     if (el("cFunil")) {
       makeDoughnutChartWithPercentages("cFunil", ["Fila", "Ofertas", "Realizados", "Faltosos"], 
         [totalFila, totalOferta, totalRealizados, totalFaltosos], 
         ["#F87171", "#5A9EFF", "#0B5E42", "#F59E0B"]);
     }
 
+    // Complexidade Fila (Visão Geral)
     if (el("cComplexidadeFila")) {
       const compMap = new Map(); fila.forEach(d => compMap.set(d.complexidade || "Não informado", (compMap.get(d.complexidade || "Não informado") || 0) + d.fila));
       const labels = [...compMap.keys()];
@@ -1741,6 +1761,7 @@
       makeDoughnutChartWithPercentages("cComplexidadeFila", labels, values, colors.slice(0, labels.length));
     }
 
+    // Top Especialidades (Realizados vs Faturados)
     if (el("cTopEspComp")) {
       if (charts.cTopEspComp) charts.cTopEspComp.destroy();
       const espReal = new Map(); agendados.forEach(d => espReal.set(d.especialidade || "Outros", (espReal.get(d.especialidade || "Outros") || 0) + d.recepcionados));
@@ -1783,6 +1804,7 @@
       });
     }
 
+    // Receita Financeira por Especialidade (Horizontal)
     if (el("cFatEspecialidadeHorizontal")) {
       if (charts.cFatEspecialidadeHorizontal) charts.cFatEspecialidadeHorizontal.destroy();
       const espFat = new Map(); financeiro.forEach(d => {
@@ -1817,6 +1839,7 @@
       });
     }
 
+    // Evolução da Fila por Mês
     if (el("cEvolucaoFila")) {
       if (charts.cEvolucaoFila) charts.cEvolucaoFila.destroy();
       const mesesFila = Object.keys(filaPorMes).sort((a,b) => periodoSortValue(a)-periodoSortValue(b));
@@ -1834,12 +1857,51 @@
       });
     }
 
+    // Top Estabelecimentos com Maior Fila
     const topEstabFila = [...filaPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
     makeBarChartWithValueInside("cRankFilaEstab", topEstabFila.map(t => truncateLabel(t[0],25)), topEstabFila.map(t => t[1]), "#F87171", "Fila");
 
-    const topEspFila = [...filaPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChartWithValueInside("cRankFilaEspecialidade", topEspFila.map(t => truncateLabel(t[0],25)), topEspFila.map(t => t[1]), "#5A9EFF", "Fila");
+    // Top Especialidades com Maior Fila - TODAS as especialidades (sem limite)
+    const todasEspecialidadesFila = [...filaPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]);
+    makeBarChartWithValueInside("cRankFilaEspecialidade", todasEspecialidadesFila.map(t => truncateLabel(t[0],25)), todasEspecialidadesFila.map(t => t[1]), "#5A9EFF", "Fila");
 
+    // NOVO GRÁFICO: Fila de Espera por Subgrupo (cor diferente - verde azulado)
+    const todasSubgruposFila = [...filaPorSubgrupo.entries()].sort((a,b) => b[1]-a[1]);
+    if (todasSubgruposFila.length > 0) {
+      makeBarChartWithValueInside("cFilaPorSubgrupo", todasSubgruposFila.map(t => truncateLabel(t[0],35)), todasSubgruposFila.map(t => t[1]), "#3B82F6", "Fila por Subgrupo");
+    } else {
+      if (el("cFilaPorSubgrupo")) {
+        const ctx = el("cFilaPorSubgrupo").getContext("2d");
+        if (charts.cFilaPorSubgrupo) charts.cFilaPorSubgrupo.destroy();
+        charts.cFilaPorSubgrupo = new Chart(ctx, {
+          type: "bar",
+          data: { labels: ["Sem dados"], datasets: [{ label: "Fila por Subgrupo", data: [0], backgroundColor: "#3B82F6" }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
+        });
+      }
+    }
+
+    // NOVO GRÁFICO: Fila de Espera por Complexidade (Rosca)
+    const complexidadeData = [...filaPorComplexidade.entries()].sort((a,b) => b[1]-a[1]);
+    if (complexidadeData.length > 0) {
+      const coresComplexidade = ["#8B5CF6", "#EC4899", "#10B981", "#F59E0B", "#EF4444", "#3B82F6", "#0B5E42"];
+      makeDoughnutChartWithPercentages("cFilaComplexidadeRosca", 
+        complexidadeData.map(t => truncateLabel(t[0], 25)), 
+        complexidadeData.map(t => t[1]), 
+        coresComplexidade.slice(0, complexidadeData.length));
+    } else {
+      if (el("cFilaComplexidadeRosca")) {
+        const ctx = el("cFilaComplexidadeRosca").getContext("2d");
+        if (charts.cFilaComplexidadeRosca) charts.cFilaComplexidadeRosca.destroy();
+        charts.cFilaComplexidadeRosca = new Chart(ctx, {
+          type: "doughnut",
+          data: { labels: ["Sem dados"], datasets: [{ data: [1], backgroundColor: ["#e5e7eb"] }] },
+          options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { display: false } } }
+        });
+      }
+    }
+
+    // Evolução das Cirurgias Realizadas
     if (el("cEvolucaoRealizados")) {
       if (charts.cEvolucaoRealizados) charts.cEvolucaoRealizados.destroy();
       const dadosRealPorMes = meses.map(m => realizadosPorMes[m] || 0);
@@ -1857,6 +1919,7 @@
       });
     }
 
+    // Distribuição por Especialidade (Rosca)
     const espRealMap = new Map(); agendados.forEach(d => espRealMap.set(d.especialidade || "Outros", (espRealMap.get(d.especialidade || "Outros") || 0) + d.recepcionados));
     const topEspReal = [...espRealMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
     if (el("cEspecialidadeRealizados")) {
@@ -1866,10 +1929,12 @@
         ["#0B5E42","#F87171","#5A9EFF","#F59E0B","#8B5CF6","#EC4899","#10B981","#6366F1"]);
     }
 
+    // Top Estabelecimentos por Cirurgias Realizadas
     const estabProd = new Map(); agendados.forEach(d => estabProd.set(d.estabelecimento, (estabProd.get(d.estabelecimento) || 0) + d.recepcionados));
     const topProd = [...estabProd.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
     makeBarChartWithValueInside("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0B5E42", "Realizados");
 
+    // Faturamento Mensal
     if (el("cFaturamentoMensal")) {
       if (charts.cFaturamentoMensal) charts.cFaturamentoMensal.destroy();
       const fatPorMes = meses.map(m => financeiro.reduce((s,d) => s + (d.mensal[m] || 0), 0));
@@ -1888,10 +1953,12 @@
       });
     }
 
+    // Financeiro por Especialidade
     const espFatMap = new Map(); financeiro.forEach(d => espFatMap.set(d.especialidade || "Outros", (espFatMap.get(d.especialidade || "Outros") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEspFat = [...espFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
     makeBarChartWithValueInside("cFatEspecialidade", topEspFat.map(t => truncateLabel(t[0],22)), topEspFat.map(t => t[1]), "#0B5E42", "Financeiro", true);
     
+    // Financeiro por Estabelecimento
     const estabFatMap = new Map(); financeiro.forEach(d => estabFatMap.set(d.estabelecimento || "Não informado", (estabFatMap.get(d.estabelecimento || "Não informado") || 0) + (periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total)));
     const topEstabFat = [...estabFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
     makeBarChartWithValueInside("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#0B5E42", "Financeiro", true);
