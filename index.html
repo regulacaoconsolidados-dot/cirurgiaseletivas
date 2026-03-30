@@ -799,7 +799,7 @@
     </div>
   </section>
 
-  <!-- ABA 4: EXECUÇÃO POR ESPECIALIDADE (SEM EVOLUÇÃO TEMPORAL) -->
+  <!-- ABA 4: EXECUÇÃO POR ESPECIALIDADE -->
   <section id="tab-execucao_especialidade" class="tabContent">
     <div class="row2eq">
       <div class="chartCard">
@@ -826,7 +826,7 @@
     </div>
   </section>
 
-  <!-- ABA 5: EXECUÇÃO POR ESTABELECIMENTO (SEM EVOLUÇÃO TEMPORAL) -->
+  <!-- ABA 5: EXECUÇÃO POR ESTABELECIMENTO -->
   <section id="tab-execucao_estabelecimento" class="tabContent">
     <div class="row2eq">
       <div class="chartCard">
@@ -934,6 +934,7 @@
 
   const el = id => document.getElementById(id);
 
+  // URLs atualizadas para as planilhas
   const URL_FILA = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1716569787&single=true&output=csv";
   const URL_AGENDADOS = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=1546152833&single=true&output=csv";
   const URL_FATURADO = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSqltus8b2SYt7WPDLHHPJwM8BTqOTCgoyaLwvyhOEbaRLHQbocDMTqYoMjE-muww/pub?gid=252919053&single=true&output=csv";
@@ -990,20 +991,6 @@
       "0418": "0418 - Cirurgia em nefrologia"
     }
   };
-
-  const ESTABELECIMENTOS_FINANCEIROS = new Set([
-    "HOSPITAL MUNICIPAL DE CONTAGEM",
-    "HOSPITAL SÃO JOSÉ",
-    "HOSPITAL SANTA RITA",
-    "CENTRO MATERNO INFANTIL"
-  ]);
-
-  const ESPECIALIDADES_FINANCEIRAS = new Set([
-    "CIRURGIA GERAL",
-    "CIRURGIA PEDIÁTRICA",
-    "CIRURGIA PLÁSTICA",
-    "NEUROCIRURGIA"
-  ]);
 
   let dadosFila = [];
   let dadosAgendados = [];
@@ -1094,7 +1081,18 @@
     if (!s) return "";
     s = s.replace(/\s+/g, "").replace(/\./g, "").replace(/-/g, "/");
     const match = s.match(/^(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/?(\d{2,4})$/i);
-    if (!match) return normalizeText(label);
+    if (!match) {
+      const matchNum = s.match(/^(\d{1,2})\/?(\d{2,4})$/);
+      if (matchNum) {
+        let mesNum = parseInt(matchNum[1]);
+        let ano = matchNum[2];
+        if (ano.length === 4) ano = ano.slice(2);
+        if (mesNum >= 1 && mesNum <= 12) {
+          return `${MONTHS_ORDER[mesNum-1]}/${ano}`;
+        }
+      }
+      return s;
+    }
     let mes = match[1];
     let ano = match[2];
     if (ano.length === 4) ano = ano.slice(2);
@@ -1151,12 +1149,15 @@
     }).filter(obj => Object.values(obj).some(v => normalizeText(v) !== ""));
   }
 
-  function extractMonthlyValues(row, isFinanceiro = false) {
+  function extractMonthlyValues(row) {
     const mensal = {};
     Object.keys(row).forEach(key => {
-      const periodo = normalizePeriodo(key);
+      const rawKey = key;
+      const periodo = normalizePeriodo(rawKey);
       if (/^(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\/\d{2}$/i.test(periodo)) {
-        mensal[periodo] = parseNumberBR(row[key]);
+        let value = row[key];
+        let parsedValue = parseNumberBR(value);
+        mensal[periodo] = parsedValue;
       }
     });
     return mensal;
@@ -1179,33 +1180,34 @@
     el("loading").classList.add("on");
     try {
       const [filaRaw, agendadosRaw, faturadoRaw, financeiroRaw] = await Promise.all([
-        loadCSVSmart(URL_FILA, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "GRUPO", "SUBGRUPO"]),
+        loadCSVSmart(URL_FILA, ["Código do Procedimento", "PROCEDIMENTO DESCRIÇÃO", "GRUPO", "SUBGRUPO"]),
         loadCSVSmart(URL_AGENDADOS, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "MÊS", "REC", "FAL", "OFERTA"]),
         loadCSVSmart(URL_FATURADO, ["Procedimento Descrição", "CÓDIGO DO PROCEDIMENTO", "ESTABELECIMENTO"]),
         loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "CÓDIGO PROCEDIMENTO", "ESTABELECIMENTO", "Total geral"])
       ]);
 
+      // Processamento da FILA DE ESPERA com as novas nomenclaturas
       dadosFila = filaRaw.map(r => {
-        let dataCorte = normalizePeriodo(getField(r, ["DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
+        let dataCorte = normalizePeriodo(getField(r, ["Data Corte/ Fila de Espera", "DATA CORTE/ FILA DE ESPERA", "DATA CORTE", "DATA"]));
         if (!dataCorte || dataCorte === "sem dados") dataCorte = "";
-        let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
-        let subgrupoOriginal = normalizeText(getField(r, ["SUBGRUPO"]));
+        let grupoOriginal = normalizeText(getField(r, ["Grupo", "GRUPO"]));
+        let subgrupoOriginal = normalizeText(getField(r, ["Subgrupo", "SUBGRUPO"]));
         let grupoCodigo = extractGrupoCodigo(grupoOriginal);
         let subgrupoCodigo = extractSubgrupoCodigo(subgrupoOriginal);
         let grupoNome = GRUPOS_SIGTAP[grupoCodigo] || grupoOriginal;
         let subgrupoNome = (SUBGRUPOS_SIGTAP[grupoCodigo]?.[subgrupoCodigo]) || subgrupoOriginal;
-        let filaValue = parseNumberBR(getField(r, ["FILA INTERNA ATUAL SUR"]));
+        let filaValue = parseNumberBR(getField(r, ["TOTAL", "FILA INTERNA ATUAL SUR", "Total"]));
         return {
-          codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
-          descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])),
+          codigo: normalizeText(getField(r, ["Código do Procedimento", "CÓDIGO DO PROCEDIMENTO"])),
+          descricao: normalizeText(getField(r, ["Descrição do Procedimento", "PROCEDIMENTO DESCRIÇÃO"])),
           grupo: grupoNome,
           grupoCodigo: grupoCodigo,
           subgrupo: subgrupoNome,
           subgrupoCodigo: subgrupoCodigo,
-          estabelecimento: normalizeText(getField(r, ["PRESTADOR", "ESTABELECIMENTO"])),
+          estabelecimento: normalizeText(getField(r, ["PRESTADOR", "ESTABELECIMENTO", "Estabelecimento"])),
           fila: filaValue,
-          complexidade: normalizeText(getField(r, ["COMPLEXIDADE"])),
-          especialidade: normalizeText(getField(r, ["ESPECIALIDADE"])),
+          complexidade: normalizeText(getField(r, ["Complexidade- Sigtap", "COMPLEXIDADE", "Complexidade"])),
+          especialidade: normalizeText(getField(r, ["Especialidade", "ESPECIALIDADE"])),
           dataCorte
         };
       }).filter(d => d.descricao);
@@ -1282,39 +1284,40 @@
         if (d.mes) allPeriodos.push(d.mes);
       });
 
-      dadosFaturado = faturadoRaw.map(r => {
+      // Processamento do FATURADO
+      dadosFaturado = [];
+      faturadoRaw.forEach(r => {
         const mensal = extractMonthlyValues(r);
+        let estabelecimento = normalizeText(getField(r, ["ESTABELECIMENTO", "PRESTADOR", "ESTABELECIMENTO PRESTADOR"]));
+        let especialidade = normalizeText(getField(r, ["ESPECIALIDADE", "Especialidade Descrição", "ESPECIALIDADE DESCRIÇÃO"]));
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
         let subgrupoOriginal = normalizeText(getField(r, ["SUBGRUPO"]));
         let grupoCodigo = extractGrupoCodigo(grupoOriginal);
         let subgrupoCodigo = extractSubgrupoCodigo(subgrupoOriginal);
         let grupoNome = GRUPOS_SIGTAP[grupoCodigo] || grupoOriginal;
         let subgrupoNome = (SUBGRUPOS_SIGTAP[grupoCodigo]?.[subgrupoCodigo]) || subgrupoOriginal;
-        let estabelecimento = normalizeText(getField(r, ["ESTABELECIMENTO", "PRESTADOR"]));
-        let especialidade = normalizeText(getField(r, ["ESPECIALIDADE", "Especialidade Descrição"]));
         
-        if (estabelecimento && !ESTABELECIMENTOS_FINANCEIROS.has(estabelecimento.toUpperCase())) return null;
-        if (especialidade && !ESPECIALIDADES_FINANCEIRAS.has(especialidade.toUpperCase())) return null;
-        
-        return {
-          codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])),
-          descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO", "Procedimento Descrição"])),
-          grupo: grupoNome,
-          grupoCodigo: grupoCodigo,
-          subgrupo: subgrupoNome,
-          subgrupoCodigo: subgrupoCodigo,
-          estabelecimento: estabelecimento,
-          especialidade: especialidade,
-          mensal,
-          total: Object.values(mensal).reduce((s,v) => s+v, 0)
-        };
-      }).filter(d => d && d.descricao);
+        if (Object.keys(mensal).length > 0) {
+          dadosFaturado.push({
+            codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO", "CÓDIGO PROCEDIMENTO"])),
+            descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO", "Procedimento Descrição"])),
+            grupo: grupoNome,
+            grupoCodigo: grupoCodigo,
+            subgrupo: subgrupoNome,
+            subgrupoCodigo: subgrupoCodigo,
+            estabelecimento: estabelecimento || "Não informado",
+            especialidade: especialidade || "Não informado",
+            mensal: mensal,
+            total: Object.values(mensal).reduce((s,v) => s+v, 0)
+          });
+        }
+      });
       
       dadosFaturado.forEach(d => { 
-        if (d.especialidade) especialidadesSet.add(d.especialidade); 
+        if (d.especialidade && d.especialidade !== "Não informado") especialidadesSet.add(d.especialidade); 
         if (d.grupoCodigo) gruposSet.add(d.grupoCodigo); 
         if (d.subgrupoCodigo && d.grupoCodigo) subgruposMap.set(d.subgrupoCodigo, d.grupoCodigo);
-        if (d.estabelecimento) estabelecimentosSet.add(d.estabelecimento);
+        if (d.estabelecimento && d.estabelecimento !== "Não informado") estabelecimentosSet.add(d.estabelecimento);
         Object.keys(d.mensal).forEach(m => allPeriodos.push(m));
       });
 
@@ -1326,13 +1329,13 @@
           faturadosPorMes[mes] = (faturadosPorMes[mes] || 0) + qtd;
           faturadosQtdPorMes[mes] = (faturadosQtdPorMes[mes] || 0) + qtd;
         });
-        if (d.estabelecimento) {
+        if (d.estabelecimento && d.estabelecimento !== "Não informado") {
           faturadosPorEstab.set(d.estabelecimento, (faturadosPorEstab.get(d.estabelecimento) || 0) + d.total);
         }
       });
 
       dadosFinanceiro = financeiroRaw.map(r => {
-        const mensal = extractMonthlyValues(r, true);
+        const mensal = extractMonthlyValues(r);
         let grupoOriginal = normalizeText(getField(r, ["GRUPO"]));
         let subgrupoOriginal = normalizeText(getField(r, ["SUBGRUPO"]));
         let grupoCodigo = extractGrupoCodigo(grupoOriginal);
@@ -1341,9 +1344,6 @@
         let subgrupoNome = (SUBGRUPOS_SIGTAP[grupoCodigo]?.[subgrupoCodigo]) || subgrupoOriginal;
         let estabelecimento = normalizeText(getField(r, ["ESTABELECIMENTO"]));
         let especialidade = normalizeText(getField(r, ["ESPECIALIDADE"]));
-        
-        if (estabelecimento && !ESTABELECIMENTOS_FINANCEIROS.has(estabelecimento.toUpperCase())) return null;
-        if (especialidade && !ESPECIALIDADES_FINANCEIRAS.has(especialidade.toUpperCase())) return null;
         
         return {
           codigo: normalizeText(getField(r, ["CÓDIGO PROCEDIMENTO"])),
@@ -1943,7 +1943,7 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '十大<td colspan="8">Nenhum dado</tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
           <tr>
             <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
