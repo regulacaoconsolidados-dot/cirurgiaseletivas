@@ -283,7 +283,9 @@
       border-radius: 60px;
       border: 1px solid var(--border);
       margin-top: 24px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      white-space: nowrap;
     }
     .tab {
       border: none;
@@ -295,6 +297,7 @@
       cursor: pointer;
       transition: all 0.2s;
       color: var(--muted);
+      white-space: nowrap;
     }
     .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(11,59,47,0.2); }
 
@@ -334,7 +337,6 @@
     .full-width { grid-template-columns: 1fr; }
     @media (max-width: 900px) { .row2eq { grid-template-columns: 1fr; } }
 
-    /* Estilo do filtro verde claro para o gráfico de estabelecimento */
     .estab-selector-highlight {
       background: var(--green-light-bg);
       border: 2px solid #10b981;
@@ -797,22 +799,8 @@
     </div>
   </section>
 
-  <!-- ABA 4: EXECUÇÃO POR ESPECIALIDADE (NOVO TÓPICO) -->
+  <!-- ABA 4: EXECUÇÃO POR ESPECIALIDADE (SEM EVOLUÇÃO TEMPORAL) -->
   <section id="tab-execucao_especialidade" class="tabContent">
-    <div class="chartCard">
-      <div class="chartHead">
-        <h3><i class="fa-solid fa-chart-line"></i> Evolução Temporal por Especialidade</h3>
-        <div class="chartSub">Selecione uma especialidade para visualizar a evolução mensal</div>
-      </div>
-      <div class="estab-selector-highlight">
-        <label><i class="fa-solid fa-stethoscope"></i> Escolha a Especialidade:</label>
-        <select id="especialidadeSelecionada">
-          <option value="">Carregando especialidades...</option>
-        </select>
-      </div>
-      <div class="chartWrap"><canvas id="cEvolucaoPorEspecialidade"></canvas></div>
-    </div>
-
     <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Especialidade</h3></div>
@@ -838,22 +826,8 @@
     </div>
   </section>
 
-  <!-- ABA 5: EXECUÇÃO POR ESTABELECIMENTO -->
+  <!-- ABA 5: EXECUÇÃO POR ESTABELECIMENTO (SEM EVOLUÇÃO TEMPORAL) -->
   <section id="tab-execucao_estabelecimento" class="tabContent">
-    <div class="chartCard">
-      <div class="chartHead">
-        <h3><i class="fa-solid fa-chart-line"></i> Evolução Temporal por Estabelecimento</h3>
-        <div class="chartSub">Selecione um estabelecimento para visualizar a evolução mensal</div>
-      </div>
-      <div class="estab-selector-highlight">
-        <label><i class="fa-solid fa-building"></i> Escolha o Estabelecimento:</label>
-        <select id="estabSelecionado">
-          <option value="">Carregando estabelecimentos...</option>
-        </select>
-      </div>
-      <div class="chartWrap"><canvas id="cEvolucaoPorEstab"></canvas></div>
-    </div>
-
     <div class="row2eq">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Estabelecimento</h3></div>
@@ -1407,28 +1381,6 @@
         });
       }
       
-      const estabSelect = el("estabSelecionado");
-      if (estabSelect) {
-        const estabList = [...estabelecimentosSet].sort();
-        estabSelect.innerHTML = '<option value="">Selecione um estabelecimento</option>' + 
-          estabList.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
-        estabSelect.addEventListener("change", () => {
-          if (charts.cEvolucaoPorEstab) charts.cEvolucaoPorEstab.destroy();
-          renderEvolucaoPorEstab(estabSelect.value);
-        });
-      }
-      
-      const especialidadeSelect = el("especialidadeSelecionada");
-      if (especialidadeSelect) {
-        const espList = [...especialidadesSet].sort();
-        especialidadeSelect.innerHTML = '<option value="">Selecione uma especialidade</option>' + 
-          espList.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
-        especialidadeSelect.addEventListener("change", () => {
-          if (charts.cEvolucaoPorEspecialidade) charts.cEvolucaoPorEspecialidade.destroy();
-          renderEvolucaoPorEspecialidade(especialidadeSelect.value);
-        });
-      }
-      
       populateFilters();
       updateLastUpdate();
       applyFilters();
@@ -1439,74 +1391,6 @@
       toast(`Erro: ${e.message}`, "error");
     } finally {
       el("loading").classList.remove("on");
-    }
-  }
-
-  function renderEvolucaoPorEstab(estabelecimento) {
-    if (!estabelecimento) return;
-    
-    const dadosEstab = dadosAgendados.filter(d => d.estabelecimento === estabelecimento);
-    const meses = allPeriodos;
-    const realizadosData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.recepcionados, 0));
-    const ofertasData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.oferta, 0));
-    const faltososData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.faltosos, 0));
-    
-    if (el("cEvolucaoPorEstab")) {
-      if (charts.cEvolucaoPorEstab) charts.cEvolucaoPorEstab.destroy();
-      charts.cEvolucaoPorEstab = new Chart(el("cEvolucaoPorEstab").getContext("2d"), {
-        type: "line",
-        data: { 
-          labels: meses, 
-          datasets: [
-            { label: "Realizados", data: realizadosData, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 },
-            { label: "Ofertas", data: ofertasData, borderColor: "#5A9EFF", backgroundColor: "rgba(90,158,255,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#5A9EFF", pointRadius: 4 },
-            { label: "Faltosos", data: faltososData, borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointRadius: 4 }
-          ] 
-        },
-        options: { 
-          responsive: true, maintainAspectRatio: false, 
-          plugins: { 
-            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 4 },
-            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
-            legend: { labels: { font: { weight: "bold" } } }
-          },
-          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
-        }
-      });
-    }
-  }
-
-  function renderEvolucaoPorEspecialidade(especialidade) {
-    if (!especialidade) return;
-    
-    const dadosEsp = dadosAgendados.filter(d => d.especialidade === especialidade);
-    const meses = allPeriodos;
-    const realizadosData = meses.map(m => dadosEsp.filter(d => d.mes === m).reduce((s,d) => s + d.recepcionados, 0));
-    const ofertasData = meses.map(m => dadosEsp.filter(d => d.mes === m).reduce((s,d) => s + d.oferta, 0));
-    const faltososData = meses.map(m => dadosEsp.filter(d => d.mes === m).reduce((s,d) => s + d.faltosos, 0));
-    
-    if (el("cEvolucaoPorEspecialidade")) {
-      if (charts.cEvolucaoPorEspecialidade) charts.cEvolucaoPorEspecialidade.destroy();
-      charts.cEvolucaoPorEspecialidade = new Chart(el("cEvolucaoPorEspecialidade").getContext("2d"), {
-        type: "line",
-        data: { 
-          labels: meses, 
-          datasets: [
-            { label: "Realizados", data: realizadosData, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 },
-            { label: "Ofertas", data: ofertasData, borderColor: "#5A9EFF", backgroundColor: "rgba(90,158,255,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#5A9EFF", pointRadius: 4 },
-            { label: "Faltosos", data: faltososData, borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointRadius: 4 }
-          ] 
-        },
-        options: { 
-          responsive: true, maintainAspectRatio: false, 
-          plugins: { 
-            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 4 },
-            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
-            legend: { labels: { font: { weight: "bold" } } }
-          },
-          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
-        }
-      });
     }
   }
 
@@ -1806,7 +1690,10 @@
     
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
-      const dadosFilaPorMes = meses.map(m => filaPorMes[m] || 0);
+      const dadosFilaPorMes = meses.map(m => {
+        const dadosFilaFiltrados = fila.filter(d => d.dataCorte === m);
+        return dadosFilaFiltrados.reduce((s,d) => s + d.fila, 0);
+      });
       const dadosRealizadosPorMes = meses.map(m => realizadosPorMes[m] || 0);
       const dadosOfertasPorMes = meses.map(m => ofertasPorMes[m] || 0);
       const dadosFaltososPorMes = meses.map(m => faltososPorMes[m] || 0);
@@ -2058,16 +1945,16 @@
     const tbody = el("tBody");
     if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
-         <tr>
-          <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
-          <td>${escapeHtml(r.grupo || "-")}</td>
-          <td>${escapeHtml(r.subgrupo || "-")}</td>
-          <td>${escapeHtml(r.estabelecimento || "-")}</td>
-          <td>${escapeHtml(r.mes || "-")}</td>
-          <td>${r.realizados.toLocaleString("pt-BR")}</td>
-          <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
-          <td>${formatMoney(r.financeiroValor)}</td>
-         </tr>
+          <tr>
+            <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
+            <td>${escapeHtml(r.grupo || "-")}</td>
+            <td>${escapeHtml(r.subgrupo || "-")}</td>
+            <td>${escapeHtml(r.estabelecimento || "-")}</td>
+            <td>${escapeHtml(r.mes || "-")}</td>
+            <td>${r.realizados.toLocaleString("pt-BR")}</td>
+            <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
+            <td>${formatMoney(r.financeiroValor)}</td>
+          </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
     const searchInput = el("tSearch");
