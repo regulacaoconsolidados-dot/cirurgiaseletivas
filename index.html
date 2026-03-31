@@ -141,7 +141,7 @@
       gap: 16px;
     }
     .fg { grid-column: span 2; }
-    .fg-subgrupo { grid-column: span 3; } /* Aumentando a largura do Subgrupo SIGTAP */
+    .fg-subgrupo { grid-column: span 4; } /* Aumentado para 4 colunas */
     @media (max-width: 1100px) { .fg { grid-column: span 4; } .fg-subgrupo { grid-column: span 6; } }
     @media (max-width: 700px) { .fg { grid-column: span 6; } .fg-subgrupo { grid-column: span 12; } }
     @media (max-width: 500px) { .fg { grid-column: span 12; } .fg-subgrupo { grid-column: span 12; } }
@@ -285,20 +285,23 @@
       flex-wrap: nowrap;
       overflow-x: auto;
       white-space: nowrap;
+      justify-content: space-between;
     }
     .tab {
       border: none;
       background: transparent;
-      padding: 10px 24px;
+      padding: 10px 20px;
       border-radius: 40px;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 13px;
       cursor: pointer;
       transition: all 0.2s;
       color: var(--muted);
       white-space: nowrap;
+      flex: 1;
+      text-align: center;
     }
-    .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(11,59,47,0.2); }
+    .tab.active { background: var(--primary); color: white; box-shadow: 0 4px 10px rgba(11,59,47,0.2); font-weight: 800; }
 
     .tabContent { display: none; margin-top: 24px; }
     .tabContent.active { display: block; }
@@ -456,6 +459,9 @@
     }
     .data-table th:hover { background: linear-gradient(135deg, #0B5E42, #0B3B2F); }
     .data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-weight: 500; }
+    .data-table td:nth-child(4),
+    .data-table td:nth-child(5),
+    .data-table td:nth-child(6) { text-align: center; } /* Centraliza os valores */
     .data-table tr:hover { background: #f0fdfa; }
 
     .toastBox {
@@ -846,30 +852,57 @@
 
   <!-- ABA: DEMANDA REPRIMIDA NA FILA DE ESPERA (último tópico) -->
   <section id="tab-demanda_reprimida" class="tabContent">
-    <div class="chartCard full-width">
-      <div class="chartHead">
-        <h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3>
-        <div class="chartSub">Evolução mensal da fila de espera</div>
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3>
+          <div class="chartSub">Evolução mensal da fila de espera</div>
+        </div>
+        <div class="chartWrap" style="height: 420px;"><canvas id="cEvolucaoFila"></canvas></div>
       </div>
-      <div class="chartWrap" style="height: 450px;"><canvas id="cEvolucaoFila"></canvas></div>
+
+      <div class="chartCard">
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-pie"></i> Fila de Espera por Complexidade</h3>
+          <div class="chartSub">Distribuição por nível de complexidade</div>
+        </div>
+        <div class="chartWrap"><canvas id="cFilaComplexidadeRosca"></canvas></div>
+      </div>
     </div>
 
     <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-simple"></i> Top Especialidades com Maior Fila</h3></div>
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-simple"></i> Top Especialidades com Maior Fila</h3>
+          <div class="chartSub">Especialidades com maior demanda reprimida</div>
+        </div>
         <div class="chartWrap"><canvas id="cRankFilaEspecialidade"></canvas></div>
       </div>
 
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Fila de Espera por Subgrupo</h3></div>
-        <div class="chartWrap"><canvas id="cFilaPorSubgrupo"></canvas></div>
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-gantt"></i> Tempo Médio de Espera por Especialidade</h3>
+          <div class="chartSub">Estimativa do tempo médio de espera (dias)</div>
+        </div>
+        <div class="chartWrap"><canvas id="cTempoEsperaEspecialidade"></canvas></div>
       </div>
     </div>
 
     <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Fila de Espera por Complexidade</h3></div>
-        <div class="chartWrap"><canvas id="cFilaComplexidadeRosca"></canvas></div>
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-bar"></i> Fila de Espera por Subgrupo</h3>
+          <div class="chartSub">Distribuição por subgrupo SIGTAP</div>
+        </div>
+        <div class="chartWrap"><canvas id="cFilaPorSubgrupo"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-line"></i> Tendência de Crescimento da Fila</h3>
+          <div class="chartSub">Projeção dos próximos 3 meses</div>
+        </div>
+        <div class="chartWrap"><canvas id="cTendenciaFila"></canvas></div>
       </div>
     </div>
   </section>
@@ -1223,6 +1256,7 @@
           realizadosPorEstab.set(d.estabelecimento, (realizadosPorEstab.get(d.estabelecimento) || 0) + d.recepcionados);
           ofertasPorEstab.set(d.estabelecimento, (ofertasPorEstab.get(d.estabelecimento) || 0) + d.oferta);
           faltososPorEstab.set(d.estabelecimento, (faltososPorEstab.get(d.estabelecimento) || 0) + d.faltosos);
+          estabelecimentosSet.add(d.estabelecimento);
         }
         if (d.especialidade) {
           realizadosPorEspecialidade.set(d.especialidade, (realizadosPorEspecialidade.get(d.especialidade) || 0) + d.recepcionados);
@@ -1558,7 +1592,6 @@
       categoryPercentage = 0.9;
     }
     
-    // Configuração especial para o gráfico de Receita Financeira por Estabelecimento - sem grid lines
     const gridConfig = (id === "cReceitaFinanceiraEstab") ? { display: false } : { display: false };
     
     charts[id] = new Chart(el(id).getContext("2d"), {
@@ -1699,7 +1732,7 @@
         ["#5A9EFF", "#0B5E42", "#F59E0B"]);
     }
 
-    // GRÁFICO: Receita Financeira por Estabelecimento - VERMELHO ESCURO (sem grid lines)
+    // GRÁFICO: Receita Financeira por Estabelecimento - VERMELHO ESCURO
     if (el("cReceitaFinanceiraEstab")) {
       const receitaPorEstab = new Map();
       financeiro.forEach(d => {
@@ -1838,6 +1871,95 @@
         coresComplexidade.slice(0, complexidadeData.length));
     }
 
+    // NOVO GRÁFICO: Tempo Médio de Espera por Especialidade
+    if (el("cTempoEsperaEspecialidade")) {
+      const tempoEsperaMap = new Map();
+      // Simulação de tempo médio de espera baseado no tamanho da fila e capacidade de produção
+      filaPorEspecialidade.forEach((fila, especialidade) => {
+        const realizados = realizadosPorEspecialidade.get(especialidade) || 1;
+        const tempoMedio = Math.round((fila / realizados) * 30); // Estimativa em dias
+        tempoEsperaMap.set(especialidade, Math.min(tempoMedio, 365)); // Limite de 365 dias
+      });
+      const topTempoEspera = [...tempoEsperaMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+      if (topTempoEspera.length > 0) {
+        makeBarChartWithValueInside("cTempoEsperaEspecialidade", topTempoEspera.map(t => truncateLabel(t[0], 25)), topTempoEspera.map(t => t[1]), "#F97316", "Tempo Médio (dias)", false, 0.85);
+      }
+    }
+
+    // NOVO GRÁFICO: Tendência de Crescimento da Fila
+    if (el("cTendenciaFila")) {
+      const mesesOrdenados = Object.keys(filaPorMes).sort((a,b) => periodoSortValue(a)-periodoSortValue(b));
+      const valoresFila = mesesOrdenados.map(m => filaPorMes[m] || 0);
+      
+      // Calcular média móvel e projeção simples
+      const ultimos3 = valoresFila.slice(-3);
+      const mediaCrescimento = ultimos3.length >= 2 ? (ultimos3[ultimos3.length-1] - ultimos3[0]) / ultimos3.length : 0;
+      
+      const labels = [...mesesOrdenados];
+      const dados = [...valoresFila];
+      
+      // Adicionar projeção para os próximos 3 meses
+      const ultimoValor = valoresFila[valoresFila.length-1] || 0;
+      for (let i = 1; i <= 3; i++) {
+        const mesNum = mesesOrdenados.length + i;
+        const mesAno = `proj${i}`;
+        labels.push(`Projeção ${i}`);
+        const projecao = Math.max(0, ultimoValor + (mediaCrescimento * i));
+        dados.push(Math.round(projecao));
+      }
+      
+      if (charts.cTendenciaFila) charts.cTendenciaFila.destroy();
+      charts.cTendenciaFila = new Chart(el("cTendenciaFila").getContext("2d"), {
+        type: "line",
+        data: { 
+          labels: labels, 
+          datasets: [
+            { 
+              label: "Fila Real", 
+              data: dados.slice(0, mesesOrdenados.length), 
+              borderColor: "#F87171", 
+              backgroundColor: "rgba(248,113,113,0.1)", 
+              fill: true, 
+              tension: 0.3,
+              pointBackgroundColor: "#F87171",
+              pointRadius: 4
+            },
+            { 
+              label: "Projeção", 
+              data: [...Array(mesesOrdenados.length).fill(null), ...dados.slice(mesesOrdenados.length)], 
+              borderColor: "#F59E0B", 
+              borderDash: [5, 5],
+              backgroundColor: "rgba(245,158,11,0.05)", 
+              fill: false,
+              pointBackgroundColor: "#F59E0B",
+              pointRadius: 4
+            }
+          ] 
+        },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            datalabels: { 
+              display: true, 
+              formatter: (value, context) => {
+                if (context.dataIndex >= mesesOrdenados.length && value) return value.toLocaleString("pt-BR");
+                return "";
+              },
+              font: { weight: "bold", size: 10 },
+              align: "top",
+              offset: 4
+            },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw?.toLocaleString("pt-BR") || "0"}` } },
+            legend: { labels: { font: { weight: "bold" } } }
+          },
+          scales: { 
+            x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, 
+            y: { grid: { display: false }, ticks: { font: { weight: "bold" }, callback: v => v.toLocaleString("pt-BR") } } 
+          }
+        }
+      });
+    }
+
     // Faturamento Mensal
     if (el("cFaturamentoMensal")) {
       if (charts.cFaturamentoMensal) charts.cFaturamentoMensal.destroy();
@@ -1917,15 +2039,15 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="6">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="6">Nenhum dado</tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
       <tr>
         <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
         <td title="${escapeHtml(r.estabelecimento)}">${escapeHtml(truncateLabel(r.estabelecimento,60))}</td>
         <td>${escapeHtml(r.mes || "-")}</td>
-        <td>${r.realizados.toLocaleString("pt-BR")}</td>
-        <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
-        <td>${formatMoney(r.financeiroValor)}</td>
+        <td style="text-align: center;">${r.realizados.toLocaleString("pt-BR")}</td>
+        <td style="text-align: center;">${r.faturadosQtd.toLocaleString("pt-BR")}</td>
+        <td style="text-align: center;">${formatMoney(r.financeiroValor)}</td>
       </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
