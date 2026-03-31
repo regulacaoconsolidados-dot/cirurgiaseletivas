@@ -24,6 +24,7 @@
       --blue-dark: #1e3a5f;
       --red-light: #F87171;
       --red-medium: #EF4444;
+      --red-dark: #8B0000;
       --success: #0B5E42;
       --warning: #f59e0b;
       --danger: #F87171;
@@ -652,8 +653,8 @@
       </div>
 
       <div class="fg">
-        <label><i class="fa-solid fa-search"></i> Procedimento</label>
-        <input type="text" id="procedimentoSearch" class="search-proc-input" placeholder="Digite para filtrar...">
+        <label><i class="fa-solid fa-building"></i> Subgrupo</label>
+        <input type="text" id="subgrupoSearch" class="search-proc-input" placeholder="Digite para filtrar...">
       </div>
     </div>
   </div>
@@ -707,12 +708,11 @@
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('visao_geral', this)"><i class="fa-solid fa-chart-pie"></i> Visão Geral</button>
-    <button class="tab" onclick="switchTab('consolidado_fila', this)"><i class="fa-solid fa-hourglass-half"></i> Consolidado/Fila de Espera</button>
-    <button class="tab" onclick="switchTab('consolidado_realizadas', this)"><i class="fa-solid fa-table-list"></i> Consolidado/Cirurgias Realizadas</button>
-    <button class="tab" onclick="switchTab('consolidado_especialidades', this)"><i class="fa-solid fa-stethoscope"></i> Consolidado/Especialidades</button>
-    <button class="tab" onclick="switchTab('consolidado_estabelecimento', this)"><i class="fa-solid fa-building"></i> Consolidado/Estabelecimento</button>
-    <button class="tab" onclick="switchTab('evolucao_financeira', this)"><i class="fa-solid fa-coins"></i> Evolução Financeira</button>
-    <button class="tab" onclick="switchTab('dados_detalhados', this)"><i class="fa-solid fa-database"></i> Dados Detalhados</button>
+    <button class="tab" onclick="switchTab('consolidado_estabelecimento', this)"><i class="fa-solid fa-building"></i> Consolidado por Estabelecimento</button>
+    <button class="tab" onclick="switchTab('demanda_reprimida', this)"><i class="fa-solid fa-hourglass-half"></i> Demanda Reprimida na Fila de Espera<br><small style="font-size:10px">ate 30-03-2026</small></button>
+    <button class="tab" onclick="switchTab('consolidado_especialidades', this)"><i class="fa-solid fa-stethoscope"></i> Consolidado por Especialidade</button>
+    <button class="tab" onclick="switchTab('financeiro', this)"><i class="fa-solid fa-coins"></i> Financeiro</button>
+    <button class="tab" onclick="switchTab('fisico_financeiro', this)"><i class="fa-solid fa-database"></i> Fisico x Financeiro</button>
   </div>
 
   <!-- ABA 1: VISÃO GERAL -->
@@ -748,16 +748,43 @@
 
       <div class="chartCard">
         <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-bar"></i> Total Geral da Fila de Espera Atual por Especialidade</h3>
-          <div class="chartSub">Distribuição da fila por especialidade</div>
+          <h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Estabelecimento</h3>
+          <div class="chartSub">Distribuição financeira por estabelecimento</div>
         </div>
-        <div class="chartWrap"><canvas id="cFilaPorEspecialidadeGeral"></canvas></div>
+        <div class="chartWrap"><canvas id="cReceitaFinanceiraEstab"></canvas></div>
       </div>
     </div>
   </section>
 
-  <!-- ABA 2: CONSOLIDADO/FILA DE ESPERA -->
-  <section id="tab-consolidado_fila" class="tabContent">
+  <!-- ABA: CONSOLIDADO POR ESTABELECIMENTO -->
+  <section id="tab-consolidado_estabelecimento" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cRealizadosPorEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Financeiro por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cFaturadosPorEstab"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Ofertas por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cOfertasPorEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faltosos por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cFaltososPorEstab"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA: DEMANDA REPRIMIDA NA FILA DE ESPERA (ate 30-03-2026) -->
+  <section id="tab-demanda_reprimida" class="tabContent">
     <div class="chartCard full-width">
       <div class="chartHead">
         <h3><i class="fa-solid fa-chart-line"></i> Evolução da Fila por Mês (Data Corte)</h3>
@@ -786,36 +813,7 @@
     </div>
   </section>
 
-  <!-- ABA 3: CONSOLIDADO/CIRURGIAS REALIZADAS -->
-  <section id="tab-consolidado_realizadas" class="tabContent">
-    <div class="chartCard">
-      <div class="chartHead">
-        <h3><i class="fa-solid fa-chart-line"></i> Evolução das Cirurgias Realizadas por Estabelecimento</h3>
-        <div class="chartSub">Selecione um estabelecimento para visualizar a evolução mensal</div>
-      </div>
-      <div class="estab-selector-highlight">
-        <label><i class="fa-solid fa-building"></i> Escolha o Estabelecimento:</label>
-        <select id="estabSelecionadoRealizados">
-          <option value="">Carregando estabelecimentos...</option>
-        </select>
-      </div>
-      <div class="chartWrap"><canvas id="cEvolucaoRealizadosPorEstab"></canvas></div>
-    </div>
-
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Distribuição por Especialidade</h3></div>
-        <div class="chartWrap"><canvas id="cEspecialidadeRealizados"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-building"></i> Top Estabelecimentos por Cirurgias Realizadas (Físico)</h3></div>
-        <div class="chartWrap"><canvas id="cRankProducaoEstab"></canvas></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ABA 4: CONSOLIDADO/ESPECIALIDADES -->
+  <!-- ABA: CONSOLIDADO POR ESPECIALIDADE -->
   <section id="tab-consolidado_especialidades" class="tabContent">
     <div class="row2eq">
       <div class="chartCard">
@@ -842,35 +840,8 @@
     </div>
   </section>
 
-  <!-- ABA 5: CONSOLIDADO/ESTABELECIMENTO -->
-  <section id="tab-consolidado_estabelecimento" class="tabContent">
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cRealizadosPorEstab"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Financeiro por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cFaturadosPorEstab"></canvas></div>
-      </div>
-    </div>
-
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Ofertas por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cOfertasPorEstab"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faltosos por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cFaltososPorEstab"></canvas></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ABA 6: EVOLUÇÃO FINANCEIRA -->
-  <section id="tab-evolucao_financeira" class="tabContent">
+  <!-- ABA: FINANCEIRO -->
+  <section id="tab-financeiro" class="tabContent">
     <div class="fin-header">
       <div class="fin-header-icon"><i class="fa-solid fa-chart-line"></i></div>
       <div>
@@ -907,11 +878,11 @@
     </div>
   </section>
 
-  <!-- ABA 7: DADOS DETALHADOS -->
-  <section id="tab-dados_detalhados" class="tabContent">
+  <!-- ABA: FISICO X FINANCEIRO -->
+  <section id="tab-fisico_financeiro" class="tabContent">
     <div class="card section">
       <div class="tableTop">
-        <div class="sectionTitle"><i class="fa-solid fa-table"></i> Dados Consolidados</div>
+        <div class="sectionTitle"><i class="fa-solid fa-table"></i> Físico x Financeiro</div>
         <div class="month-filter">
           <i class="fa-solid fa-calendar"></i>
           <select id="tableMonthFilter">
@@ -1401,17 +1372,6 @@
         });
       }
       
-      const estabSelectRealizados = el("estabSelecionadoRealizados");
-      if (estabSelectRealizados) {
-        const estabList = [...estabelecimentosSet].sort();
-        estabSelectRealizados.innerHTML = '<option value="">Selecione um estabelecimento</option>' + 
-          estabList.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join("");
-        estabSelectRealizados.addEventListener("change", () => {
-          if (charts.cEvolucaoRealizadosPorEstab) charts.cEvolucaoRealizadosPorEstab.destroy();
-          renderEvolucaoRealizadosPorEstab(estabSelectRealizados.value);
-        });
-      }
-      
       populateFilters();
       updateLastUpdate();
       applyFilters();
@@ -1423,50 +1383,6 @@
     } finally {
       el("loading").classList.remove("on");
     }
-  }
-
-  function renderEvolucaoRealizadosPorEstab(estabelecimento) {
-    if (!estabelecimento) return;
-    
-    const dadosEstab = dadosAgendados.filter(d => d.estabelecimento === estabelecimento);
-    const meses = allPeriodos;
-    const realizadosData = meses.map(m => dadosEstab.filter(d => d.mes === m).reduce((s,d) => s + d.recepcionados, 0));
-    
-    if (el("cEvolucaoRealizadosPorEstab")) {
-      if (charts.cEvolucaoRealizadosPorEstab) charts.cEvolucaoRealizadosPorEstab.destroy();
-      charts.cEvolucaoRealizadosPorEstab = new Chart(el("cEvolucaoRealizadosPorEstab").getContext("2d"), {
-        type: "line",
-        data: { 
-          labels: meses, 
-          datasets: [
-            { label: "Cirurgias Realizadas", data: realizadosData, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 }
-          ] 
-        },
-        options: { 
-          responsive: true, maintainAspectRatio: false, 
-          plugins: { 
-            datalabels: { display: true, formatter: v => v.toLocaleString("pt-BR"), font: { weight: "bold", size: 11 }, align: "top", offset: 4 },
-            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } },
-            legend: { labels: { font: { weight: "bold" } } }
-          },
-          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { font: { weight: "bold" } } } }
-        }
-      });
-    }
-  }
-
-  function renderGraficosPorEspecialidade() {
-    const topRealizados = [...realizadosPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChartWithValueInside("cRealizadosPorEspecialidade", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", "Realizados");
-    
-    const topFinanceiro = [...financeiroPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChartWithValueInside("cFinanceiroPorEspecialidade", topFinanceiro.map(t => truncateLabel(t[0],25)), topFinanceiro.map(t => t[1]), "#1e3a5f", "Financeiro", true);
-    
-    const topOfertas = [...ofertasPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChartWithValueInside("cOfertasPorEspecialidade", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", "Ofertas");
-    
-    const topFaltosos = [...faltososPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
-    makeBarChartWithValueInside("cFaltososPorEspecialidade", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
   }
 
   function updateLastUpdate() { el("lastUpdate").textContent = `Última atualização: ${new Date().toLocaleDateString("pt-BR")} ${new Date().toLocaleTimeString("pt-BR")}`; }
@@ -1546,15 +1462,15 @@
   function applyFilters() {
     const grupo = el("grupoSelect").value;
     const periodo = el("periodoSelect").value;
-    const procSearch = (el("procedimentoSearch")?.value || "").toLowerCase();
+    const subgrupoSearch = (el("subgrupoSearch")?.value || "").toLowerCase();
 
     const baseMatch = d => {
       const grupoMatch = !grupo || d.grupoCodigo === grupo;
       const subgrupoMatch = selectedSubgrupos.size === 0 || selectedSubgrupos.has(d.subgrupo);
       const especialidadeMatch = selectedEspecialidades.size === 0 || selectedEspecialidades.has(d.especialidade);
       const estabelecimentoMatch = selectedEstabelecimentos.size === 0 || selectedEstabelecimentos.has(d.estabelecimento);
-      const procMatch = !procSearch || d.descricao.toLowerCase().includes(procSearch);
-      return grupoMatch && subgrupoMatch && especialidadeMatch && estabelecimentoMatch && procMatch;
+      const subgrupoSearchMatch = !subgrupoSearch || (d.subgrupo && d.subgrupo.toLowerCase().includes(subgrupoSearch));
+      return grupoMatch && subgrupoMatch && especialidadeMatch && estabelecimentoMatch && subgrupoSearchMatch;
     };
 
     const filteredFila = dadosFila.filter(baseMatch);
@@ -1614,6 +1530,20 @@
     makeBarChartWithValueInside("cOfertasPorEspecialidade", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", "Ofertas");
     
     const topFaltosos = [...faltososPorEspFiltrado.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cFaltososPorEspecialidade", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
+  }
+
+  function renderGraficosPorEspecialidade() {
+    const topRealizados = [...realizadosPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cRealizadosPorEspecialidade", topRealizados.map(t => truncateLabel(t[0],25)), topRealizados.map(t => t[1]), "#0B5E42", "Realizados");
+    
+    const topFinanceiro = [...financeiroPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cFinanceiroPorEspecialidade", topFinanceiro.map(t => truncateLabel(t[0],25)), topFinanceiro.map(t => t[1]), "#1e3a5f", "Financeiro", true);
+    
+    const topOfertas = [...ofertasPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
+    makeBarChartWithValueInside("cOfertasPorEspecialidade", topOfertas.map(t => truncateLabel(t[0],25)), topOfertas.map(t => t[1]), "#F59E0B", "Ofertas");
+    
+    const topFaltosos = [...faltososPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]).slice(0,15);
     makeBarChartWithValueInside("cFaltososPorEspecialidade", topFaltosos.map(t => truncateLabel(t[0],25)), topFaltosos.map(t => t[1]), "#F87171", "Faltosos");
   }
 
@@ -1748,7 +1678,7 @@
     const totalFaltosos = agendados.reduce((s,d) => s+d.faltosos, 0);
     const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
-    // Gráfico de evolução - agora com dados filtrados corretamente
+    // Gráfico de evolução
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
       
@@ -1809,23 +1739,24 @@
         ["#5A9EFF", "#0B5E42", "#F59E0B"]);
     }
 
-    // GRÁFICO: Total Geral da Fila de Espera Atual por Especialidade - COR AZUL ESCURO
-    if (el("cFilaPorEspecialidadeGeral")) {
-      const filaPorEspFiltrada = new Map();
-      fila.forEach(d => {
-        if (d.especialidade) {
-          filaPorEspFiltrada.set(d.especialidade, (filaPorEspFiltrada.get(d.especialidade) || 0) + d.fila);
+    // GRÁFICO: Receita Financeira por Estabelecimento - VERMELHO ESCURO
+    if (el("cReceitaFinanceiraEstab")) {
+      const receitaPorEstab = new Map();
+      financeiro.forEach(d => {
+        if (d.estabelecimento) {
+          const valor = periodoSelecionado ? (d.mensal[periodoSelecionado] || 0) : d.total;
+          receitaPorEstab.set(d.estabelecimento, (receitaPorEstab.get(d.estabelecimento) || 0) + valor);
         }
       });
-      const todasEspFila = [...filaPorEspFiltrada.entries()].sort((a,b) => b[1]-a[1]);
-      if (todasEspFila.length > 0) {
-        makeBarChartWithValueInside("cFilaPorEspecialidadeGeral", todasEspFila.map(t => truncateLabel(t[0], 30)), todasEspFila.map(t => t[1]), "#1e3a5f", "Fila de Espera", false, 0.85);
+      const topReceitaEstab = [...receitaPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+      if (topReceitaEstab.length > 0) {
+        makeBarChartWithValueInside("cReceitaFinanceiraEstab", topReceitaEstab.map(t => truncateLabel(t[0], 30)), topReceitaEstab.map(t => t[1]), "#8B0000", "Receita Financeira", true, 0.85);
       } else {
-        const ctx = el("cFilaPorEspecialidadeGeral").getContext("2d");
-        if (charts.cFilaPorEspecialidadeGeral) charts.cFilaPorEspecialidadeGeral.destroy();
-        charts.cFilaPorEspecialidadeGeral = new Chart(ctx, {
+        const ctx = el("cReceitaFinanceiraEstab").getContext("2d");
+        if (charts.cReceitaFinanceiraEstab) charts.cReceitaFinanceiraEstab.destroy();
+        charts.cReceitaFinanceiraEstab = new Chart(ctx, {
           type: "bar",
-          data: { labels: ["Sem dados"], datasets: [{ label: "Fila de Espera", data: [0], backgroundColor: "#1e3a5f" }] },
+          data: { labels: ["Sem dados"], datasets: [{ label: "Receita Financeira", data: [0], backgroundColor: "#8B0000" }] },
           options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
         });
       }
@@ -1927,27 +1858,17 @@
       });
     }
 
-    // Top Especialidades com Maior Fila - TODAS as especialidades
+    // Top Especialidades com Maior Fila
     const todasEspecialidadesFila = [...filaPorEspecialidade.entries()].sort((a,b) => b[1]-a[1]);
     makeBarChartWithValueInside("cRankFilaEspecialidade", todasEspecialidadesFila.map(t => truncateLabel(t[0],25)), todasEspecialidadesFila.map(t => t[1]), "#5A9EFF", "Fila", false, 0.85);
 
-    // Fila de Espera por Subgrupo - com barras mais largas e cor verde escuro
+    // Fila de Espera por Subgrupo
     const todasSubgruposFila = [...filaPorSubgrupo.entries()].sort((a,b) => b[1]-a[1]);
     if (todasSubgruposFila.length > 0) {
       makeBarChartWithValueInside("cFilaPorSubgrupo", todasSubgruposFila.map(t => truncateLabel(t[0],35)), todasSubgruposFila.map(t => t[1]), "#0B5E42", "Fila por Subgrupo", false, 0.9);
-    } else {
-      if (el("cFilaPorSubgrupo")) {
-        const ctx = el("cFilaPorSubgrupo").getContext("2d");
-        if (charts.cFilaPorSubgrupo) charts.cFilaPorSubgrupo.destroy();
-        charts.cFilaPorSubgrupo = new Chart(ctx, {
-          type: "bar",
-          data: { labels: ["Sem dados"], datasets: [{ label: "Fila por Subgrupo", data: [0], backgroundColor: "#0B5E42" }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false } } }
-        });
-      }
     }
 
-    // Fila de Espera por Complexidade (Rosca)
+    // Fila de Espera por Complexidade
     const complexidadeData = [...filaPorComplexidade.entries()].sort((a,b) => b[1]-a[1]);
     if (complexidadeData.length > 0) {
       const coresComplexidade = ["#8B5CF6", "#EC4899", "#10B981", "#F59E0B", "#EF4444", "#3B82F6", "#0B5E42"];
@@ -1955,32 +1876,7 @@
         complexidadeData.map(t => truncateLabel(t[0], 25)), 
         complexidadeData.map(t => t[1]), 
         coresComplexidade.slice(0, complexidadeData.length));
-    } else {
-      if (el("cFilaComplexidadeRosca")) {
-        const ctx = el("cFilaComplexidadeRosca").getContext("2d");
-        if (charts.cFilaComplexidadeRosca) charts.cFilaComplexidadeRosca.destroy();
-        charts.cFilaComplexidadeRosca = new Chart(ctx, {
-          type: "doughnut",
-          data: { labels: ["Sem dados"], datasets: [{ data: [1], backgroundColor: ["#e5e7eb"] }] },
-          options: { responsive: true, maintainAspectRatio: false, plugins: { datalabels: { display: false }, legend: { display: false } } }
-        });
-      }
     }
-
-    // Distribuição por Especialidade (Rosca)
-    const espRealMap = new Map(); agendados.forEach(d => espRealMap.set(d.especialidade || "Outros", (espRealMap.get(d.especialidade || "Outros") || 0) + d.recepcionados));
-    const topEspReal = [...espRealMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
-    if (el("cEspecialidadeRealizados")) {
-      makeDoughnutChartWithPercentages("cEspecialidadeRealizados", 
-        topEspReal.map(t => truncateLabel(t[0],22)), 
-        topEspReal.map(t => t[1]), 
-        ["#0B5E42","#F87171","#5A9EFF","#F59E0B","#8B5CF6","#EC4899","#10B981","#6366F1"]);
-    }
-
-    // Top Estabelecimentos por Cirurgias Realizadas
-    const estabProd = new Map(); agendados.forEach(d => estabProd.set(d.estabelecimento, (estabProd.get(d.estabelecimento) || 0) + d.recepcionados));
-    const topProd = [...estabProd.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChartWithValueInside("cRankProducaoEstab", topProd.map(t => truncateLabel(t[0],25)), topProd.map(t => t[1]), "#0B5E42", "Realizados", false, 0.85);
 
     // Faturamento Mensal
     if (el("cFaturamentoMensal")) {
@@ -2058,9 +1954,9 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '十大<td colspan="8">Nenhum dado</td>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="8">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
-          <tr>
+           <tr>
             <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
             <td>${escapeHtml(r.grupo || "-")}</td>
             <td>${escapeHtml(r.subgrupo || "-")}</td>
@@ -2069,7 +1965,7 @@
             <td>${r.realizados.toLocaleString("pt-BR")}</td>
             <td>${r.faturadosQtd.toLocaleString("pt-BR")}</td>
             <td>${formatMoney(r.financeiroValor)}</td>
-          </tr>
+           </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
     const searchInput = el("tSearch");
@@ -2169,10 +2065,10 @@
   window.addEventListener("DOMContentLoaded", () => {
     loadAllData();
     el("btnRefresh").addEventListener("click", () => { loadAllData(); });
-    el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEspecialidades.clear(); selectedEstabelecimentos.clear(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; el("procedimentoSearch").value = ""; el("msSearchSub").value = ""; el("msSearchEsp").value = ""; el("msSearchEstab").value = ""; currentTableMonthFilter = ""; if(el("tableMonthFilter")) el("tableMonthFilter").value = ""; buildSubgrupoList(); buildEspecialidadeList(); buildEstabelecimentoList(); applyFilters(); toast("Filtros limpos", "info"); });
+    el("btnClear").addEventListener("click", () => { selectedSubgrupos.clear(); selectedEspecialidades.clear(); selectedEstabelecimentos.clear(); el("grupoSelect").value = ""; el("periodoSelect").value = ""; el("subgrupoSearch").value = ""; el("msSearchSub").value = ""; el("msSearchEsp").value = ""; el("msSearchEstab").value = ""; currentTableMonthFilter = ""; if(el("tableMonthFilter")) el("tableMonthFilter").value = ""; buildSubgrupoList(); buildEspecialidadeList(); buildEstabelecimentoList(); applyFilters(); toast("Filtros limpos", "info"); });
     el("btnExcel").addEventListener("click", exportExcel);
     el("periodoSelect").addEventListener("change", applyFilters);
-    el("procedimentoSearch").addEventListener("input", applyFilters);
+    el("subgrupoSearch").addEventListener("input", applyFilters);
     el("grupoSelect").addEventListener("change", () => { buildSubgrupoList(); applyFilters(); });
     document.addEventListener("click", () => closeAllDropdowns());
     el("msDropdownSub")?.addEventListener("click", e => e.stopPropagation());
