@@ -780,10 +780,10 @@
 
   <div class="tabs">
     <button class="tab active" onclick="switchTab('visao_geral', this)"><i class="fa-solid fa-chart-pie"></i> Visão Geral</button>
-    <button class="tab" onclick="switchTab('consolidado_estabelecimento', this)"><i class="fa-solid fa-building"></i> Consolidado por Estabelecimento</button>
-    <button class="tab" onclick="switchTab('agendamentos_especialidades', this)"><i class="fa-solid fa-stethoscope"></i> Agendamentos por Especialidade - VIVER</button>
     <button class="tab" onclick="switchTab('financeiro', this)"><i class="fa-solid fa-coins"></i> Financeiro</button>
     <button class="tab" onclick="switchTab('fisico_financeiro', this)"><i class="fa-solid fa-database"></i> Fisico x Financeiro</button>
+    <button class="tab" onclick="switchTab('consolidado_estabelecimento', this)"><i class="fa-solid fa-building"></i> Consolidado por Estabelecimento</button>
+    <button class="tab" onclick="switchTab('agendamentos_especialidades', this)"><i class="fa-solid fa-stethoscope"></i> Agendamentos por Especialidade Vivver</button>
     <button class="tab" onclick="switchTab('demanda_reprimida', this)"><i class="fa-solid fa-hourglass-half"></i> Demanda Reprimida na Fila de Espera</button>
   </div>
 
@@ -797,15 +797,10 @@
       <div class="chartWrap"><canvas id="cEvolucao"></canvas></div>
     </div>
 
-    <div class="row2eq">
+    <div class="row2eq full-width">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados vs Faturados por Mês</h3></div>
         <div class="chartWrap"><canvas id="cRealizadosVsFaturadosMes"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Mês</h3></div>
-        <div class="chartWrap"><canvas id="cReceitaFinanceiraMes"></canvas></div>
       </div>
     </div>
 
@@ -839,107 +834,10 @@
 
       <div class="chartCard">
         <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Estabelecimento</h3>
-          <div class="chartSub">Distribuição financeira por estabelecimento</div>
+          <h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Mês</h3>
+          <div class="chartSub">Evolução mensal da receita financeira</div>
         </div>
-        <div class="chartWrap"><canvas id="cReceitaFinanceiraEstab"></canvas></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ABA: CONSOLIDADO POR ESTABELECIMENTO -->
-  <section id="tab-consolidado_estabelecimento" class="tabContent">
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Recepcionados por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cRealizadosPorEstab"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Financeiro por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cFaturadosPorEstab"></canvas></div>
-      </div>
-    </div>
-
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Ofertas por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cOfertasPorEstab"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faltosos por Estabelecimento</h3></div>
-        <div class="chartWrap"><canvas id="cFaltososPorEstab"></canvas></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ABA: AGENDAMENTOS POR ESPECIALIDADE - VIVVER -->
-  <section id="tab-agendamentos_especialidades" class="tabContent">
-    <div class="three-tables">
-      <!-- Tabela Ofertas por Especialidade (REC + FAL) - SEM COLUNA % DA FILA -->
-      <div class="chartCard">
-        <div class="table-title">
-          <i class="fa-solid fa-chart-simple" style="color: #F59E0B;"></i>
-          Ofertas por Especialidade (REC + FAL)
-        </div>
-        <div class="table-wrapper" id="tableOfertasWrapper">
-          <table class="data-table-simple" id="tableOfertas">
-            <thead>
-                <tr>
-                <th>Especialidade</th>
-                <th style="text-align: right;">Total</th>
-                </tr>
-            </thead>
-            <tbody id="tableOfertasBody">
-              <tr><td colspan="2">Carregando...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Tabela Recepcionados por Especialidade -->
-      <div class="chartCard">
-        <div class="table-title">
-          <i class="fa-solid fa-chart-simple" style="color: #0B5E42;"></i>
-          Recepcionados por Especialidade
-        </div>
-        <div class="table-wrapper" id="tableRealizadosWrapper">
-          <table class="data-table-simple" id="tableRealizados">
-            <thead>
-                <tr>
-                <th>Especialidade</th>
-                <th style="text-align: right;">Total</th>
-                <th style="width: 40%;">% Referente a Oferta</th>
-                </tr>
-            </thead>
-            <tbody id="tableRealizadosBody">
-                <tr><td colspan="3">Carregando...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Tabela Faltosos por Especialidade - % Referente a Oferta -->
-      <div class="chartCard">
-        <div class="table-title">
-          <i class="fa-solid fa-chart-simple" style="color: #F87171;"></i>
-          Faltosos por Especialidade
-        </div>
-        <div class="table-wrapper" id="tableFaltososWrapper">
-          <table class="data-table-simple" id="tableFaltosos">
-            <thead>
-                <tr>
-                <th>Especialidade</th>
-                <th style="text-align: right;">Total</th>
-                <th style="width: 40%;">% Referente a Oferta</th>
-                </tr>
-            </thead>
-            <tbody id="tableFaltososBody">
-                <tr><td colspan="3">Carregando...</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="chartWrap"><canvas id="cReceitaFinanceiraMes"></canvas></div>
       </div>
     </div>
   </section>
@@ -994,17 +892,111 @@
       <div class="table-container">
         <table class="data-table" id="tabelaPrincipal">
           <thead>
-                <tr>
+            <tr>
               <th onclick="sortTable(0)">Especialidade <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(1)">Estabelecimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(2)">Mês <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(3)">REALIZADOS <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(4)">Total Faturado <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(5)">Total Financeiro <i class="fa-solid fa-arrow-up-wide-short"></i></th>
-                </tr>
+            </tr>
           </thead>
           <tbody id="tBody"></tbody>
         </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA: CONSOLIDADO POR ESTABELECIMENTO -->
+  <section id="tab-consolidado_estabelecimento" class="tabContent">
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Recepcionados por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cRealizadosPorEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Financeiro por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cFaturadosPorEstab"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Ofertas por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cOfertasPorEstab"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Faltosos por Estabelecimento</h3></div>
+        <div class="chartWrap"><canvas id="cFaltososPorEstab"></canvas></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABA: AGENDAMENTOS POR ESPECIALIDADE - VIVVER -->
+  <section id="tab-agendamentos_especialidades" class="tabContent">
+    <div class="three-tables">
+      <!-- Tabela Ofertas por Especialidade (REC + FAL) - SEM COLUNA % DA FILA -->
+      <div class="chartCard">
+        <div class="table-title">
+          <i class="fa-solid fa-chart-simple" style="color: #F59E0B;"></i>
+          Ofertas por Especialidade (REC + FAL)
+        </div>
+        <div class="table-wrapper" id="tableOfertasWrapper">
+          <table class="data-table-simple" id="tableOfertas">
+            <thead>
+                32<th>Especialidade</th>
+                <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody id="tableOfertasBody">
+              <tr><td colspan="2">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tabela Recepcionados por Especialidade -->
+      <div class="chartCard">
+        <div class="table-title">
+          <i class="fa-solid fa-chart-simple" style="color: #0B5E42;"></i>
+          Recepcionados por Especialidade
+        </div>
+        <div class="table-wrapper" id="tableRealizadosWrapper">
+          <table class="data-table-simple" id="tableRealizados">
+            <thead>
+                32<th>Especialidade</th>
+                <th style="text-align: right;">Total</th>
+                <th style="width: 40%;">% Referente a Oferta</th>
+                </tr>
+            </thead>
+            <tbody id="tableRealizadosBody">
+              <tr><td colspan="3">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Tabela Faltosos por Especialidade - % Referente a Oferta -->
+      <div class="chartCard">
+        <div class="table-title">
+          <i class="fa-solid fa-chart-simple" style="color: #F87171;"></i>
+          Faltosos por Especialidade
+        </div>
+        <div class="table-wrapper" id="tableFaltososWrapper">
+          <table class="data-table-simple" id="tableFaltosos">
+            <thead>
+                32<th>Especialidade</th>
+                <th style="text-align: right;">Total</th>
+                <th style="width: 40%;">% Referente a Oferta</th>
+                </tr>
+            </thead>
+            <tbody id="tableFaltososBody">
+              <tr><td colspan="3">Carregando...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </section>
@@ -1038,14 +1030,13 @@
         <div class="table-wrapper" style="max-height: 400px;">
           <table class="data-table-simple" id="tableFilaEspecialidade">
             <thead>
-                <tr>
-                <th>Especialidade</th>
+                32<th>Especialidade</th>
                 <th style="text-align: right;">Total na Fila</th>
                 <th style="width: 40%;">% do Total</th>
                 </tr>
             </thead>
             <tbody id="tableFilaEspecialidadeBody">
-                <tr><td colspan="3">Carregando...</td></tr>
+              <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1059,14 +1050,13 @@
         <div class="table-wrapper" style="max-height: 400px;">
           <table class="data-table-simple" id="tableFilaProcedimento">
             <thead>
-                <tr>
-                <th>Procedimento</th>
+                32<th>Procedimento</th>
                 <th style="text-align: right;">Total na Fila</th>
                 <th style="width: 40%;">% do Total</th>
-                </tr>
+                32</tr>
             </thead>
             <tbody id="tableFilaProcedimentoBody">
-                <tr><td colspan="3">Carregando...</td></tr>
+              <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1082,14 +1072,13 @@
         <div class="table-wrapper" style="max-height: 400px;">
           <table class="data-table-simple" id="tableFilaComplexidade">
             <thead>
-                <tr>
-                <th>Complexidade</th>
+                32<th>Complexidade</th>
                 <th style="text-align: right;">Total na Fila</th>
                 <th style="width: 40%;">% do Total</th>
-                </tr>
+                32</tr>
             </thead>
             <tbody id="tableFilaComplexidadeBody">
-                <tr><td colspan="3">Carregando...</td></tr>
+              <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1103,14 +1092,13 @@
         <div class="table-wrapper" style="max-height: 400px;">
           <table class="data-table-simple" id="tableFilaSubgrupo">
             <thead>
-                <tr>
-                <th>Subgrupo</th>
+                32<th>Subgrupo</th>
                 <th style="text-align: right;">Total na Fila</th>
                 <th style="width: 40%;">% do Total</th>
-                </tr>
+                32</tr>
             </thead>
             <tbody id="tableFilaSubgrupoBody">
-                <tr><td colspan="3">Carregando...</td></tr>
+              <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
           </table>
         </div>
@@ -1631,7 +1619,7 @@
     if (!tbody) return;
     
     if (ofertasPorEspecialidade.size === 0) {
-      tbody.innerHTML = '可怜<td colspan="2">Nenhum dado disponível</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="2">Nenhum dado disponível</td></tr>';
       return;
     }
     
@@ -1813,7 +1801,7 @@
           {
             label: "FATURADOS (Qtd)",
             data: valoresFaturados,
-            backgroundColor: "#1e3a5f",
+            backgroundColor: "#8B0000",
             borderRadius: 8,
             barPercentage: 0.7
           }
@@ -2326,7 +2314,7 @@
     const totalFaltosos = agendados.reduce((s,d) => s+d.faltosos, 0);
     const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
-    // NOVO GRÁFICO: Fila vs Ofertas vs Realizados (Financeiro) vs Faturados (Financeiro)
+    // GRÁFICO: Fila vs Ofertas vs Realizados vs Faturados - linha de Faturados na cor vinho
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
       
@@ -2358,7 +2346,7 @@
             { label: "Fila de Espera", data: dadosFilaPorMes, borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointBorderColor: "#F87171", pointRadius: 5, pointHoverRadius: 7 },
             { label: "Ofertas", data: dadosOfertasPorMes, borderColor: "#5A9EFF", backgroundColor: "rgba(90,158,255,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#5A9EFF", pointBorderColor: "#5A9EFF", pointRadius: 5, pointHoverRadius: 7 },
             { label: "Realizados", data: dadosRealizadosFinanceiroPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointBorderColor: "#0B5E42", pointRadius: 5, pointHoverRadius: 7 },
-            { label: "Faturados", data: dadosFaturadosPorMes, borderColor: "#1e3a5f", backgroundColor: "rgba(30,58,95,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#1e3a5f", pointBorderColor: "#1e3a5f", pointRadius: 5, pointHoverRadius: 7 }
+            { label: "Faturados", data: dadosFaturadosPorMes, borderColor: "#8B0000", backgroundColor: "rgba(139,0,0,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#8B0000", pointBorderColor: "#8B0000", pointRadius: 5, pointHoverRadius: 7 }
           ] 
         },
         options: { 
@@ -2386,20 +2374,34 @@
         ["#5A9EFF", "#0B5E42", "#F59E0B"]);
     }
 
-    if (el("cReceitaFinanceiraEstab")) {
-      const receitaPorEstab = new Map();
-      financeiro.forEach(d => {
-        if (d.estabelecimento) {
-          const valor = periodoSelecionado ? (d.mes === periodoSelecionado ? d.financeiroValor : 0) : d.financeiroValor;
-          receitaPorEstab.set(d.estabelecimento, (receitaPorEstab.get(d.estabelecimento) || 0) + valor);
+    if (el("cFaturamentoMensal")) {
+      if (charts.cFaturamentoMensal) charts.cFaturamentoMensal.destroy();
+      const fatPorMes = meses.map(m => financeiro.reduce((s,d) => s + (d.mes === m ? d.financeiroValor : 0), 0));
+      charts.cFaturamentoMensal = new Chart(el("cFaturamentoMensal").getContext("2d"), {
+        type: "line",
+        data: { labels: meses, datasets: [{ label: "Financeiro", data: fatPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 }] },
+        options: { 
+          responsive: true, maintainAspectRatio: false, 
+          plugins: { 
+            tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, 
+            datalabels: { display: true, formatter: v => formatMoneyCompact(v), font: { weight: "bold", size: 11 }, align: "top", offset: 6 },
+            legend: { labels: { font: { weight: "bold" } } }
+          }, 
+          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } } } }
         }
       });
-      const topReceitaEstab = [...receitaPorEstab.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-      if (topReceitaEstab.length > 0) {
-        makeBarChartWithValueInside("cReceitaFinanceiraEstab", topReceitaEstab.map(t => truncateLabel(t[0], 30)), topReceitaEstab.map(t => t[1]), "#8B0000", "Receita Financeira", true, 0.85);
-      }
     }
 
+    const estabFatMap = new Map(); 
+    financeiro.forEach(d => {
+      const estab = d.estabelecimento || "Não informado";
+      const valor = periodoSelecionado ? (d.mes === periodoSelecionado ? d.financeiroValor : 0) : d.financeiroValor;
+      estabFatMap.set(estab, (estabFatMap.get(estab) || 0) + valor);
+    });
+    const topEstabFat = [...estabFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
+    makeBarChartWithValueInside("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#0B5E42", "Financeiro", true, 0.7);
+
+    // Gráfico de complexidade da fila
     const complexidadeData = [...filaPorComplexidade.entries()].sort((a,b) => b[1]-a[1]);
     if (complexidadeData.length > 0 && el("cFilaComplexidadeRosca")) {
       const coresComplexidade = ["#8B5CF6", "#EC4899", "#10B981", "#F59E0B", "#EF4444", "#3B82F6", "#0B5E42"];
@@ -2409,6 +2411,7 @@
         coresComplexidade.slice(0, complexidadeData.length));
     }
 
+    // Gráfico de tendência da fila
     if (el("cTendenciaFila")) {
       const mesesOrdenados = Object.keys(filaPorMes).sort((a,b) => periodoSortValue(a)-periodoSortValue(b));
       const valoresFila = mesesOrdenados.map(m => filaPorMes[m] || 0);
@@ -2477,33 +2480,6 @@
         }
       });
     }
-
-    if (el("cFaturamentoMensal")) {
-      if (charts.cFaturamentoMensal) charts.cFaturamentoMensal.destroy();
-      const fatPorMes = meses.map(m => financeiro.reduce((s,d) => s + (d.mes === m ? d.financeiroValor : 0), 0));
-      charts.cFaturamentoMensal = new Chart(el("cFaturamentoMensal").getContext("2d"), {
-        type: "line",
-        data: { labels: meses, datasets: [{ label: "Financeiro", data: fatPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointRadius: 4 }] },
-        options: { 
-          responsive: true, maintainAspectRatio: false, 
-          plugins: { 
-            tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }, 
-            datalabels: { display: true, formatter: v => formatMoneyCompact(v), font: { weight: "bold", size: 11 }, align: "top", offset: 6 },
-            legend: { labels: { font: { weight: "bold" } } }
-          }, 
-          scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold" } } } }
-        }
-      });
-    }
-
-    const estabFatMap = new Map(); 
-    financeiro.forEach(d => {
-      const estab = d.estabelecimento || "Não informado";
-      const valor = periodoSelecionado ? (d.mes === periodoSelecionado ? d.financeiroValor : 0) : d.financeiroValor;
-      estabFatMap.set(estab, (estabFatMap.get(estab) || 0) + valor);
-    });
-    const topEstabFat = [...estabFatMap.entries()].sort((a,b) => b[1]-a[1]).slice(0,10);
-    makeBarChartWithValueInside("cFatEstabelecimento", topEstabFat.map(t => truncateLabel(t[0],25)), topEstabFat.map(t => t[1]), "#0B5E42", "Financeiro", true, 0.7);
   }
 
   let currentTableData = [];
@@ -2544,7 +2520,7 @@
         <td style="text-align: center;">${r.realizados.toLocaleString("pt-BR")}</td>
         <td style="text-align: center;">${r.faturadosQtd.toLocaleString("pt-BR")}</td>
         <td style="text-align: center;">${formatMoney(r.financeiroValor)}</td>
-       </tr>
+        </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
     const searchInput = el("tSearch");
