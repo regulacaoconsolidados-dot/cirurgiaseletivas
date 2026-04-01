@@ -791,7 +791,7 @@
   <section id="tab-visao_geral" class="tabContent active">
     <div class="chartCard">
       <div class="chartHead">
-        <h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Recepcionados vs Ofertas vs Faltosos</h3>
+        <h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Ofertas vs Realizados vs Faturados</h3>
         <div class="chartSub">Comparativo mensal</div>
       </div>
       <div class="chartWrap"><canvas id="cEvolucao"></canvas></div>
@@ -806,24 +806,6 @@
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Mês</h3></div>
         <div class="chartWrap"><canvas id="cReceitaFinanceiraMes"></canvas></div>
-      </div>
-    </div>
-
-    <div class="row2eq">
-      <div class="chartCard">
-        <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3>
-          <div class="chartSub">Ofertas → Recepcionados → Faltosos</div>
-        </div>
-        <div class="chartWrap"><canvas id="cFunil"></canvas></div>
-      </div>
-
-      <div class="chartCard">
-        <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Estabelecimento</h3>
-          <div class="chartSub">Distribuição financeira por estabelecimento</div>
-        </div>
-        <div class="chartWrap"><canvas id="cReceitaFinanceiraEstab"></canvas></div>
       </div>
     </div>
 
@@ -843,6 +825,24 @@
           <div class="chartSub">Baseado na coluna "Total Faturado" da aba Financeiro</div>
         </div>
         <div class="chartWrap" style="height: 380px;"><canvas id="cMediaFaturados"></canvas></div>
+      </div>
+    </div>
+
+    <div class="row2eq">
+      <div class="chartCard">
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-simple"></i> Funil Cirúrgico</h3>
+          <div class="chartSub">Ofertas → Recepcionados → Faltosos</div>
+        </div>
+        <div class="chartWrap"><canvas id="cFunil"></canvas></div>
+      </div>
+
+      <div class="chartCard">
+        <div class="chartHead">
+          <h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Estabelecimento</h3>
+          <div class="chartSub">Distribuição financeira por estabelecimento</div>
+        </div>
+        <div class="chartWrap"><canvas id="cReceitaFinanceiraEstab"></canvas></div>
       </div>
     </div>
   </section>
@@ -886,15 +886,15 @@
         <div class="table-wrapper" id="tableOfertasWrapper">
           <table class="data-table-simple" id="tableOfertas">
             <thead>
-               <tr>
+                <tr>
                 <th>Especialidade</th>
                 <th style="text-align: right;">Total</th>
-               </tr>
+                </tr>
             </thead>
             <tbody id="tableOfertasBody">
               <tr><td colspan="2">Carregando...</td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
 
@@ -916,7 +916,7 @@
             <tbody id="tableRealizadosBody">
                 <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
 
@@ -938,7 +938,7 @@
             <tbody id="tableFaltososBody">
                 <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
     </div>
@@ -994,17 +994,17 @@
       <div class="table-container">
         <table class="data-table" id="tabelaPrincipal">
           <thead>
-               <tr>
+                <tr>
               <th onclick="sortTable(0)">Especialidade <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(1)">Estabelecimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(2)">Mês <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(3)">REALIZADOS <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(4)">Total Faturado <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(5)">Total Financeiro <i class="fa-solid fa-arrow-up-wide-short"></i></th>
-               </tr>
+                </tr>
           </thead>
           <tbody id="tBody"></tbody>
-         </table>
+        </table>
       </div>
     </div>
   </section>
@@ -1047,7 +1047,7 @@
             <tbody id="tableFilaEspecialidadeBody">
                 <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
 
@@ -1068,7 +1068,7 @@
             <tbody id="tableFilaProcedimentoBody">
                 <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
     </div>
@@ -1091,7 +1091,7 @@
             <tbody id="tableFilaComplexidadeBody">
                 <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
       
@@ -1112,7 +1112,7 @@
             <tbody id="tableFilaSubgrupoBody">
                 <tr><td colspan="3">Carregando...</td></tr>
             </tbody>
-           </table>
+          </table>
         </div>
       </div>
     </div>
@@ -1201,9 +1201,10 @@
   
   let allPeriodos = [];
   let filaPorMes = {};
-  let realizadosPorMes = {};
+  let realizadosAgendadosPorMes = {};
   let ofertasPorMes = {};
   let faltososPorMes = {};
+  let realizadosFinanceiroPorMes = {};
   let faturadosPorMes = {};
   let faturadosQtdPorMes = {};
   
@@ -1446,7 +1447,7 @@
         }
       });
 
-      realizadosPorMes = {};
+      realizadosAgendadosPorMes = {};
       ofertasPorMes = {};
       faltososPorMes = {};
       realizadosPorEstab.clear();
@@ -1458,7 +1459,7 @@
       
       dadosAgendados.forEach(d => { 
         if (d.mes) {
-          realizadosPorMes[d.mes] = (realizadosPorMes[d.mes] || 0) + d.recepcionados;
+          realizadosAgendadosPorMes[d.mes] = (realizadosAgendadosPorMes[d.mes] || 0) + d.recepcionados;
           ofertasPorMes[d.mes] = (ofertasPorMes[d.mes] || 0) + d.oferta;
           faltososPorMes[d.mes] = (faltososPorMes[d.mes] || 0) + d.faltosos;
         }
@@ -1479,8 +1480,12 @@
         if (d.mes) allPeriodos.push(d.mes);
       });
 
-      // Processamento FATURADO E FINANCEIRO - ATUALIZADO COM COLUNA "REALIZADOS"
+      // Processamento FATURADO E FINANCEIRO
       dadosFaturadoFinanceiro = [];
+      realizadosFinanceiroPorMes = {};
+      faturadosPorMes = {};
+      faturadosQtdPorMes = {};
+      
       faturadoFinanceiroRaw.forEach(row => {
         let estabelecimento = normalizeText(getField(row, ["ESTABELECIMENTO", "Estabelecimento"]));
         let mes = normalizePeriodo(getField(row, ["MÊS", "MES", "Mês"]));
@@ -1504,17 +1509,13 @@
         }
       });
 
-      // Agregações
-      faturadosPorMes = {};
-      faturadosQtdPorMes = {};
-      faturadosPorEstab.clear();
-      financeiroPorEspecialidade.clear();
-      faturadoQtdPorEspecialidade.clear();
-      realizadosPorEstabFinanceiro.clear();
-      
+      // Agregações financeiras
       dadosFaturadoFinanceiro.forEach(d => {
-        faturadosPorMes[d.mes] = (faturadosPorMes[d.mes] || 0) + d.financeiroValor;
-        faturadosQtdPorMes[d.mes] = (faturadosQtdPorMes[d.mes] || 0) + d.faturadoQtd;
+        if (d.mes) {
+          realizadosFinanceiroPorMes[d.mes] = (realizadosFinanceiroPorMes[d.mes] || 0) + d.realizados;
+          faturadosQtdPorMes[d.mes] = (faturadosQtdPorMes[d.mes] || 0) + d.faturadoQtd;
+          faturadosPorMes[d.mes] = (faturadosPorMes[d.mes] || 0) + d.financeiroValor;
+        }
         
         if (d.estabelecimento && d.estabelecimento !== "Não informado") {
           faturadosPorEstab.set(d.estabelecimento, (faturadosPorEstab.get(d.estabelecimento) || 0) + d.financeiroValor);
@@ -1630,7 +1631,7 @@
     if (!tbody) return;
     
     if (ofertasPorEspecialidade.size === 0) {
-      tbody.innerHTML = '<tr><td colspan="2">Nenhum dado disponível</td></tr>';
+      tbody.innerHTML = '可怜<td colspan="2">Nenhum dado disponível</td></tr>';
       return;
     }
     
@@ -1775,7 +1776,7 @@
     }).join("");
   }
 
-  // FUNÇÃO PARA RENDERIZAR GRÁFICO REALIZADOS VS FATURADOS POR MÊS
+  // FUNÇÃO PARA RENDERIZAR GRÁFICO REALIZADOS VS FATURADOS POR MÊS - COR AZUL ESCURO E NÚMEROS VERTICAIS
   function renderRealizadosVsFaturadosMes(financeiroFiltrado) {
     if (!el("cRealizadosVsFaturadosMes")) return;
     if (charts.cRealizadosVsFaturadosMes) charts.cRealizadosVsFaturadosMes.destroy();
@@ -1812,7 +1813,7 @@
           {
             label: "FATURADOS (Qtd)",
             data: valoresFaturados,
-            backgroundColor: "#F59E0B",
+            backgroundColor: "#1e3a5f",
             borderRadius: 8,
             barPercentage: 0.7
           }
@@ -1936,7 +1937,7 @@
     });
   }
 
-  // FUNÇÃO PARA RENDERIZAR GRÁFICOS DE MÉDIA - ATUALIZADA COM MELHORIAS
+  // FUNÇÃO PARA RENDERIZAR GRÁFICOS DE MÉDIA
   function renderMediaCharts(financeiroFiltrado) {
     const realizadosPorMes = new Map();
     const faturadosPorMes = new Map();
@@ -2325,6 +2326,7 @@
     const totalFaltosos = agendados.reduce((s,d) => s+d.faltosos, 0);
     const meses = periodoSelecionado ? [periodoSelecionado] : allPeriodos;
     
+    // NOVO GRÁFICO: Fila vs Ofertas vs Realizados (Financeiro) vs Faturados (Financeiro)
     if (el("cEvolucao")) {
       if (charts.cEvolucao) charts.cEvolucao.destroy();
       
@@ -2333,19 +2335,19 @@
         return dadosFilaFiltrados.reduce((s,d) => s + d.fila, 0);
       });
       
-      const dadosRealizadosPorMes = meses.map(m => {
-        const dadosAgendadosFiltrados = agendados.filter(d => d.mes === m);
-        return dadosAgendadosFiltrados.reduce((s,d) => s + d.recepcionados, 0);
-      });
-      
       const dadosOfertasPorMes = meses.map(m => {
         const dadosAgendadosFiltrados = agendados.filter(d => d.mes === m);
         return dadosAgendadosFiltrados.reduce((s,d) => s + d.oferta, 0);
       });
       
-      const dadosFaltososPorMes = meses.map(m => {
-        const dadosAgendadosFiltrados = agendados.filter(d => d.mes === m);
-        return dadosAgendadosFiltrados.reduce((s,d) => s + d.faltosos, 0);
+      const dadosRealizadosFinanceiroPorMes = meses.map(m => {
+        const dadosFinanceiroFiltrados = financeiro.filter(d => d.mes === m);
+        return dadosFinanceiroFiltrados.reduce((s,d) => s + d.realizados, 0);
+      });
+      
+      const dadosFaturadosPorMes = meses.map(m => {
+        const dadosFinanceiroFiltrados = financeiro.filter(d => d.mes === m);
+        return dadosFinanceiroFiltrados.reduce((s,d) => s + d.faturadoQtd, 0);
       });
       
       charts.cEvolucao = new Chart(el("cEvolucao").getContext("2d"), {
@@ -2355,8 +2357,8 @@
           datasets: [
             { label: "Fila de Espera", data: dadosFilaPorMes, borderColor: "#F87171", backgroundColor: "rgba(248,113,113,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F87171", pointBorderColor: "#F87171", pointRadius: 5, pointHoverRadius: 7 },
             { label: "Ofertas", data: dadosOfertasPorMes, borderColor: "#5A9EFF", backgroundColor: "rgba(90,158,255,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#5A9EFF", pointBorderColor: "#5A9EFF", pointRadius: 5, pointHoverRadius: 7 },
-            { label: "Cirurgias Recepcionadas", data: dadosRealizadosPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointBorderColor: "#0B5E42", pointRadius: 5, pointHoverRadius: 7 },
-            { label: "Faltosos", data: dadosFaltososPorMes, borderColor: "#F59E0B", backgroundColor: "rgba(245,158,11,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#F59E0B", pointBorderColor: "#F59E0B", pointRadius: 5, pointHoverRadius: 7 }
+            { label: "Realizados", data: dadosRealizadosFinanceiroPorMes, borderColor: "#0B5E42", backgroundColor: "rgba(11,94,66,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#0B5E42", pointBorderColor: "#0B5E42", pointRadius: 5, pointHoverRadius: 7 },
+            { label: "Faturados", data: dadosFaturadosPorMes, borderColor: "#1e3a5f", backgroundColor: "rgba(30,58,95,0.05)", fill: true, tension: 0.3, pointBackgroundColor: "#1e3a5f", pointBorderColor: "#1e3a5f", pointRadius: 5, pointHoverRadius: 7 }
           ] 
         },
         options: { 
@@ -2533,7 +2535,7 @@
 
   function renderTableBody() {
     const tbody = el("tBody");
-    if (!currentTableData.length) { tbody.innerHTML = '<tr><td colspan="6">Nenhum dado</td></tr>'; el("tInfo").innerText = "0 registros"; return; }
+    if (!currentTableData.length) { tbody.innerHTML = ' Hut<td colspan="6">Nenhum dado</tr>'; el("tInfo").innerText = "0 registros"; return; }
     tbody.innerHTML = currentTableData.slice(0,500).map(r => `
       <tr>
         <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
@@ -2542,7 +2544,7 @@
         <td style="text-align: center;">${r.realizados.toLocaleString("pt-BR")}</td>
         <td style="text-align: center;">${r.faturadosQtd.toLocaleString("pt-BR")}</td>
         <td style="text-align: center;">${formatMoney(r.financeiroValor)}</td>
-      </tr>
+       </tr>
     `).join("");
     el("tInfo").innerText = `${currentTableData.length.toLocaleString("pt-BR")} registros`;
     const searchInput = el("tSearch");
