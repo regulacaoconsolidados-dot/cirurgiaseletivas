@@ -38,8 +38,6 @@
       --r: 20px;
       --green-light: #d1fae5;
       --green-light-bg: #ecfdf5;
-      --wine: #8B0000;
-      --wine-light: #A52A2A;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -782,7 +780,7 @@
   <div class="tabs">
     <button class="tab active" onclick="switchTab('visao_geral', this)"><i class="fa-solid fa-chart-pie"></i> Visão Geral</button>
     <button class="tab" onclick="switchTab('consolidado_estabelecimento', this)"><i class="fa-solid fa-building"></i> Consolidado por Estabelecimento</button>
-    <button class="tab" onclick="switchTab('agendamentos_especialidades', this)"><i class="fa-solid fa-stethoscope"></i> Agendamentos por Especialidade - VIVER</button>
+    <button class="tab" onclick="switchTab('consolidado_especialidades', this)"><i class="fa-solid fa-stethoscope"></i> Consolidado Agendamentos por Especialidade</button>
     <button class="tab" onclick="switchTab('financeiro', this)"><i class="fa-solid fa-coins"></i> Financeiro</button>
     <button class="tab" onclick="switchTab('fisico_financeiro', this)"><i class="fa-solid fa-database"></i> Fisico x Financeiro</button>
     <button class="tab" onclick="switchTab('demanda_reprimida', this)"><i class="fa-solid fa-hourglass-half"></i> Demanda Reprimida na Fila de Espera</button>
@@ -800,13 +798,13 @@
 
     <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Realizados vs Faturados por Mês</h3></div>
-        <div class="chartWrap"><canvas id="cRealizadosVsFaturadosMes"></canvas></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Especialidades (Recepcionados vs Faturados Qtd)</h3></div>
+        <div class="chartWrap"><canvas id="cTopEspComp"></canvas></div>
       </div>
 
       <div class="chartCard">
-        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Mês</h3></div>
-        <div class="chartWrap"><canvas id="cReceitaFinanceiraMes"></canvas></div>
+        <div class="chartHead"><h3><i class="fa-solid fa-chart-bar"></i> Receita Financeira por Especialidade</h3></div>
+        <div class="chartWrap"><canvas id="cFatEspecialidadeHorizontal"></canvas></div>
       </div>
     </div>
 
@@ -828,24 +826,25 @@
       </div>
     </div>
 
-    <!-- GRÁFICOS DE MÉDIA - TERCEIRA LINHA -->
+    <!-- NOVOS GRÁFICOS DE MÉDIA - ADICIONADOS AQUI -->
     <div class="graficos-lado">
       <div class="chartCard media-chart">
         <div class="chartHead">
           <h3><i class="fa-solid fa-chart-line" style="color: #0B5E42;"></i> Média de Cirurgias Realizadas por Mês</h3>
-          <div class="chartSub">Baseado na coluna "Realizados SUS Fácil" da aba Financeiro</div>
+          <div class="chartSub">Baseado na coluna "Agendados SUS Fácil" da aba Financeiro</div>
         </div>
         <div class="chartWrap" style="height: 380px;"><canvas id="cMediaCirurgiasRealizadas"></canvas></div>
       </div>
 
       <div class="chartCard media-chart">
         <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-line" style="color: #8B0000;"></i> Média de Faturados por Mês</h3>
+          <h3><i class="fa-solid fa-chart-line" style="color: #F59E0B;"></i> Média de Faturados por Mês</h3>
           <div class="chartSub">Baseado na coluna "Total Faturado" da aba Financeiro</div>
         </div>
         <div class="chartWrap" style="height: 380px;"><canvas id="cMediaFaturados"></canvas></div>
       </div>
     </div>
+    <!-- FIM DOS NOVOS GRÁFICOS -->
   </section>
 
   <!-- ABA: CONSOLIDADO POR ESTABELECIMENTO -->
@@ -875,8 +874,8 @@
     </div>
   </section>
 
-  <!-- ABA: AGENDAMENTOS POR ESPECIALIDADE - VIVER -->
-  <section id="tab-agendamentos_especialidades" class="tabContent">
+  <!-- ABA: CONSOLIDADO AGENDAMENTOS POR ESPECIALIDADE -->
+  <section id="tab-consolidado_especialidades" class="tabContent">
     <div class="three-tables">
       <!-- Tabela Ofertas por Especialidade (REC + FAL) - SEM COLUNA % DA FILA -->
       <div class="chartCard">
@@ -995,11 +994,11 @@
       <div class="table-container">
         <table class="data-table" id="tabelaPrincipal">
           <thead>
-               <tr>
+              <tr>
               <th onclick="sortTable(0)">Especialidade <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(1)">Estabelecimento <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(2)">Mês <i class="fa-solid fa-arrow-up-wide-short"></i></th>
-              <th onclick="sortTable(3)">Realizados SUS Fácil <i class="fa-solid fa-arrow-up-wide-short"></i></th>
+              <th onclick="sortTable(3)">Agendado SUS Facial <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(4)">Total Faturado <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th onclick="sortTable(5)">Total Financeiro <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               </tr>
@@ -1223,7 +1222,7 @@
   let faltososPorEspecialidade = new Map();
   let financeiroPorEspecialidade = new Map();
   let faturadoQtdPorEspecialidade = new Map();
-  let realizadosSUSFacialPorEstab = new Map();
+  let agendadoSUSFacialPorEstab = new Map();
   
   let selectedSubgrupos = new Set();
   let selectedEspecialidades = new Set();
@@ -1369,7 +1368,7 @@
       const [filaRaw, agendadosRaw, faturadoFinanceiroRaw] = await Promise.all([
         loadCSVSmart(URL_FILA, ["Código do Procedimento", "PROCEDIMENTO DESCRIÇÃO", "GRUPO", "SUBGRUPO"]),
         loadCSVSmart(URL_AGENDADOS, ["CÓDIGO DO PROCEDIMENTO", "PROCEDIMENTO DESCRIÇÃO", "MÊS", "REC", "FAL", "OFERTA"]),
-        loadCSVSmart(URL_FATURADO_FINANCEIRO, ["ESTABELECIMENTO", "MÊS", "REALIZADOS SUS FÁCIL", "AGENDADO SUS FACIAL", "TOTAL FATURADO", "TOTAL FINANCEIRO"])
+        loadCSVSmart(URL_FATURADO_FINANCEIRO, ["ESTABELECIMENTO", "MÊS", "AGENDADO SUS FACIAL", "TOTAL FATURADO", "TOTAL FINANCEIRO"])
       ]);
 
       // Processamento FILA
@@ -1485,16 +1484,16 @@
       faturadoFinanceiroRaw.forEach(row => {
         let estabelecimento = normalizeText(getField(row, ["ESTABELECIMENTO", "Estabelecimento"]));
         let mes = normalizePeriodo(getField(row, ["MÊS", "MES", "Mês"]));
-        let realizadosSUSFacil = parseNumberBR(getField(row, ["REALIZADOS SUS FÁCIL", "Agendado SUS Facial", "AGENDADO SUS FACIAL"]));
+        let agendadoSUSFacial = parseNumberBR(getField(row, ["AGENDADO SUS FACIAL", "Agendado SUS Facial", "AGENDADO SUS"]));
         let totalFaturado = parseNumberBR(getField(row, ["TOTAL FATURADO", "Total Faturado", "FATURADO"]));
         let totalFinanceiro = parseNumberBR(getField(row, ["TOTAL FINANCEIRO", "Total Financeiro", "FINANCEIRO"]));
         let especialidade = normalizeText(getField(row, ["ESPECIALIDADE", "Especialidade"]));
         
-        if (mes && (totalFaturado > 0 || totalFinanceiro > 0 || realizadosSUSFacil > 0)) {
+        if (mes && (totalFaturado > 0 || totalFinanceiro > 0 || agendadoSUSFacial > 0)) {
           dadosFaturadoFinanceiro.push({
             estabelecimento: estabelecimento || "Não informado",
             mes: mes,
-            realizadosSUSFacil: realizadosSUSFacil,
+            agendadoSUSFacial: agendadoSUSFacial,
             faturadoQtd: totalFaturado,
             financeiroValor: totalFinanceiro,
             especialidade: especialidade || "Não informado"
@@ -1511,7 +1510,7 @@
       faturadosPorEstab.clear();
       financeiroPorEspecialidade.clear();
       faturadoQtdPorEspecialidade.clear();
-      realizadosSUSFacialPorEstab.clear();
+      agendadoSUSFacialPorEstab.clear();
       
       dadosFaturadoFinanceiro.forEach(d => {
         faturadosPorMes[d.mes] = (faturadosPorMes[d.mes] || 0) + d.financeiroValor;
@@ -1519,7 +1518,7 @@
         
         if (d.estabelecimento && d.estabelecimento !== "Não informado") {
           faturadosPorEstab.set(d.estabelecimento, (faturadosPorEstab.get(d.estabelecimento) || 0) + d.financeiroValor);
-          realizadosSUSFacialPorEstab.set(d.estabelecimento, (realizadosSUSFacialPorEstab.get(d.estabelecimento) || 0) + d.realizadosSUSFacil);
+          agendadoSUSFacialPorEstab.set(d.estabelecimento, (agendadoSUSFacialPorEstab.get(d.estabelecimento) || 0) + d.agendadoSUSFacial);
         }
         
         if (d.especialidade && d.especialidade !== "Não informado") {
@@ -1631,7 +1630,7 @@
     if (!tbody) return;
     
     if (ofertasPorEspecialidade.size === 0) {
-      tbody.innerHTML = '} \\n<td colspan="2">Nenhum dado disponível</td>\\n</tr>';
+      tbody.innerHTML = '<tr><td colspan="2">Nenhum dado disponível</td></tr>';
       return;
     }
     
@@ -1642,7 +1641,7 @@
         <tr>
           <td title="${escapeHtml(name)}">${escapeHtml(truncateLabel(name, 50))}</td>
           <td style="text-align: right; font-weight: 700;">${value.toLocaleString("pt-BR")}</td>
-         </tr>
+        </tr>
       `;
     }).join("");
   }
@@ -1675,7 +1674,7 @@
               </div>
             </div>
           </td>
-         </tr>
+        </tr>
       `;
     }).join("");
   }
@@ -1707,7 +1706,7 @@
               </div>
             </div>
           </td>
-         </tr>
+        </tr>
       `;
     }).join("");
   }
@@ -1739,7 +1738,7 @@
               </div>
             </div>
           </td>
-         </tr>
+        </tr>
       `;
     }).join("");
   }
@@ -1771,187 +1770,28 @@
               </div>
             </div>
           </td>
-         </tr>
+        </tr>
       `;
     }).join("");
-  }
-
-  // FUNÇÃO PARA RENDERIZAR GRÁFICO REALIZADOS VS FATURADOS POR MÊS
-  function renderRealizadosVsFaturadosMes(financeiroFiltrado) {
-    if (!el("cRealizadosVsFaturadosMes")) return;
-    if (charts.cRealizadosVsFaturadosMes) charts.cRealizadosVsFaturadosMes.destroy();
-    
-    const realizadosPorMes = new Map();
-    const faturadosPorMes = new Map();
-    
-    financeiroFiltrado.forEach(d => {
-      if (d.mes) {
-        realizadosPorMes.set(d.mes, (realizadosPorMes.get(d.mes) || 0) + d.realizadosSUSFacil);
-        faturadosPorMes.set(d.mes, (faturadosPorMes.get(d.mes) || 0) + d.faturadoQtd);
-      }
-    });
-    
-    const mesesOrdenados = [...new Set([...realizadosPorMes.keys(), ...faturadosPorMes.keys()])].sort((a, b) => periodoSortValue(a) - periodoSortValue(b));
-    
-    if (mesesOrdenados.length === 0) return;
-    
-    const valoresRealizados = mesesOrdenados.map(m => realizadosPorMes.get(m) || 0);
-    const valoresFaturados = mesesOrdenados.map(m => faturadosPorMes.get(m) || 0);
-    
-    charts.cRealizadosVsFaturadosMes = new Chart(el("cRealizadosVsFaturadosMes").getContext("2d"), {
-      type: "bar",
-      data: {
-        labels: mesesOrdenados,
-        datasets: [
-          {
-            label: "Realizados (SUS Fácil)",
-            data: valoresRealizados,
-            backgroundColor: "#0B5E42",
-            borderRadius: 8,
-            barPercentage: 0.7
-          },
-          {
-            label: "Faturados (Qtd)",
-            data: valoresFaturados,
-            backgroundColor: "#F59E0B",
-            borderRadius: 8,
-            barPercentage: 0.7
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}`
-            }
-          },
-          datalabels: {
-            display: true,
-            color: "#ffffff",
-            font: { weight: "bold", size: 13 },
-            formatter: (value) => value > 0 ? value.toLocaleString("pt-BR") : "",
-            anchor: "center",
-            align: "center"
-          },
-          legend: {
-            labels: { font: { weight: "bold", size: 12 } },
-            position: "top"
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: { display: false },
-            ticks: { font: { weight: "bold", size: 11 } },
-            title: { display: true, text: "Quantidade", font: { weight: "bold" } }
-          },
-          x: {
-            grid: { display: false },
-            ticks: { font: { weight: "bold", size: 11 } },
-            title: { display: true, text: "Mês/Ano", font: { weight: "bold" } }
-          }
-        }
-      }
-    });
-  }
-  
-  // FUNÇÃO PARA RENDERIZAR RECEITA FINANCEIRA POR MÊS
-  function renderReceitaFinanceiraMes(financeiroFiltrado) {
-    if (!el("cReceitaFinanceiraMes")) return;
-    if (charts.cReceitaFinanceiraMes) charts.cReceitaFinanceiraMes.destroy();
-    
-    const financeiroPorMes = new Map();
-    
-    financeiroFiltrado.forEach(d => {
-      if (d.mes) {
-        financeiroPorMes.set(d.mes, (financeiroPorMes.get(d.mes) || 0) + d.financeiroValor);
-      }
-    });
-    
-    const mesesOrdenados = [...financeiroPorMes.keys()].sort((a, b) => periodoSortValue(a) - periodoSortValue(b));
-    
-    if (mesesOrdenados.length === 0) return;
-    
-    const valoresFinanceiro = mesesOrdenados.map(m => financeiroPorMes.get(m) || 0);
-    
-    charts.cReceitaFinanceiraMes = new Chart(el("cReceitaFinanceiraMes").getContext("2d"), {
-      type: "line",
-      data: {
-        labels: mesesOrdenados,
-        datasets: [
-          {
-            label: "Receita Financeira (R$)",
-            data: valoresFinanceiro,
-            borderColor: "#0B5E42",
-            backgroundColor: "rgba(11,94,66,0.1)",
-            fill: true,
-            tension: 0.3,
-            pointBackgroundColor: "#0B5E42",
-            pointRadius: 5,
-            pointHoverRadius: 7
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          tooltip: {
-            callbacks: {
-              label: ctx => formatMoney(ctx.raw)
-            }
-          },
-          datalabels: {
-            display: true,
-            color: "#1F2937",
-            font: { weight: "bold", size: 12 },
-            formatter: (value) => value > 0 ? formatMoneyCompact(value) : "",
-            align: "top",
-            offset: 6
-          },
-          legend: {
-            labels: { font: { weight: "bold", size: 12 } },
-            position: "top"
-          }
-        },
-        scales: {
-          y: {
-            beginAtZero: true,
-            grid: { display: false },
-            ticks: {
-              font: { weight: "bold", size: 11 },
-              callback: (v) => formatMoneyCompact(v)
-            },
-            title: { display: true, text: "Valor (R$)", font: { weight: "bold" } }
-          },
-          x: {
-            grid: { display: false },
-            ticks: { font: { weight: "bold", size: 11 } },
-            title: { display: true, text: "Mês/Ano", font: { weight: "bold" } }
-          }
-        }
-      }
-    });
   }
 
   // FUNÇÃO PARA RENDERIZAR GRÁFICOS DE MÉDIA
   function renderMediaCharts(financeiroFiltrado) {
     // Agrupar dados por mês
-    const realizadosPorMes = new Map();
-    const faturadosPorMes = new Map();
+    const agendadoPorMes = new Map();
+    const faturadoPorMes = new Map();
     
     financeiroFiltrado.forEach(d => {
       if (d.mes) {
-        realizadosPorMes.set(d.mes, (realizadosPorMes.get(d.mes) || 0) + d.realizadosSUSFacil);
-        faturadosPorMes.set(d.mes, (faturadosPorMes.get(d.mes) || 0) + d.faturadoQtd);
+        // Agendados SUS Facial (cirurgias realizadas)
+        agendadoPorMes.set(d.mes, (agendadoPorMes.get(d.mes) || 0) + d.agendadoSUSFacial);
+        // Total Faturado
+        faturadoPorMes.set(d.mes, (faturadoPorMes.get(d.mes) || 0) + d.faturadoQtd);
       }
     });
     
     // Ordenar meses cronologicamente
-    const mesesOrdenados = [...new Set([...realizadosPorMes.keys(), ...faturadosPorMes.keys()])].sort((a, b) => periodoSortValue(a) - periodoSortValue(b));
+    const mesesOrdenados = [...new Set([...agendadoPorMes.keys(), ...faturadoPorMes.keys()])].sort((a, b) => periodoSortValue(a) - periodoSortValue(b));
     
     if (mesesOrdenados.length === 0) {
       toast("Não há dados suficientes para exibir os gráficos de média", "info");
@@ -1959,16 +1799,16 @@
     }
     
     // Calcular médias
-    const totalRealizados = [...realizadosPorMes.values()].reduce((a, b) => a + b, 0);
-    const totalFaturados = [...faturadosPorMes.values()].reduce((a, b) => a + b, 0);
-    const mediaRealizados = totalRealizados / mesesOrdenados.length;
+    const totalAgendados = [...agendadoPorMes.values()].reduce((a, b) => a + b, 0);
+    const totalFaturados = [...faturadoPorMes.values()].reduce((a, b) => a + b, 0);
+    const mediaAgendados = totalAgendados / mesesOrdenados.length;
     const mediaFaturados = totalFaturados / mesesOrdenados.length;
     
     // Preparar dados para o gráfico
-    const valoresRealizados = mesesOrdenados.map(m => realizadosPorMes.get(m) || 0);
-    const valoresFaturados = mesesOrdenados.map(m => faturadosPorMes.get(m) || 0);
+    const valoresAgendados = mesesOrdenados.map(m => agendadoPorMes.get(m) || 0);
+    const valoresFaturados = mesesOrdenados.map(m => faturadoPorMes.get(m) || 0);
     
-    // Gráfico 1: Média de Cirurgias Realizadas (Realizados SUS Fácil)
+    // Gráfico 1: Média de Cirurgias Realizadas (Agendados SUS Facial)
     if (el("cMediaCirurgiasRealizadas")) {
       if (charts.cMediaCirurgiasRealizadas) charts.cMediaCirurgiasRealizadas.destroy();
       
@@ -1978,8 +1818,8 @@
           labels: mesesOrdenados,
           datasets: [
             {
-              label: "Cirurgias Realizadas (Realizados SUS Fácil)",
-              data: valoresRealizados,
+              label: "Cirurgias Realizadas (Agendados SUS Facial)",
+              data: valoresAgendados,
               backgroundColor: "rgba(11, 94, 66, 0.8)",
               borderColor: "#0B5E42",
               borderWidth: 1,
@@ -1988,12 +1828,12 @@
               categoryPercentage: 0.8
             },
             {
-              label: `📊 Média: ${Math.round(mediaRealizados).toLocaleString("pt-BR")}`,
-              data: new Array(mesesOrdenados.length).fill(mediaRealizados),
+              label: `Média (${Math.round(mediaAgendados).toLocaleString("pt-BR")})`,
+              data: new Array(mesesOrdenados.length).fill(mediaAgendados),
               type: "line",
               borderColor: "#F59E0B",
-              borderWidth: 4,
-              borderDash: [10, 5],
+              borderWidth: 3,
+              borderDash: [8, 4],
               fill: false,
               pointRadius: 0,
               tension: 0
@@ -2010,28 +1850,28 @@
                   let label = context.dataset.label || '';
                   if (label) label += ': ';
                   label += context.raw.toLocaleString("pt-BR");
+                  if (context.dataset.label === "Média") {
+                    label = `📊 ${label}`;
+                  }
                   return label;
                 }
               }
             },
             datalabels: {
               display: true,
-              color: "#ffffff",
-              font: { weight: "bold", size: 14 },
+              color: "#1F2937",
+              font: { weight: "bold", size: 11 },
               formatter: (value, context) => {
                 if (context.datasetIndex === 0 && value > 0) {
                   return value.toLocaleString("pt-BR");
                 }
-                if (context.datasetIndex === 1 && context.dataIndex === 0) {
-                  return "";
-                }
                 return "";
               },
-              anchor: "center",
-              align: "center"
+              align: "top",
+              offset: 4
             },
             legend: {
-              labels: { font: { weight: "bold", size: 13 } },
+              labels: { font: { weight: "bold", size: 12 } },
               position: "top"
             }
           },
@@ -2040,22 +1880,22 @@
               beginAtZero: true,
               grid: { display: false },
               ticks: {
-                font: { weight: "bold", size: 12 },
+                font: { weight: "bold", size: 11 },
                 callback: (v) => v.toLocaleString("pt-BR")
               },
               title: {
                 display: true,
                 text: "Quantidade de Cirurgias",
-                font: { weight: "bold", size: 13 }
+                font: { weight: "bold", size: 12 }
               }
             },
             x: {
               grid: { display: false },
-              ticks: { font: { weight: "bold", size: 12 } },
+              ticks: { font: { weight: "bold", size: 11 } },
               title: {
                 display: true,
                 text: "Mês/Ano",
-                font: { weight: "bold", size: 13 }
+                font: { weight: "bold", size: 12 }
               }
             }
           }
@@ -2063,7 +1903,7 @@
       });
     }
     
-    // Gráfico 2: Média de Faturados (Total Faturado) - COR VINHO
+    // Gráfico 2: Média de Faturados (Total Faturado)
     if (el("cMediaFaturados")) {
       if (charts.cMediaFaturados) charts.cMediaFaturados.destroy();
       
@@ -2075,20 +1915,20 @@
             {
               label: "Total Faturado",
               data: valoresFaturados,
-              backgroundColor: "rgba(139, 0, 0, 0.8)",
-              borderColor: "#8B0000",
+              backgroundColor: "rgba(245, 158, 11, 0.8)",
+              borderColor: "#F59E0B",
               borderWidth: 1,
               borderRadius: 8,
               barPercentage: 0.7,
               categoryPercentage: 0.8
             },
             {
-              label: `📊 Média: ${Math.round(mediaFaturados).toLocaleString("pt-BR")}`,
+              label: `Média (${Math.round(mediaFaturados).toLocaleString("pt-BR")})`,
               data: new Array(mesesOrdenados.length).fill(mediaFaturados),
               type: "line",
               borderColor: "#0B5E42",
-              borderWidth: 4,
-              borderDash: [10, 5],
+              borderWidth: 3,
+              borderDash: [8, 4],
               fill: false,
               pointRadius: 0,
               tension: 0
@@ -2105,28 +1945,28 @@
                   let label = context.dataset.label || '';
                   if (label) label += ': ';
                   label += context.raw.toLocaleString("pt-BR");
+                  if (context.dataset.label === "Média") {
+                    label = `📊 ${label}`;
+                  }
                   return label;
                 }
               }
             },
             datalabels: {
               display: true,
-              color: "#ffffff",
-              font: { weight: "bold", size: 14 },
+              color: "#1F2937",
+              font: { weight: "bold", size: 11 },
               formatter: (value, context) => {
                 if (context.datasetIndex === 0 && value > 0) {
                   return value.toLocaleString("pt-BR");
                 }
-                if (context.datasetIndex === 1 && context.dataIndex === 0) {
-                  return "";
-                }
                 return "";
               },
-              anchor: "center",
-              align: "center"
+              align: "top",
+              offset: 4
             },
             legend: {
-              labels: { font: { weight: "bold", size: 13 } },
+              labels: { font: { weight: "bold", size: 12 } },
               position: "top"
             }
           },
@@ -2135,22 +1975,22 @@
               beginAtZero: true,
               grid: { display: false },
               ticks: {
-                font: { weight: "bold", size: 12 },
+                font: { weight: "bold", size: 11 },
                 callback: (v) => v.toLocaleString("pt-BR")
               },
               title: {
                 display: true,
                 text: "Quantidade Faturada",
-                font: { weight: "bold", size: 13 }
+                font: { weight: "bold", size: 12 }
               }
             },
             x: {
               grid: { display: false },
-              ticks: { font: { weight: "bold", size: 12 } },
+              ticks: { font: { weight: "bold", size: 11 } },
               title: {
                 display: true,
                 text: "Mês/Ano",
-                font: { weight: "bold", size: 13 }
+                font: { weight: "bold", size: 12 }
               }
             }
           }
@@ -2209,9 +2049,7 @@
     renderFinTable(filteredFinanceiro, periodo);
     renderGraficosPorEstabelecimento(filteredAgendados, filteredFinanceiro);
     
-    // NOVOS GRÁFICOS
-    renderRealizadosVsFaturadosMes(filteredFinanceiro);
-    renderReceitaFinanceiraMes(filteredFinanceiro);
+    // NOVO: Renderizar os gráficos de média
     renderMediaCharts(filteredFinanceiro);
   }
 
@@ -2413,6 +2251,86 @@
       }
     }
 
+    // Top Especialidades (Recepcionados vs Faturados Qtd) - alterado o label do dataset
+    if (el("cTopEspComp")) {
+      if (charts.cTopEspComp) charts.cTopEspComp.destroy();
+      const espReal = new Map(); agendados.forEach(d => espReal.set(d.especialidade || "Outros", (espReal.get(d.especialidade || "Outros") || 0) + d.recepcionados));
+      const espFatQtd = new Map(); 
+      financeiro.forEach(d => {
+        const esp = d.especialidade || "Outros";
+        const qtd = periodoSelecionado ? (d.mes === periodoSelecionado ? d.faturadoQtd : 0) : d.faturadoQtd;
+        espFatQtd.set(esp, (espFatQtd.get(esp) || 0) + qtd);
+      });
+      const topEsp = [...espReal.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
+      charts.cTopEspComp = new Chart(el("cTopEspComp").getContext("2d"), {
+        type: "bar",
+        data: { 
+          labels: topEsp.map(t => truncateLabel(t[0], 25)), 
+          datasets: [
+            { label: "Recepcionados", data: topEsp.map(t => t[1]), backgroundColor: "#0B5E42", borderRadius: 12, barPercentage: 0.85, categoryPercentage: 0.9 },
+            { label: "Faturados (Qtd)", data: topEsp.map(t => espFatQtd.get(t[0]) || 0), backgroundColor: "#5A9EFF", borderRadius: 12, barPercentage: 0.85, categoryPercentage: 0.9 }
+          ] 
+        },
+        options: { 
+          indexAxis: "y",
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { left: 10, right: 10 } },
+          plugins: { 
+            datalabels: { 
+              display: true,
+              color: "#ffffff",
+              font: { weight: "bold", size: 14 },
+              anchor: "center",
+              align: "center",
+              formatter: (value) => value.toLocaleString("pt-BR")
+            },
+            legend: { labels: { font: { weight: "bold", size: 12 } }, position: "top" },
+            tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${ctx.raw.toLocaleString("pt-BR")}` } }
+          },
+          scales: { 
+            x: { grid: { display: false }, ticks: { font: { weight: "bold", size: 11 } }, title: { display: true, text: "Quantidade", font: { weight: "bold" } } },
+            y: { grid: { display: false }, ticks: { font: { weight: "bold", size: 11 } } }
+          }
+        }
+      });
+    }
+
+    // Receita Financeira por Especialidade (Horizontal)
+    if (el("cFatEspecialidadeHorizontal")) {
+      if (charts.cFatEspecialidadeHorizontal) charts.cFatEspecialidadeHorizontal.destroy();
+      const espFat = new Map(); 
+      financeiro.forEach(d => {
+        const esp = d.especialidade || "Outros";
+        const valor = periodoSelecionado ? (d.mes === periodoSelecionado ? d.financeiroValor : 0) : d.financeiroValor;
+        espFat.set(esp, (espFat.get(esp) || 0) + valor);
+      });
+      const topEspFat = [...espFat.entries()].sort((a,b) => b[1]-a[1]).slice(0,8);
+      charts.cFatEspecialidadeHorizontal = new Chart(el("cFatEspecialidadeHorizontal").getContext("2d"), {
+        type: "bar",
+        data: { labels: topEspFat.map(t => truncateLabel(t[0], 25)), datasets: [{ label: "Receita Financeira (R$)", data: topEspFat.map(t => t[1]), backgroundColor: "#F87171", borderRadius: 12, barPercentage: 0.7, categoryPercentage: 0.8 }] },
+        options: { 
+          indexAxis: "y",
+          responsive: true, maintainAspectRatio: false,
+          layout: { padding: { left: 10, right: 10 } },
+          plugins: { 
+            datalabels: { 
+              formatter: v => formatMoney(v), 
+              font: { weight: "bold", size: 14 }, 
+              color: "#fff",
+              anchor: "center",
+              align: "center"
+            },
+            legend: { labels: { font: { weight: "bold", size: 12 } }, position: "top" },
+            tooltip: { callbacks: { label: ctx => formatMoney(ctx.raw) } }
+          },
+          scales: { 
+            x: { grid: { display: false }, ticks: { callback: v => formatMoneyCompact(v), font: { weight: "bold", size: 11 } }, title: { display: true, text: "Valor (R$)", font: { weight: "bold" } } },
+            y: { grid: { display: false }, ticks: { font: { weight: "bold", size: 11 } } }
+          }
+        }
+      });
+    }
+
     // Fila de Espera por Complexidade (gráfico)
     const complexidadeData = [...filaPorComplexidade.entries()].sort((a,b) => b[1]-a[1]);
     if (complexidadeData.length > 0 && el("cFilaComplexidadeRosca")) {
@@ -2535,13 +2453,13 @@
     
     const addRow = (esp, estab, mes) => { 
       const key = `${esp}||${estab}||${mes}`; 
-      if (!map.has(key)) map.set(key, { especialidade: esp, estabelecimento: estab, mes: mes, realizadosSUSFacial: 0, faturadosQtd: 0, financeiroValor: 0 }); 
+      if (!map.has(key)) map.set(key, { especialidade: esp, estabelecimento: estab, mes: mes, agendadoSUSFacial: 0, faturadosQtd: 0, financeiroValor: 0 }); 
       return map.get(key); 
     };
     
     filteredFinanceiroTable.forEach(d => { 
       const r = addRow(d.especialidade || "Não informado", d.estabelecimento || "Não informado", d.mes);
-      r.realizadosSUSFacial += d.realizadosSUSFacil;
+      r.agendadoSUSFacial += d.agendadoSUSFacial;
       r.faturadosQtd += d.faturadoQtd;
       r.financeiroValor += d.financeiroValor;
     });
@@ -2559,7 +2477,7 @@
         <td title="${escapeHtml(r.especialidade)}">${escapeHtml(truncateLabel(r.especialidade,60))}</td>
         <td title="${escapeHtml(r.estabelecimento)}">${escapeHtml(truncateLabel(r.estabelecimento,60))}</td>
         <td>${escapeHtml(r.mes || "-")}</td>
-        <td style="text-align: center;">${r.realizadosSUSFacial.toLocaleString("pt-BR")}</td>
+        <td style="text-align: center;">${r.agendadoSUSFacial.toLocaleString("pt-BR")}</td>
         <td style="text-align: center;">${r.faturadosQtd.toLocaleString("pt-BR")}</td>
         <td style="text-align: center;">${formatMoney(r.financeiroValor)}</td>
       </tr>
@@ -2584,7 +2502,7 @@
       currentSortDirection = 'asc';
     }
     
-    const columns = ["especialidade", "estabelecimento", "mes", "realizadosSUSFacial", "faturadosQtd", "financeiroValor"];
+    const columns = ["especialidade", "estabelecimento", "mes", "agendadoSUSFacial", "faturadosQtd", "financeiroValor"];
     const col = columns[colIndex];
     
     currentTableData.sort((a, b) => {
@@ -2641,7 +2559,7 @@
       Especialidade: r.especialidade,
       Estabelecimento: r.estabelecimento,
       Mes: r.mes,
-      Realizados_SUS_Facil: r.realizadosSUSFacial, 
+      Agendado_SUS_Facial: r.agendadoSUSFacial, 
       Total_Faturado: r.faturadosQtd, 
       Total_Financeiro: r.financeiroValor 
     }));
