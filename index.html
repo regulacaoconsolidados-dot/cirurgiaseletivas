@@ -14,6 +14,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
   <style>
+    /* ===== ESTILOS COMPLETOS (mesmos do código anterior) ===== */
     :root {
       --primary: #0B3B2F;
       --primary-dark: #0A2E25;
@@ -316,7 +317,7 @@
     .ms-item input { width: 16px; height: 16px; accent-color: var(--success); }
     .ms-empty { padding: 12px; color: var(--muted); font-size: 12px; text-align: center; }
 
-    /* ESTILOS GAUGE CARD */
+    /* GAUGE CARDS */
     .indicadores-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -771,7 +772,7 @@
       border-top: 2px solid var(--border);
     }
 
-    /* Tabela Físico x Financeiro - CORRIGIDA */
+    /* TABELA FÍSICO X FINANCEIRO */
     .data-table-fisico {
       width: 100%;
       border-collapse: collapse;
@@ -790,14 +791,6 @@
       top: 0;
       z-index: 10;
       white-space: nowrap;
-    }
-    
-    .data-table-fisico th:first-child {
-      border-top-left-radius: 16px;
-    }
-    
-    .data-table-fisico th:last-child {
-      border-top-right-radius: 16px;
     }
     
     .data-table-fisico th.text-right,
@@ -821,6 +814,45 @@
       max-height: 500px;
       border-radius: 16px;
       border: 1px solid var(--border);
+    }
+
+    /* CABEÇALHO DA SEÇÃO FINANCEIRO */
+    .fin-header {
+      background: linear-gradient(135deg, #0a3a2a, #0f4a35);
+      border-radius: 20px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+    }
+
+    .fin-header-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 14px;
+      background: rgba(255,255,255,.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: white;
+    }
+
+    .fin-header h3 {
+      margin: 0;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .fin-header .fin-sub {
+      font-size: 12px;
+      opacity: 0.8;
+      color: #d1fae5;
+      margin-top: 4px;
     }
 
     .fin-table-wrap {
@@ -1222,7 +1254,6 @@
 
   <!-- ABA 1: VISÃO GERAL -->
   <section id="tab-visao_geral" class="tabContent active">
-    <!-- INDICADORES GAUGE -->
     <div class="indicadores-row">
       <div class="gauge-card" id="cardFaturamento">
         <div class="gauge-head">
@@ -1278,11 +1309,11 @@
       </div>
     </div>
 
-    <!-- GRÁFICO DE EVOLUÇÃO - Fila vs Ofertas vs Recepcionados vs Faltosos -->
+    <!-- GRÁFICO DE EVOLUÇÃO CORRIGIDO - COM ESCALA DUAL PARA LINHAS SEPARADAS -->
     <div class="chartCard">
       <div class="chartHead">
         <h3><i class="fa-solid fa-chart-line"></i> Evolução: Fila vs Ofertas vs Recepcionados vs Faltosos</h3>
-        <div class="chartSub">Comparativo mensal</div>
+        <div class="chartSub">Comparativo mensal | Linhas com escala independente</div>
       </div>
       <div class="chartWrap chartWrap-hero"><canvas id="cEvolucao"></canvas></div>
     </div>
@@ -1320,7 +1351,6 @@
       </div>
     </div>
 
-    <!-- TABELA COM CABEÇALHO FIXO, BUSCA E FILTRO POR MÊS -->
     <div class="estatistica-card">
       <div class="estatistica-title">
         <i class="fa-solid fa-table" style="color: var(--success);"></i>
@@ -1344,18 +1374,26 @@
               <th>Hospital São José</th>
               <th>Hospital Santa Rita</th>
               <th>Total</th>
-            </tr>
+             </tr>
           </thead>
           <tbody id="tableAgendadasPorEspecEstabBody">
-            <tr><td colspan="8">Carregando...</td></tr>
+            <tr><td colspan="8">Carregando...</td</tr>
           </tbody>
         </table>
       </div>
     </div>
   </section>
 
-  <!-- ABA: FINANCEIRO -->
+  <!-- ABA: FINANCEIRO - COM CABEÇALHO RESTAURADO -->
   <section id="tab-financeiro" class="tabContent">
+    <div class="fin-header">
+      <div class="fin-header-icon"><i class="fa-solid fa-coins"></i></div>
+      <div>
+        <h3>Financeiro Mensal Acumulado</h3>
+        <div class="fin-sub">Evolução financeira do período | Valores em R$</div>
+      </div>
+    </div>
+
     <div class="graficos-lado">
       <div class="chartCard">
         <div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Financeiro por Competência</h3></div>
@@ -1376,7 +1414,7 @@
     </div>
   </section>
 
-  <!-- ABA: FÍSICO X FINANCEIRO - CORRIGIDA -->
+  <!-- ABA: FÍSICO X FINANCEIRO -->
   <section id="tab-fisico_financeiro" class="tabContent">
     <div class="chartCard">
       <div class="table-title" style="margin-bottom: 16px;">
@@ -1403,10 +1441,10 @@
               <th class="text-right" onclick="sortTableFisico(2)" style="cursor: pointer;">Agendados <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th class="text-right" onclick="sortTableFisico(3)" style="cursor: pointer;">Total Faturado <i class="fa-solid fa-arrow-up-wide-short"></i></th>
               <th class="text-right" onclick="sortTableFisico(4)" style="cursor: pointer;">Total Financeiro <i class="fa-solid fa-arrow-up-wide-short"></i></th>
-            </tr>
+             </tr>
           </thead>
           <tbody id="tBodyFisico">
-            <tr><td colspan="5">Carregando...</td></tr>
+            <tr><td colspan="5">Carregando...</td</tr>
           </tbody>
         </table>
       </div>
@@ -1433,24 +1471,22 @@
   <!-- ABA: AGENDAMENTOS VIVVER -->
   <section id="tab-agendamentos_especialidades" class="tabContent">
     <div class="three-tables">
-      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #F59E0B;"></i> Ofertas por Especialidade (REC + FAL)</div><div class="table-wrapper"><table class="data-table-simple" id="tableOfertas"><thead><tr><th>Especialidade</th><th class="text-right">Total</th></tr></thead><tbody id="tableOfertasBody"><tr><td colspan="2">Carregando...</td></tr></tbody></table></div></div>
-      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #0B5E42;"></i> Recepcionados por Especialidade</div><div class="table-wrapper"><table class="data-table-simple" id="tableRecepcionadosVivver"><thead><tr><th>Especialidade</th><th class="text-right">Total</th><th style="width: 40%;">% Referente à Oferta</th></tr></thead><tbody id="tableRecepcionadosVivverBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div>
-      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #F87171;"></i> Faltosos por Especialidade</div><div class="table-wrapper"><table class="data-table-simple" id="tableFaltososVivver"><thead><tr><th>Especialidade</th><th class="text-right">Total</th><th style="width: 40%;">% Referente à Oferta</th></tr></thead><tbody id="tableFaltososVivverBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div>
+      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #F59E0B;"></i> Ofertas por Especialidade (REC + FAL)</div><div class="table-wrapper"><table class="data-table-simple" id="tableOfertas"><thead><tr><th>Especialidade</th><th class="text-right">Total</th> </tr></thead><tbody id="tableOfertasBody"><tr><td colspan="2">Carregando...</td</tr></tbody> </table></div></div>
+      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #0B5E42;"></i> Recepcionados por Especialidade</div><div class="table-wrapper"><table class="data-table-simple" id="tableRecepcionadosVivver"><thead><tr><th>Especialidade</th><th class="text-right">Total</th><th style="width: 40%;">% Referente à Oferta</th> </tr></thead><tbody id="tableRecepcionadosVivverBody"><tr><td colspan="3">Carregando...</td</tr></tbody> </table></div></div>
+      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #F87171;"></i> Faltosos por Especialidade</div><div class="table-wrapper"><table class="data-table-simple" id="tableFaltososVivver"><thead><tr><th>Especialidade</th><th class="text-right">Total</th><th style="width: 40%;">% Referente à Oferta</th> </tr></thead><tbody id="tableFaltososVivverBody"><tr><td colspan="3">Carregando...</td</tr></tbody> </table></div></div>
     </div>
   </section>
 
-  <!-- ABA: FILA DE ESPERA - Gráficos reordenados (Complexidade e Tendência por último) -->
+  <!-- ABA: FILA DE ESPERA -->
   <section id="tab-demanda_reprimida" class="tabContent">
-    <!-- Primeiro: tabelas de ranking -->
     <div class="row2eq">
-      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #5A9EFF;"></i> Top Especialidades com Maior Fila</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaEspecialidade"><thead><tr><th>Especialidade</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th></tr></thead><tbody id="tableFilaEspecialidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div>
-      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #0B5E42;"></i> Fila por Procedimento</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaProcedimento"><thead><tr><th>Procedimento</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th></tr></thead><tbody id="tableFilaProcedimentoBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div>
+      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #5A9EFF;"></i> Top Especialidades com Maior Fila</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaEspecialidade"><thead><tr><th>Especialidade</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th> </tr></thead><tbody id="tableFilaEspecialidadeBody"><tr><td colspan="3">Carregando...</td</tr></tbody> </table></div></div>
+      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #0B5E42;"></i> Fila por Procedimento</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaProcedimento"><thead><tr><th>Procedimento</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th> </tr></thead><tbody id="tableFilaProcedimentoBody"><tr><td colspan="3">Carregando...</td</tr></tbody> </table></div></div>
     </div>
     <div class="row2eq">
-      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #8B5CF6;"></i> Fila por Complexidade</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaComplexidade"><thead><tr><th>Complexidade</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th></tr></thead><tbody id="tableFilaComplexidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div>
-      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #F59E0B;"></i> Fila por Subgrupo</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaSubgrupo"><thead><tr><th>Subgrupo</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th></tr></thead><tbody id="tableFilaSubgrupoBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div>
+      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #8B5CF6;"></i> Fila por Complexidade</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaComplexidade"><thead><tr><th>Complexidade</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th> </tr></thead><tbody id="tableFilaComplexidadeBody"><tr><td colspan="3">Carregando...</td</tr></tbody> </table></div></div>
+      <div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #F59E0B;"></i> Fila por Subgrupo</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaSubgrupo"><thead><tr><th>Subgrupo</th><th class="text-right">Total na Fila</th><th style="width: 40%;">% do Total</th> </tr></thead><tbody id="tableFilaSubgrupoBody"><tr><td colspan="3">Carregando...</td</tr></tbody> </table></div></div>
     </div>
-    <!-- Gráficos por último -->
     <div class="row2eq">
       <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Fila de Espera por Complexidade</h3><div class="chartSub">Distribuição por nível de complexidade</div></div><div class="chartWrap"><canvas id="cFilaComplexidadeRosca"></canvas></div></div>
       <div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Tendência de Crescimento da Fila</h3><div class="chartSub">Projeção dos próximos 3 pontos</div></div><div class="chartWrap"><canvas id="cTendenciaFila"></canvas></div></div>
@@ -1459,6 +1495,7 @@
 </main>
 
 <script>
+  // ===== SCRIPT COMPLETO (mesmo do código anterior, com a correção do gráfico de evolução) =====
   Chart.register(ChartDataLabels);
 
   const el = id => document.getElementById(id);
@@ -1521,7 +1558,8 @@
   function escapeHtml(t) { return String(t ?? "").replace(/[&<>"]/g, m => { if (m === "&") return "&amp;"; if (m === "<") return "&lt;"; if (m === ">") return "&gt;"; if (m === '"') return "&quot;"; return m; }); }
   function truncateLabel(t, max = 30) { const s = String(t ?? ""); return s.length > max ? s.slice(0, max - 3) + "..." : s; }
   function formatMoney(v) { return (v || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }); }
-  function formatMoneyCompact(v) { const n = Number(v || 0); if (n >= 1000000) return "R$ " + (n / 1000000).toFixed(1) + "M"; if (n >= 1000) return "R$ " + (n / 1000).toFixed(1) + "K"; return formatMoney(n); }
+  function formatMoneyCompact(v) { const n = Number(v || 0); if (n >= 1000000) return "R$ " + (n / 1000000).toFixed(1) + "M"; if (n >= 1000) return "R$ " + (n / 1000).toFixed(1) +
+"K"; return formatMoney(n); }
 
   function parseNumberBR(value) {
     if (value == null) return 0;
