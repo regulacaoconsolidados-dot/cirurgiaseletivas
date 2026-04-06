@@ -567,9 +567,8 @@ function renderMixedEvolutionChart(periods, filaPorMes, ofertaPorMes, recepciona
   destroyChart("cEvolucao");
   
   // Verificar se há dados para exibir
-  console.log("===== RENDERIZANDO GRÁFICO DE EVOLUÇÃO =====");
   console.log("Períodos para evolução:", periods);
-  console.log("Fila por mês (com retroativos):", filaPorMes);
+  console.log("Fila por mês:", filaPorMes);
   console.log("Oferta por mês:", ofertaPorMes);
   
   const filaData = periods.map(p => filaPorMes.get(p) || 0);
@@ -577,21 +576,12 @@ function renderMixedEvolutionChart(periods, filaPorMes, ofertaPorMes, recepciona
   const recepData = periods.map(p => recepcionadosPorMes.get(p) || 0);
   const faltaData = periods.map(p => faltososPorMes.get(p) || 0);
   
-  console.log("Dados da fila para o gráfico:", filaData);
-  console.log("Soma total da fila no gráfico:", filaData.reduce((a,b) => a+b, 0));
-  
-  // Se não houver dados, mostrar mensagem
-  const temDados = filaData.some(v => v > 0) || ofertaData.some(v => v > 0);
-  if (!temDados) {
-    console.warn("Nenhum dado para exibir no gráfico de evolução!");
-  }
-  
   charts.cEvolucao = new Chart(canvas.getContext("2d"), { 
     data: { 
       labels: periods, 
       datasets: [
         { type: "bar", label: "Ofertas", data: ofertaData, backgroundColor: "rgba(37,99,235,0.22)", borderColor: "#2563eb", borderWidth: 1.5, borderRadius: 10, yAxisID: "y", order: 4 },
-        { type: "line", label: "Fila de Espera (Atual + Retroativa)", data: filaData, borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.10)", borderWidth: 3, fill: false, tension: 0.28, pointBackgroundColor: "#ffffff", pointBorderColor: "#dc2626", pointBorderWidth: 2.5, pointRadius: 5, pointHoverRadius: 8, yAxisID: "y1", order: 1 },
+        { type: "line", label: "Fila de Espera", data: filaData, borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.10)", borderWidth: 3, fill: false, tension: 0.28, pointBackgroundColor: "#ffffff", pointBorderColor: "#dc2626", pointBorderWidth: 2.5, pointRadius: 5, pointHoverRadius: 8, yAxisID: "y1", order: 1 },
         { type: "line", label: "Recepcionados", data: recepData, borderColor: "#059669", backgroundColor: "rgba(5,150,105,0.10)", borderWidth: 3, fill: false, tension: 0.28, pointBackgroundColor: "#ffffff", pointBorderColor: "#059669", pointBorderWidth: 2.5, pointRadius: 5, pointHoverRadius: 8, yAxisID: "y", order: 2 },
         { type: "line", label: "Faltosos", data: faltaData, borderColor: "#d97706", backgroundColor: "rgba(217,119,6,0.10)", borderWidth: 3, fill: false, tension: 0.28, pointBackgroundColor: "#ffffff", pointBorderColor: "#d97706", pointBorderWidth: 2.5, pointRadius: 5, pointHoverRadius: 8, yAxisID: "y", order: 3 }
       ] 
@@ -660,22 +650,10 @@ function setupChartLegendClick(periods, agendadosValues, faturadosValues) {
 
 function renderVisaoGeral(filteredFila, filteredAgVivver, filteredAgendados, filteredFaturado, filteredFinanceiro) {
   // CORREÇÃO: Incorporar dados retroativos na evolução da fila
-  // Filtrar os dados retroativos com os mesmos critérios dos filtros atuais
-  const filteredFilaRetroativa = dadosFilaRetroativa.filter(d => matchBaseWithDimensions(d, true));
+  // Combinar dados da fila principal com os dados retroativos para ter uma visão completa
+  const combinedFilaData = [...filteredFila, ...dadosFilaRetroativa];
   
-  // Combinar dados da fila principal com os dados retroativos
-  const combinedFilaData = [...filteredFila, ...filteredFilaRetroativa];
-  
-  console.log("Dados combinados para evolução:");
-  console.log("- Fila principal:", filteredFila.length, "registros");
-  console.log("- Fila retroativa:", filteredFilaRetroativa.length, "registros");
-  console.log("- Total combinado:", combinedFilaData.length, "registros");
-  
-  // Mostrar os dados retroativos por data de corte para debug
-  const retroPorData = aggregateBy(filteredFilaRetroativa, d => d.dataCorte, d => d.fila);
-  console.log("Dados retroativos por data de corte:", retroPorData);
-  
-  // Obter todos os períodos disponíveis (incluindo os retroativos)
+  // Obter todos os períodos disponíveis (meses e datas de corte)
   const allPeriodsFromData = getPeriodsFromFilteredData(combinedFilaData, filteredAgVivver, filteredAgendados, filteredFaturado, filteredFinanceiro);
   
   // Se não houver períodos, usar um array vazio
@@ -683,7 +661,7 @@ function renderVisaoGeral(filteredFila, filteredAgVivver, filteredAgendados, fil
   
   console.log("Períodos para visão geral (incluindo dados retroativos):", periods);
   
-  // Agregar dados de fila usando os dados COMBINADOS
+  // Agora usar os dados combinados para a fila
   const filaPorMes = aggregateBy(combinedFilaData, d => d.dataCorte, d => d.fila);
   const ofertaPorMes = aggregateBy(filteredAgVivver, d => d.mes, d => d.oferta);
   const recepcionadosPorMes = aggregateBy(filteredAgVivver, d => d.mes, d => d.recepcionados);
@@ -691,7 +669,7 @@ function renderVisaoGeral(filteredFila, filteredAgVivver, filteredAgendados, fil
   
   console.log("Dados de fila por mês (combinados):", filaPorMes);
   
-  // Renderizar o gráfico de evolução com os dados COMBINADOS
+  // Renderizar o gráfico de evolução com os dados combinados
   renderMixedEvolutionChart(periods, filaPorMes, ofertaPorMes, recepcionadosPorMes, faltososPorMes);
   
   const agendadosPorMes = aggregateBy(filteredAgendados, d => d.mes, d => d.agendados);
