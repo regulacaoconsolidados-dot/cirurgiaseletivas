@@ -35,10 +35,9 @@ html { scroll-behavior: smooth; }
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(37,99,235,0.06), transparent 18%),
-    radial-gradient(circle at top right, rgba(11,94,66,0.07), transparent 22%),
-    linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+  background: radial-gradient(circle at top left, rgba(37,99,235,0.06), transparent 18%),
+              radial-gradient(circle at top right, rgba(11,94,66,0.07), transparent 22%),
+              linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -100,35 +99,6 @@ body {
 }
 
 .h-meta b { color: #dbeafe; }
-
-.header-badges {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 12px;
-}
-
-.top-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 11px;
-  font-weight: 800;
-  background: rgba(255,255,255,0.10);
-  border: 1px solid rgba(255,255,255,0.18);
-  backdrop-filter: blur(10px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
-}
-
-.dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #34d399;
-  box-shadow: 0 0 10px #34d399;
-}
 
 .lastUpdate {
   font-size: 11px;
@@ -744,30 +714,6 @@ select:focus,
   text-align: center;
 }
 
-.gauge-zones-row {
-  display: flex;
-  gap: 12px;
-  margin-top: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-}
-
-.gauge-zone-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 10px;
-  font-weight: 800;
-  color: var(--muted);
-}
-
-.zone-circle {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
 .gauge-badge {
   display: inline-flex;
   align-items: center;
@@ -859,7 +805,6 @@ select:focus,
   }
 }
 
-/* CORREÇÃO: Tabelas do Agendamentos Vivver - tamanho proporcional */
 .three-tables .chartCard {
   overflow: hidden;
   display: flex;
@@ -922,7 +867,6 @@ select:focus,
   align-items: center;
 }
 
-/* Estilo para as legendas clicáveis do gráfico */
 .legend-with-avg .legend-item {
   cursor: pointer;
   padding: 4px 12px;
@@ -1126,30 +1070,6 @@ select:focus,
   font-size: 12px;
 }
 
-.table-chip-control {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: #f9fbfd;
-  padding: 4px 12px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-}
-
-.table-chip-control input,
-.table-chip-control select {
-  border: none;
-  background: transparent;
-  box-shadow: none !important;
-  padding: 8px 4px;
-  min-height: auto;
-}
-
-.table-chip-control input:focus,
-.table-chip-control select:focus {
-  outline: none;
-}
-
 .progress-bar-container {
   background: #e5e7eb;
   border-radius: 999px;
@@ -1212,4 +1132,65 @@ select:focus,
   .chartWrap-hero { height: 360px; }
   .topic-pill { margin-left: 0; }
   .topic-header { padding: 18px 16px; }
+}
+/* Estilos para as legendas dos gráficos Gauge */
+.gauge-legend {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+
+.gauge-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.gauge-legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.gauge-legend-label {
+  color: var(--text-primary);
+}
+
+.gauge-legend-value {
+  color: var(--primary-color);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.gauge-legend-sublabel {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Ajuste para os containers dos gráficos gauge */
+.gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.gauge-container canvas {
+  max-height: 180px;
+  width: 100%;
 }
