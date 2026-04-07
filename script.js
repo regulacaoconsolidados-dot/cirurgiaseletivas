@@ -44,6 +44,8 @@ let selectedEspecialidades = new Set();
 
 let charts = {};
 let currentTableDataFisico = [];
+let currentSortColumnFisico = 0;
+let currentSortDirectionFisico = "asc";
 let currentTableMonthFilterFisico = "";
 let currentChartFilter = null;
 
@@ -189,11 +191,20 @@ async function loadAllData() {
       loadCSVSmart(URL_FINANCEIRO, ["PROCEDIMENTO DESCRIÇÃO", "GRUPO", "SUBGRUPO", "ESTABELECIMENTO", "ESPECIALIDADE"]),
       loadCSVSmart(URL_AGENDADOS, ["ESTABELECIMENTO", "ESPECIALIDADE"])
     ]);
+    console.log("Dados carregados:", { 
+      fila: filaRaw.length, 
+      filaRetroativa: filaRetroativaRaw.length, 
+      vivver: agVivverRaw.length, 
+      faturado: faturadoRaw.length, 
+      financeiro: financeiroRaw.length, 
+      agendados: agendadosRaw.length 
+    });
 
     const allRawPeriods = [];
     filaRaw.forEach(row => { const dataCorte = normalizeText(getField(row, ["Data Corte/ Fila de Espera", "DATA CORTE/ FILA DE ESPERA", "Data Corte"])); if (dataCorte) allRawPeriods.push(dataCorte); });
     filaRetroativaRaw.forEach(row => { const dataCorte = normalizeText(getField(row, ["Data Corte/ Fila de Espera", "DATA CORTE/ FILA DE ESPERA", "Data Corte"])); if (dataCorte) allRawPeriods.push(dataCorte); });
     agVivverRaw.forEach(row => { const mes = normalizeText(getField(row, ["MÊS"])); if (mes) allRawPeriods.push(mes); });
+    agendadosRaw.forEach(row => { Object.keys(row).forEach(col => { const colLower = col.toLowerCase(); const hasMonth = MONTHS_FULL.some(month => colLower.includes(month)) || MONTHS_ORDER.some(month => colLower === month); if (hasMonth) { const yearMatch = col.match(/(\d{4})/); if (yearMatch) { allRawPeriods.push(`${col}/${yearMatch[1]}`); } else { allRawPeriods.push(col); } } }); });
     
     const detectedYear = getDominantYearShort(allRawPeriods);
     currentYearShort = detectedYear || "25";
@@ -208,6 +219,7 @@ async function loadAllData() {
       const grupoRaw = normalizeText(getField(r, ["Grupo", "GRUPO"]));
       const subgrupoRaw = normalizeText(getField(r, ["Subgrupo", "SUBGRUPO"]));
       const grupoCodigo = extractGrupoCodigo(grupoRaw);
+      const subgrupoCodigo = extractSubgrupoCodigo(subgrupoRaw);
       const dataCorteRaw = normalizeText(getField(r, ["Data Corte/ Fila de Espera", "DATA CORTE/ FILA DE ESPERA", "Data Corte"]));
       const dataCorteNorm = normalizePeriodo(dataCorteRaw);
       if (especialidade) especialidadesSet.add(especialidade);
@@ -216,7 +228,7 @@ async function loadAllData() {
       addMapSet(especialidadeToGrupos, especialidade, grupoCodigo);
       addMapSet(especialidadeToSubgrupos, especialidade, subgrupoRaw);
       if (dataCorteNorm) { const sortVal = periodoSortValue(dataCorteNorm); if (sortVal > latestDateSortValue) { latestDateSortValue = sortVal; latestDateValue = dataCorteNorm; } }
-      return { codigo: normalizeText(getField(r, ["Código do Procedimento", "CÓDIGO DO PROCEDIMENTO"])), especialidade, descricao: normalizeText(getField(r, ["Descrição do Procedimento", "PROCEDIMENTO DESCRIÇÃO"])), grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, complexidade: normalizeText(getField(r, ["Complexidade- Sigtap", "COMPLEXIDADE"])), estabelecimento, fila: parseNumberBR(getField(r, ["TOTAL", "Total"])), dataCorte: dataCorteNorm, origem: "principal" };
+      return { codigo: normalizeText(getField(r, ["Código do Procedimento", "CÓDIGO DO PROCEDIMENTO"])), especialidade, descricao: normalizeText(getField(r, ["Descrição do Procedimento", "PROCEDIMENTO DESCRIÇÃO"])), grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, subgrupoCodigo, complexidade: normalizeText(getField(r, ["Complexidade- Sigtap", "COMPLEXIDADE"])), estabelecimento, fila: parseNumberBR(getField(r, ["TOTAL", "Total"])), dataCorte: dataCorteNorm, origem: "principal" };
     }).filter(d => d.especialidade || d.descricao);
     latestDataCorte = latestDateValue || "Não disponível";
 
@@ -227,6 +239,7 @@ async function loadAllData() {
       const grupoRaw = normalizeText(getField(r, ["Grupo", "GRUPO"]));
       const subgrupoRaw = normalizeText(getField(r, ["Subgrupo", "SUBGRUPO"]));
       const grupoCodigo = extractGrupoCodigo(grupoRaw);
+      const subgrupoCodigo = extractSubgrupoCodigo(subgrupoRaw);
       const dataCorteRaw = normalizeText(getField(r, ["Data Corte/ Fila de Espera", "DATA CORTE/ FILA DE ESPERA", "Data Corte"]));
       const dataCorteNorm = normalizePeriodo(dataCorteRaw);
       const complexidade = normalizeText(getField(r, ["Complexidade- Sigtap", "COMPLEXIDADE"]));
@@ -236,7 +249,7 @@ async function loadAllData() {
       addMapSet(especialidadeToGrupos, especialidade, grupoCodigo);
       addMapSet(especialidadeToSubgrupos, especialidade, subgrupoRaw);
       if (dataCorteNorm) { const sortVal = periodoSortValue(dataCorteNorm); if (sortVal > latestDateRetroativaSortValue) { latestDateRetroativaSortValue = sortVal; latestDateRetroativaValue = dataCorteNorm; } }
-      return { codigo: normalizeText(getField(r, ["Código do Procedimento", "CÓDIGO DO PROCEDIMENTO"])), especialidade, descricao: normalizeText(getField(r, ["Descrição do Procedimento", "PROCEDIMENTO DESCRIÇÃO"])), grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, complexidade, estabelecimento, fila: parseNumberBR(getField(r, ["TOTAL", "Total"])), dataCorte: dataCorteNorm, origem: "retroativa" };
+      return { codigo: normalizeText(getField(r, ["Código do Procedimento", "CÓDIGO DO PROCEDIMENTO"])), especialidade, descricao: normalizeText(getField(r, ["Descrição do Procedimento", "PROCEDIMENTO DESCRIÇÃO"])), grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, subgrupoCodigo, complexidade, estabelecimento, fila: parseNumberBR(getField(r, ["TOTAL", "Total"])), dataCorte: dataCorteNorm, origem: "retroativa" };
     }).filter(d => d.especialidade || d.descricao);
     latestDataCorteRetroativa = latestDateRetroativaValue || "Não disponível";
 
@@ -251,6 +264,7 @@ async function loadAllData() {
       const grupoRaw = normalizeText(getField(r, ["GRUPO"]));
       const subgrupoRaw = normalizeText(getField(r, ["SUBGRUPO"]));
       const grupoCodigo = extractGrupoCodigo(grupoRaw);
+      const subgrupoCodigo = extractSubgrupoCodigo(subgrupoRaw);
       const mesRaw = normalizeText(getField(r, ["MÊS"]));
       let mesNorm = normalizePeriodo(mesRaw);
       if (mesNorm && !mesNorm.includes("/")) mesNorm = `${mesNorm}/${currentYearShort}`;
@@ -263,7 +277,7 @@ async function loadAllData() {
       if (subgrupoRaw) subgruposSet.add(subgrupoRaw);
       addMapSet(especialidadeToGrupos, especialidade, grupoCodigo);
       addMapSet(especialidadeToSubgrupos, especialidade, subgrupoRaw);
-      return { codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])), descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])), especialidade, estabelecimento, grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, complexidade: normalizeText(getField(r, ["COMPLEXIDADE"])), mes: mesNorm, faltosos, recepcionados, oferta };
+      return { codigo: normalizeText(getField(r, ["CÓDIGO DO PROCEDIMENTO"])), descricao: normalizeText(getField(r, ["PROCEDIMENTO DESCRIÇÃO"])), especialidade, estabelecimento, grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, subgrupoCodigo, complexidade: normalizeText(getField(r, ["COMPLEXIDADE"])), mes: mesNorm, faltosos, recepcionados, oferta };
     }).filter(d => d.especialidade || d.descricao);
 
     dadosFaturado = [];
@@ -284,7 +298,7 @@ async function loadAllData() {
       for (let i = 0; i < monthColumns.length; i++) {
         const monthKey = monthColumns[i];
         const monthValue = parseNumberBR(getField(row, [monthKey, `${monthKey}/${currentYearShort}`, `${monthKey}/25`, monthKey.toUpperCase()]));
-        if (monthValue > 0) { const mesFormatado = `${monthColumns[i]}/${currentYearShort}`; dadosFaturado.push({ codigo, descricao, especialidade, estabelecimento: estabelecimento || "Não informado", grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, mes: mesFormatado, quantidade: monthValue }); }
+        if (monthValue > 0) { const mesFormatado = `${monthColumns[i]}/${currentYearShort}`; dadosFaturado.push({ codigo, descricao, especialidade, estabelecimento: estabelecimento || "Não informado", grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, subgrupoCodigo: extractSubgrupoCodigo(subgrupoRaw), mes: mesFormatado, quantidade: monthValue }); }
       }
     });
 
@@ -305,7 +319,7 @@ async function loadAllData() {
       for (let i = 0; i < monthColumns.length; i++) {
         const monthKey = monthColumns[i];
         const monthValue = parseNumberBR(getField(row, [monthKey, `${monthKey}/${currentYearShort}`, monthKey.toUpperCase()]));
-        if (monthValue > 0) { const mesFormatado = `${monthColumns[i]}/${currentYearShort}`; dadosFinanceiro.push({ codigo, descricao, especialidade, estabelecimento: estabelecimento || "Não informado", grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, mes: mesFormatado, valor: monthValue }); }
+        if (monthValue > 0) { const mesFormatado = `${monthColumns[i]}/${currentYearShort}`; dadosFinanceiro.push({ codigo, descricao, especialidade, estabelecimento: estabelecimento || "Não informado", grupo: grupoRaw || (GRUPOS_SIGTAP[grupoCodigo] || ""), grupoCodigo, subgrupo: subgrupoRaw, subgrupoCodigo: extractSubgrupoCodigo(subgrupoRaw), mes: mesFormatado, valor: monthValue }); }
       }
     });
 
@@ -331,8 +345,14 @@ async function loadAllData() {
       });
     });
 
+    // Coletar todos os períodos para os filtros
     const allPeriodsCollected = [...dadosFila.map(d => d.dataCorte), ...dadosFilaRetroativa.map(d => d.dataCorte), ...dadosAgendamentosVivver.map(d => d.mes), ...dadosFaturado.map(d => d.mes), ...dadosFinanceiro.map(d => d.mes), ...dadosAgendados.map(d => d.mes)].filter(Boolean);
     allPeriodos = sortPeriodos(allPeriodsCollected);
+    console.log("Períodos encontrados:", allPeriodos);
+    console.log("Especialidades:", [...especialidadesSet].length);
+    console.log("Fila principal registros:", dadosFila.length);
+    console.log("Fila retroativa registros:", dadosFilaRetroativa.length);
+    console.log("Ano atual usado:", currentYearShort);
 
     populateFilters();
     updateLastUpdate();
@@ -388,37 +408,14 @@ function buildEspecialidadeList() {
 function updateMsLabelSub() { const label = el("msLabelSub"); if (label) label.textContent = selectedSubgrupos.size ? `${selectedSubgrupos.size} selecionado(s)` : "Todos"; }
 function updateMsLabelEsp() { const label = el("msLabelEsp"); if (label) label.textContent = selectedEspecialidades.size ? `${selectedEspecialidades.size} selecionado(s)` : "Todos"; }
 function closeAllDropdowns() { ["Sub", "Esp"].forEach(suf => { const dd = el(`msDropdown${suf}`); const tr = el(`msTrigger${suf}`); if (dd) dd.classList.remove("open"); if (tr) tr.classList.remove("open"); }); }
-
-function setupDropdowns() {
-  const triggerSub = el("msTriggerSub");
-  const dropdownSub = el("msDropdownSub");
-  const triggerEsp = el("msTriggerEsp");
-  const dropdownEsp = el("msDropdownEsp");
-  
-  if (triggerSub && dropdownSub) {
-    triggerSub.addEventListener("click", (e) => { e.stopPropagation(); closeAllDropdowns(); dropdownSub.classList.toggle("open"); triggerSub.classList.toggle("open"); });
-    dropdownSub.addEventListener("click", e => e.stopPropagation());
-  }
-  if (triggerEsp && dropdownEsp) {
-    triggerEsp.addEventListener("click", (e) => { e.stopPropagation(); closeAllDropdowns(); dropdownEsp.classList.toggle("open"); triggerEsp.classList.toggle("open"); });
-    dropdownEsp.addEventListener("click", e => e.stopPropagation());
-  }
-  
-  const selectAllSubBtn = document.querySelector("#msDropdownSub .ms-btn-all");
-  const clearSubBtn = document.querySelector("#msDropdownSub .ms-btn-clr");
-  const selectAllEspBtn = document.querySelector("#msDropdownEsp .ms-btn-all");
-  const clearEspBtn = document.querySelector("#msDropdownEsp .ms-btn-clr");
-  
-  if (selectAllSubBtn) selectAllSubBtn.addEventListener("click", (e) => { e.preventDefault(); selectedSubgrupos = new Set(getVisibleSubgrupos()); buildSubgrupoList(); applyFilters(); });
-  if (clearSubBtn) clearSubBtn.addEventListener("click", (e) => { e.preventDefault(); selectedSubgrupos.clear(); buildSubgrupoList(); applyFilters(); });
-  if (selectAllEspBtn) selectAllEspBtn.addEventListener("click", (e) => { e.preventDefault(); selectedEspecialidades = new Set(getVisibleEspecialidades()); buildEspecialidadeList(); applyFilters(); });
-  if (clearEspBtn) clearEspBtn.addEventListener("click", (e) => { e.preventDefault(); selectedEspecialidades.clear(); buildEspecialidadeList(); applyFilters(); });
-  
-  const searchSub = el("msSearchSub");
-  const searchEsp = el("msSearchEsp");
-  if (searchSub) searchSub.addEventListener("input", () => { const q = searchSub.value.toLowerCase(); const list = el("msListSub"); if (!list) return; list.querySelectorAll(".ms-item").forEach(item => { const text = item.querySelector("span")?.textContent?.toLowerCase() || ""; item.style.display = text.includes(q) ? "" : "none"; }); });
-  if (searchEsp) searchEsp.addEventListener("input", () => { const q = searchEsp.value.toLowerCase(); const list = el("msListEsp"); if (!list) return; list.querySelectorAll(".ms-item").forEach(item => { const text = item.querySelector("span")?.textContent?.toLowerCase() || ""; item.style.display = text.includes(q) ? "" : "none"; }); });
-}
+function toggleMsDropdownSub(e) { e.stopPropagation(); const dd = el("msDropdownSub"); const tr = el("msTriggerSub"); if (!dd || !tr) return; const willOpen = !dd.classList.contains("open"); closeAllDropdowns(); if (willOpen) { dd.classList.add("open"); tr.classList.add("open"); } }
+function toggleMsDropdownEsp(e) { e.stopPropagation(); const dd = el("msDropdownEsp"); const tr = el("msTriggerEsp"); if (!dd || !tr) return; const willOpen = !dd.classList.contains("open"); closeAllDropdowns(); if (willOpen) { dd.classList.add("open"); tr.classList.add("open"); } }
+function selectAllSub(e) { e.preventDefault(); selectedSubgrupos = new Set(getVisibleSubgrupos()); buildSubgrupoList(); applyFilters(); }
+function clearSubSelection(e) { e.preventDefault(); selectedSubgrupos.clear(); buildSubgrupoList(); applyFilters(); }
+function selectAllEsp(e) { e.preventDefault(); selectedEspecialidades = new Set(getVisibleEspecialidades()); buildEspecialidadeList(); applyFilters(); }
+function clearEspSelection(e) { e.preventDefault(); selectedEspecialidades.clear(); buildEspecialidadeList(); applyFilters(); }
+function filterMsListSub() { const q = (el("msSearchSub")?.value || "").toLowerCase(); const list = el("msListSub"); if (!list) return; list.querySelectorAll(".ms-item").forEach(item => { const text = item.querySelector("span")?.textContent?.toLowerCase() || ""; item.style.display = text.includes(q) ? "" : "none"; }); }
+function filterMsListEsp() { const q = (el("msSearchEsp")?.value || "").toLowerCase(); const list = el("msListEsp"); if (!list) return; list.querySelectorAll(".ms-item").forEach(item => { const text = item.querySelector("span")?.textContent?.toLowerCase() || ""; item.style.display = text.includes(q) ? "" : "none"; }); }
 
 function especialidadeMatchesGrupo(especialidade, grupoCodigo) { if (!grupoCodigo) return true; const set = especialidadeToGrupos.get(especialidade); return set ? set.has(grupoCodigo) : false; }
 function especialidadeMatchesSubgrupos(especialidade, selectedSubs) { if (!selectedSubs.size) return true; const set = especialidadeToSubgrupos.get(especialidade); if (!set) return false; for (const s of selectedSubs) if (set.has(s)) return true; return false; }
@@ -450,6 +447,8 @@ function applyFilters() {
   const filteredAgendados = dadosAgendados.filter(d => matchBaseWithDimensions(d, false));
   const filteredFaturado = dadosFaturado.filter(d => matchFaturadoFinanceiro(d));
   const filteredFinanceiro = dadosFinanceiro.filter(d => matchFaturadoFinanceiro(d));
+
+  console.log("Dados filtrados - Fila:", filteredFila.length, "Agendamentos Vivver:", filteredAgVivver.length);
 
   const totalFila = filteredFila.reduce((s, d) => s + d.fila, 0);
   const totalRecepcionados = filteredAgVivver.reduce((s, d) => s + d.recepcionados, 0);
@@ -566,6 +565,11 @@ function getPeriodsFromFilteredData(...groups) {
 function renderMixedEvolutionChart(periods, filaPorMes, ofertaPorMes, recepcionadosPorMes, faltososPorMes) {
   const canvas = el("cEvolucao"); if (!canvas) return;
   destroyChart("cEvolucao");
+  
+  // Verificar se há dados para exibir
+  console.log("Períodos para evolução:", periods);
+  console.log("Fila por mês:", filaPorMes);
+  console.log("Oferta por mês:", ofertaPorMes);
   
   const filaData = periods.map(p => filaPorMes.get(p) || 0);
   const ofertaData = periods.map(p => ofertaPorMes.get(p) || 0);
