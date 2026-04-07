@@ -801,10 +801,38 @@ function renderFila(filteredFila) {
   if (cTendenciaFila) { charts.cTendenciaFila = new Chart(cTendenciaFila.getContext("2d"), { type: "line", data: { labels: trendLabels, datasets: [{ label: "Fila Real", data: [...trendDataReal, ...Array(3).fill(null)], borderColor: "#dc2626", backgroundColor: "rgba(220,38,38,0.10)", borderWidth: 3, fill: true, tension: 0.3, pointBackgroundColor: "#ffffff", pointBorderColor: "#dc2626", pointBorderWidth: 2.5, pointRadius: 5, pointHoverRadius: 8 }, { label: "Projeção", data: projectionData, borderColor: "#d97706", borderDash: [6, 4], borderWidth: 3, backgroundColor: "rgba(217,119,6,0.05)", fill: false, tension: 0.3, pointBackgroundColor: "#ffffff", pointBorderColor: "#d97706", pointBorderWidth: 2.5, pointRadius: 5, pointHoverRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false, layout: { padding: { top: 24, right: 20, bottom: 10, left: 10 } }, plugins: { legend: { position: "top", labels: { font: { weight: "bold" } } }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${(ctx.raw || 0).toLocaleString("pt-BR")}` } }, datalabels: { display: true, color: ctx => ctx.dataset.borderColor || "#1F2937", font: { weight: "bold", size: 10 }, formatter: value => value ? value.toLocaleString("pt-BR") : "", align: "top", anchor: "end", offset: 6, clamp: true } }, scales: { x: { grid: { display: false }, ticks: { font: { weight: "bold" } } }, y: { beginAtZero: true, grace: "10%", grid: { color: "rgba(148,163,184,0.12)" }, ticks: { font: { weight: "bold" } } } } } }); }
 }
 
-function renderFilaRetroativa() {
+  function renderFilaRetroativa() {
   const totalFilaRetroativa = dadosFilaRetroativa.reduce((s, d) => s + d.fila, 0);
   const kFilaRetroativa = el("kFilaRetroativa");
   if (kFilaRetroativa) kFilaRetroativa.innerText = totalFilaRetroativa.toLocaleString("pt-BR");
+  
+  // ========== CÁLCULO DA MÉDIA POR PROCEDIMENTO ==========
+  // Contar quantos procedimentos únicos existem na fila retroativa
+  const procedimentosUnicos = new Set();
+  dadosFilaRetroativa.forEach(d => {
+    if (d.codigo && d.codigo.trim() !== "") {
+      procedimentosUnicos.add(d.codigo);
+    } else if (d.descricao && d.descricao.trim() !== "") {
+      procedimentosUnicos.add(d.descricao);
+    }
+  });
+  
+  const totalProcedimentos = procedimentosUnicos.size;
+  let mediaPorProcedimento = 0;
+  
+  if (totalProcedimentos > 0) {
+    mediaPorProcedimento = totalFilaRetroativa / totalProcedimentos;
+  } else if (dadosFilaRetroativa.length > 0) {
+    // Fallback: usar número de registros como base
+    mediaPorProcedimento = totalFilaRetroativa / dadosFilaRetroativa.length;
+  }
+  
+  // Atualizar o elemento HTML com a média
+  const mediaElement = el("mediaPorProcedimento");
+  if (mediaElement) {
+    mediaElement.innerText = mediaPorProcedimento.toFixed(2);
+  }
+  // ========== FIM DO CÁLCULO ==========
   
   const filaRetroativaEspecialidade = aggregateBy(dadosFilaRetroativa, d => d.especialidade, d => d.fila);
   const filaRetroativaProcedimento = aggregateBy(dadosFilaRetroativa, d => d.descricao, d => d.fila);
