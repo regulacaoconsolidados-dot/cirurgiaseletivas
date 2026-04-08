@@ -73,6 +73,7 @@
 
   <div class="kpis">
     <div class="kpi kpi-fila kpi-principal"><div class="kpiIcon"><i class="fa-solid fa-clock"></i></div><div><div class="label">Fila de Espera Atual</div><div class="val" id="kFila">0</div><div class="sub" id="dataCorteInfo">Carregando data de corte...</div></div></div>
+    <div class="kpi kpi-fila-retroativa"><div class="kpiIcon"><i class="fa-solid fa-clock-rotate-left"></i></div><div><div class="label">Fila de Espera Retroativa/2025</div><div class="val" id="kFilaRetroativaCard">0</div><div class="sub" id="dataCorteRetroativaInfoCard">Carregando data de corte...</div></div></div>
     <div class="kpi kpi-agendados-total"><div class="kpiIcon"><i class="fa-solid fa-calendar-check"></i></div><div><div class="label">Cirurgias Agendadas</div><div class="val" id="kAgendadosTotal">0</div><div class="sub" id="subAgendados">Carregando...</div></div></div>
     <div class="kpi kpi-real"><div class="kpiIcon"><i class="fa-solid fa-hospital-user"></i></div><div><div class="label">Cirurgias Recepcionadas</div><div class="val" id="kRecepcionados">0</div><div class="sub" id="subRecepcionados">Carregando...</div></div></div>
     <div class="kpi kpi-falt"><div class="kpiIcon"><i class="fa-solid fa-user-slash"></i></div><div><div class="label">Faltosos</div><div class="val" id="kFaltosos">0</div><div class="sub" id="subFaltosos">Carregando...</div></div></div>
@@ -116,7 +117,7 @@
   <section id="tab-agendamentos_especialidades" class="tabContent"><div class="topic-header"><div class="topic-header-icon"><i class="fa-solid fa-chart-simple"></i></div><div><h3>Agendamentos Vivver</h3><div class="topic-sub">Acompanhamento das ofertas, recepcionados e faltosos por especialidade</div></div><div class="topic-pill"><i class="fa-solid fa-stethoscope"></i> Monitoramento por especialidade</div></div><div class="three-tables"><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--warning);"></i> Ofertas por Especialidade (REC + FAL)</div><div class="table-wrapper"><table class="data-table-simple" id="tableOfertas"><thead><tr><th>Especialidade</th><th class="text-right">Total</th></tr></thead><tbody id="tableOfertasBody"><tr><td colspan="2">Carregando...</td></tr></tbody></table></div></div><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--primary);"></i> Recepcionados por Especialidade</div><div class="table-wrapper"><table class="data-table-simple" id="tableRecepcionadosVivver"><thead><tr><th>Especialidade</th><th class="text-right">Total</th><th style="width:40%;">% Referente à Oferta</th></tr></thead><tbody id="tableRecepcionadosVivverBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--danger);"></i> Faltosos por Especialidade</div><div class="table-wrapper"><table class="data-table-simple" id="tableFaltososVivver"><thead><tr><th>Especialidade</th><th class="text-right">Total</th><th style="width:40%;">% Referente à Oferta</th></tr></thead><tbody id="tableFaltososVivverBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div></div></section>
 
   <!-- ABA 6: FILA DE ESPERA ATUAL -->
-  <section id="tab-demanda_reprimida" class="tabContent"><div class="topic-header"><div class="topic-header-icon"><i class="fa-solid fa-hourglass-half"></i></div><div><h3>Fila de Espera Atual</h3><div class="topic-sub">Leitura da demanda reprimida por especialidade, procedimento, complexidade e subgrupo</div></div><div class="topic-pill"><i class="fa-solid fa-users"></i> Acompanhamento da demanda reprimida</div></div><div class="row2eq"><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--secondary);"></i> Top Especialidades com Maior Fila</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaEspecialidade"><thead><tr><th>Especialidade</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaEspecialidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--primary);"></i> Fila por Procedimento</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaProcedimento"><thead><tr><th>Procedimento</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaProcedimentoBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div></div><div class="row2eq"><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #8b5cf6;"></i> Fila por Complexidade</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaComplexidade"><thead><tr><th>Complexidade</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaComplexidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--warning);"></i> Fila por Subgrupo</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaSubgrupo"><thead><tr><th>Subgrupo</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaSubgrupoBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div></div><div class="row2eq"><div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Fila de Espera por Complexidade</h3><div class="chartSub">Distribuição por nível de complexidade</div></div><div class="chartWrap"><canvas id="cFilaComplexidadeRosca"></canvas></div></div><div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-line"></i> Tendência de Crescimento da Fila</h3><div class="chartSub">Projeção com base na evolução observada</div></div><div class="chartWrap"><canvas id="cTendenciaFila"></canvas></div></div></div></section>
+  <section id="tab-demanda_reprimida" class="tabContent"><div class="topic-header"><div class="topic-header-icon"><i class="fa-solid fa-hourglass-half"></i></div><div><h3>Fila de Espera Atual</h3><div class="topic-sub">Leitura da demanda reprimida por especialidade, procedimento, complexidade e subgrupo</div></div><div class="topic-pill"><i class="fa-solid fa-users"></i> Acompanhamento da demanda reprimida</div></div><div class="row2eq"><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--secondary);"></i> Top Especialidades com Maior Fila</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaEspecialidade"><thead><tr><th>Especialidade</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaEspecialidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--primary);"></i> Fila por Procedimento</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaProcedimento"><thead><tr><th>Procedimento</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaProcedimentoBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div></div><div class="row2eq"><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: #8b5cf6;"></i> Fila por Complexidade</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaComplexidade"><thead><tr><th>Complexidade</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaComplexidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div><div class="chartCard"><div class="table-title"><i class="fa-solid fa-chart-simple" style="color: var(--warning);"></i> Fila por Subgrupo</div><div class="table-wrapper" style="max-height: 400px;"><table class="data-table-simple" id="tableFilaSubgrupo"><thead><tr><th>Subgrupo</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead><tbody id="tableFilaSubgrupoBody"><tr><td colspan="3">Carregando...</td></tr></tbody></table></div></div></div><div class="row2eq"><div class="chartCard"><div class="chartHead"><h3><i class="fa-solid fa-chart-pie"></i> Fila de Espera por Complexidade</h3><div class="chartSub">Distribuição por nível de complexidade</div></div><div class="chartWrap"><canvas id="cFilaComplexidadeRosca"></canvas></div></div></div></section>
 
   <!-- ABA 7: FILA RETROATIVA 2025 - REFORMULADA CONFORME MODELO -->
   <section id="tab-fila_retroativa" class="tabContent">
@@ -153,18 +154,7 @@
     <div class="row2eq">
       <div class="chartCard">
         <div class="table-title">
-          <i class="fa-solid fa-chart-simple" style="color: var(--secondary);"></i> Top Especialidades - Fila Retroativa
-        </div>
-        <div class="table-wrapper" style="max-height: 400px;">
-          <table class="data-table-simple" id="tableFilaRetroativaEspecialidade">
-            <thead><tr><th>Especialidade</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead>
-            <tbody id="tableFilaRetroativaEspecialidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-      <div class="chartCard">
-        <div class="table-title">
-          <i class="fa-solid fa-chart-simple" style="color: var(--primary);"></i> Top Procedimentos - Fila Retroativa
+          <i class="fa-solid fa-chart-simple" style="color: var(--secondary);"></i> Top Procedimentos - Fila Retroativa
         </div>
         <div class="table-wrapper" style="max-height: 400px;">
           <table class="data-table-simple" id="tableFilaRetroativaProcedimento">
@@ -173,23 +163,16 @@
           </table>
         </div>
       </div>
-    </div>
-
-    <!-- Gráficos lado a lado: Complexidade e Subgrupo -->
-    <div class="row2eq">
       <div class="chartCard">
-        <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-pie"></i> Fila Retroativa por Complexidade</h3>
-          <div class="chartSub">Distribuição por nível de complexidade SIGTAP</div>
+        <div class="table-title">
+          <i class="fa-solid fa-chart-simple" style="color: #8b5cf6;"></i> Fila Retroativa por Complexidade
         </div>
-        <div class="chartWrap" style="height: 320px;"><canvas id="cFilaRetroativaComplexidade"></canvas></div>
-      </div>
-      <div class="chartCard">
-        <div class="chartHead">
-          <h3><i class="fa-solid fa-chart-pie"></i> Fila Retroativa por Subgrupo</h3>
-          <div class="chartSub">Distribuição por subgrupo SIGTAP</div>
+        <div class="table-wrapper" style="max-height: 400px;">
+          <table class="data-table-simple" id="tableFilaRetroativaComplexidade">
+            <thead><tr><th>Complexidade</th><th class="text-right">Total na Fila</th><th style="width:40%;">% do Total</th></tr></thead>
+            <tbody id="tableFilaRetroativaComplexidadeBody"><tr><td colspan="3">Carregando...</td></tr></tbody>
+          </table>
         </div>
-        <div class="chartWrap" style="height: 320px;"><canvas id="cFilaRetroativaSubgrupo"></canvas></div>
       </div>
     </div>
 
