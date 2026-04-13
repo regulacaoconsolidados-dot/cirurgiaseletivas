@@ -595,8 +595,6 @@ function applyFilters() {
   const filteredFilaRetroativa = dadosFilaRetroativa.filter(d => matchBaseWithDimensions(d, true));
 
   console.log("Dados filtrados - Fila:", filteredFila.length, "Fila Retroativa:", filteredFilaRetroativa.length, "Agendamentos Vivver:", filteredAgVivver.length);
-  console.log("Financeiro filtrado - soma:", filteredFinanceiro.reduce((s, d) => s + d.valor, 0));
-  console.log("Faturado filtrado - soma:", filteredFaturado.reduce((s, d) => s + d.quantidade, 0));
 
   const totalFila = filteredFila.reduce((s, d) => s + d.fila, 0);
   const totalRecepcionados = filteredAgVivver.reduce((s, d) => s + d.recepcionados, 0);
@@ -605,9 +603,10 @@ function applyFilters() {
   const totalFaturadosQtd = filteredFaturado.reduce((s, d) => s + d.quantidade, 0);
   const totalFinanceiro = filteredFinanceiro.reduce((s, d) => s + d.valor, 0);
   
-  const totalFilaRetroativa = dadosFilaRetroativa.reduce((s, d) => s + d.fila, 0);
+  // Usar dados FILTRADOS da fila retroativa
+  const totalFilaRetroativaFiltrada = filteredFilaRetroativa.reduce((s, d) => s + d.fila, 0);
   const kFilaRetroativaCard = el("kFilaRetroativaCard");
-  if (kFilaRetroativaCard) kFilaRetroativaCard.innerText = totalFilaRetroativa.toLocaleString("pt-BR");
+  if (kFilaRetroativaCard) kFilaRetroativaCard.innerText = totalFilaRetroativaFiltrada.toLocaleString("pt-BR");
 
   if (el("kFila")) el("kFila").innerText = totalFila.toLocaleString("pt-BR");
   if (el("kRecepcionados")) el("kRecepcionados").innerText = totalRecepcionados.toLocaleString("pt-BR");
